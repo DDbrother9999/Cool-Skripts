@@ -1,2 +1,2 @@
 # Cool-Skripts
-archive of the Skript backend for the Minecraft Server's WildKits and InsaneKits
+archive of the Skript backend for the Minecraft Server's WildKits and InsaneKits while I maintained it
