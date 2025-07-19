@@ -1,0 +1,7 @@
+
+ 
+
+every 5 minute:
+  loop all players:
+    if loop-player does not have permission "staff.fly":
+      set loop-player's flight mode to false

@@ -1,0 +1,7 @@
+command /builderbosco:
+    trigger:
+        if group of player is "jrbuilder":
+            if player's gamemode is survival:
+                set player's gamemode to creative
+            else:
+                set player's gamemode to survival

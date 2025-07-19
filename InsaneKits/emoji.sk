@@ -1,0 +1,56 @@
+
+# Credits: Made by ahmaD#0001 / ahmadstoryus (on spigot)
+# If you're using this Skript please rate the Spigot resource!
+
+options:
+    # Edit to true/false
+    require permission: false
+
+
+    # if require permission is true - it will require a permission to use the Emojis
+    permission: skemojis.use 
+
+
+
+
+on chat:
+    if {@require permission} is false:
+        replace all "<3" with "&c❤&r" in message
+        replace all ":)" with "☺" in message
+        replace all ":(" with "☹" in message
+        replace all ":/" with "ツ" in message
+        replace all ":skull:" or "skull" with "☠" in message
+        replace all ":heart:" or "heart" with "❤" in message
+        replace all "airplane" with "✈" in message
+        replace all ":sun:" with "☀" in message
+        replace all ":cloud:" with "☁" in message
+        replace all ":umbrella:" with "☂" in message
+        replace all ":snowflake:" with "❄" in message
+        replace all ":snowman:" with "☃" in message
+        replace all ":pen:" with "✏" in message
+        replace all ":up:" with "⬆" in message
+        replace all ":down:" with "⬇" in message
+        replace all ":right:" with "➡" in message
+        replace all ":left:" with "⬅" in message
+        replace all ":upight:" with "↗" in message
+        replace all ":downright" with "↘" in message
+        replace all ":downleft" with "↙" in message
+        replace all ":upleft:" with "↖" in message
+        replace all ":up: and down" with "↕" in message
+        replace all ":side: to side" with "↔" in message
+        replace all ":left: curved" with "↩" in message
+        replace all ":right: curved" with "↪" in message
+        replace all ":puma:" with "☯" in message
+        replace all ":play:" with "▶" in message
+        replace all ":pause:" with "◀" in message
+        replace all ":xmark:" with "✖" in message
+        replace all ":check:" with "✔" in message
+        replace all ":star:" with "★" in message
+        replace all ":crown:" with "♕" in message
+
+    else:
+        if player has permission "{@permission}":
+            replace all "<3" with "&c❤&r" in message
+            replace all ":)" with "☺" in message
+            replace all ":(" with "☹" in message
+            replace all ":/" with "ツ" in message

@@ -1,0 +1,436 @@
+options:
+# ###################################################################
+
+# Zabrid's Clans (Quests)
+# Customer(s): Jean-Claude La Croix Sainbaire#7597
+# Author(s): {zabrid}#3433
+# Date 5/27/22
+
+# ###################################################################
+
+    # If you want a random number you can do "%random integer between 100 and 1000%"
+    quests weekly reward: "clan admin coins add %{_name}% 1000"
+    quests daily reward: "clan admin coins add %{_name}% 100"
+
+    quests menu [name]: "&8Clan Quests" # Make sure this inventory name is unique
+    quests menu [size]: 5
+    quests menu [border-item]: black stained glass pane named "&8Clan Quests" # To disable this set this to the same thing as the fill-item.
+    quests menu [fill-item]: gray stained glass pane named "&8Clan Quests" # To disable this simply set it to `air`
+
+    quests menu [back-slot]: 36
+    quests menu [back-item]: 1 of birch door named "&cReturn to Clan Interface."
+
+    max weekly quests: 5
+    max daily quests: 5
+
+    # Daily Quests
+    quests menu [daily-quest-killpeople-amount]: 10
+    quests menu [daily-quest-killpeople-slot]: 11 
+    quests menu [daily-quest-killpeople-item]: 1 of lime stained glass pane with all flags hidden named "&8(&7Daily Quest&8) &aMurderer Quest" with lore "" and "&7Kill &n10&7 people to complete this quest." and "" and "&7Progress: &b%{_progress}%/10" and "" and "&bClick to activate this quest."
+
+    quests menu [daily-quest-damage-amount]: 2000 
+    quests menu [daily-quest-damage-slot]: 12
+    quests menu [daily-quest-damage-item]: 1 of lime stained glass pane with all flags hidden named "&8(&7Daily Quest&8) &aAssault Quest" with lore "" and "&7Deal &n2,000&7 damage to complete this quest." and "" and "&7Progress: &b%{_progress}%/2000" and "" and "&bClick to activate this quest."
+
+    quests menu [daily-quest-afkpool-amount]: 1
+    quests menu [daily-quest-afkpool-slot]: 13
+    quests menu [daily-quest-afkpool-item]: 1 of lime stained glass pane with all flags hidden named "&8(&7Daily Quest&8) &6Inactive Quest" with lore "" and "&7Get &n1&7 afk pool tokens." and "" and "&7Progress: &b%{_progress}%/1" and "" and "&bClick to activate this quest."
+
+    quests menu [daily-quest-traitor-amount]: 1
+    quests menu [daily-quest-traitor-slot]: 14
+    quests menu [daily-quest-traitor-item]: 1 of lime stained glass pane with all flags hidden named "&8(&7Daily Quest&8) &6Traitor Quest" with lore "" and "&7Kill &n1&7 person who's in your clan." and "" and "&7Progress: &b%{_progress}%/1" and "" and "&bClick to activate this quest."
+
+    quests menu [daily-quest-pickup-amount]: 1000
+    quests menu [daily-quest-pickup-slot]: 15
+    quests menu [daily-quest-pickup-item]: 1 of lime stained glass pane with all flags hidden named "&8(&7Daily Quest&8) &6Pickup Quest" with lore "" and "&7Pickup &n1,000&7 items." and "" and "&7Progress: &b%{_progress}%/1000" and "" and "&bClick to activate this quest."
+
+
+    #Weekly Quests
+    quests menu [weekly-quest-killpeople-amount]: 100
+    quests menu [weekly-quest-killpeople-slot]: 29
+    quests menu [weekly-quest-killpeople-item]: 1 of orange stained glass pane with all flags hidden named "&8(&7Weekly Quest&8) &6Murderer Quest" with lore "" and "&7Kill &n100&7 people to complete this quest." and "" and "&7Progress: &b%{_progress}%/100" and "" and "&bClick to activate this quest."
+
+    quests menu [weekly-quest-damage-amount]: 20000
+    quests menu [weekly-quest-damage-slot]: 30
+    quests menu [weekly-quest-damage-item]: 1 of orange stained glass pane with all flags hidden named "&8(&7Weekly Quest&8) &6Assault Quest" with lore "" and "&7Deal &n20,000&7 damage to complete this quest." and "" and "&7Progress: &b%{_progress}%/20000" and "" and "&bClick to activate this quest."
+
+    quests menu [weekly-quest-afkpool-amount]: 20
+    quests menu [weekly-quest-afkpool-slot]: 31
+    quests menu [weekly-quest-afkpool-item]: 1 of orange stained glass pane with all flags hidden named "&8(&7Weekly Quest&8) &6Inactive Quest" with lore "" and "&7Get &n20&7 afk pool tokens." and "" and "&7Progress: &b%{_progress}%/20" and "" and "&bClick to activate this quest."
+
+    quests menu [weekly-quest-traitor-amount]: 10
+    quests menu [weekly-quest-traitor-slot]: 32
+    quests menu [weekly-quest-traitor-item]: 1 of orange stained glass pane with all flags hidden named "&8(&7Weekly Quest&8) &6Traitor Quest" with lore "" and "&7Kill &n10&7 people who're in your clan." and "" and "&7Progress: &b%{_progress}%/10" and "" and "&bClick to activate this quest."
+
+    quests menu [weekly-quest-pickup-amount]: 15000
+    quests menu [weekly-quest-pickup-slot]: 33
+    quests menu [weekly-quest-pickup-item]: 1 of orange stained glass pane with all flags hidden named "&8(&7Weekly Quest&8) &6Pickup Quest" with lore "" and "&7Pickup &n15,000&7 items." and "" and "&7Progress: &b%{_progress}%/15000" and "" and "&bClick to activate this quest."
+
+
+
+
+    message [weekly-clan-quests-reset-broadcast]: "" and "&c&lWEEKLY CLAN QUESTS RESET" and "&fAll weekly clan quests have been reset." and ""
+    message [daily-clan-quests-reset-broadcast]: "" and "&c&lDAILY CLAN QUESTS RESET" and "&fAll daily clan quests have been reset." and ""
+    message [daily-clan-quest-complete]: "" and "&a&lCLAN QUEST COMPLETE &8(&7Daily&8)" and "" and "&7Your clan has completed the &b%{_quest}%&7 quest." and ""
+    message [weekly-clan-quest-complete]: "" and "&a&lCLAN QUEST COMPLETE &8(&7Weekly&8)" and "" and "&7Your clan has completed the &b%{_quest}%&7 quest." and ""
+    
+    message [you-are-not-in-a-clan]: "&cYou cannot do this, as you're not in a clan."
+    message [you-must-be-leader]: "&cYou must be leader in order to do this."
+    message [already-started-quest]: "&cYour clan has already started this quest."
+    message [maximum-type-quests-started]: "&cYou have started the maximum amount of quests for this type."
+    message [leader-started-quest]: "&a&l(!)&a %player%&f has started the &b%{_type}% %{_name}%&f quest."
+
+# ###################################################################
+
+# Zabrid's Clans (Quests)
+# Source Code
+
+# Feel free to change anything below this point.
+# Although, beware you might break something!
+
+# #################################s#################################
+
+on load:
+    if {zclans.questtimer.weekly} is not set:
+        set {zclans.questtimer.weekly} to now
+    if {zclans.questtimer.daily} is not set:
+        set {zclans.questtimer.daily} to now
+
+# Kill Players Quests
+on death:
+    victim is a player
+    attacker is a player
+    set {_uuid} to uuid of attacker
+    set {_clan-id} to {zclans.playerclans::%{_uuid}%}
+    {_clan-id} is set
+    if {zclans.clan-%{_clan-id}%-dailyquests::killpeople} is set:
+        add 1 to {zclans.clan-%{_clan-id}%-dailyquests::killpeople}
+        if {zclans.clan-%{_clan-id}%-dailyquests::killpeople} is {@quests menu [daily-quest-killpeople-amount]}:
+            zclans_givequestrewards({_clan-id}, "daily", "killpeople")
+    if {zclans.clan-%{_clan-id}%-weeklyquests::killpeople} is set:
+        add 1 to {zclans.clan-%{_clan-id}%-weeklyquests::killpeople}
+        if {zclans.clan-%{_clan-id}%-weeklyquests::killpeople} is {@quests menu [weekly-quest-killpeople-amount]}:
+            zclans_givequestrewards({_clan-id}, "weekly", "killpeople")
+    if {zclans.clan-%{_clan-id}%-weeklyquests::traitor} is set:
+        set {_uuid2} to uuid of victim
+        set {_clan-id2} to {zclans.playerclans::%{_uuid2}%}
+        {_clan-id} is {_clan-id2}
+        add 1 to {zclans.clan-%{_clan-id}%-weeklyquests::traitor}
+        if {zclans.clan-%{_clan-id}%-weeklyquests::traitor} is {@quests menu [weekly-quest-traitor-amount]}:
+            zclans_givequestrewards({_clan-id}, "weekly", "traitor")
+    if {zclans.clan-%{_clan-id}%-dailyquests::traitor} is set:
+        set {_uuid2} to uuid of victim
+        set {_clan-id2} to {zclans.playerclans::%{_uuid2}%}
+        {_clan-id} is {_clan-id2}
+        add 1 to {zclans.clan-%{_clan-id}%-dailyquests::traitor}
+        if {zclans.clan-%{_clan-id}%-dailyquests::traitor} is {@quests menu [daily-quest-traitor-amount]}:
+            zclans_givequestrewards({_clan-id}, "daily", "traitor")
+    
+
+# Damage Quests
+on damage:
+    victim is a player
+    attacker is a player
+    set {_uuid} to uuid of attacker
+    set {_clan-id} to {zclans.playerclans::%{_uuid}%}
+    {_clan-id} is set
+    if {zclans.clan-%{_clan-id}%-dailyquests::damage} is set:
+        set {_current-damage} to {zclans.clan-%{_clan-id}%-dailyquests::damage}
+        add damage to {zclans.clan-%{_clan-id}%-dailyquests::damage}
+        set {_new-damage} to {zclans.clan-%{_clan-id}%-dailyquests::damage}
+        if {@quests menu [daily-quest-damage-amount]} is between {_current-damage} and {_new-damage}:
+            zclans_givequestrewards({_clan-id}, "daily", "damage")
+    if {zclans.clan-%{_clan-id}%-weeklyquests::damage} is set:
+        set {_current-damage} to {zclans.clan-%{_clan-id}%-weeklyquests::damage}
+        add damage to {zclans.clan-%{_clan-id}%-weeklyquests::damage}
+        set {_new-damage} to {zclans.clan-%{_clan-id}%-weeklyquests::damage}
+        if {@quests menu [weekly-quest-damage-amount]} is between {_current-damage} and {_new-damage}:
+            zclans_givequestrewards({_clan-id}, "weekly", "damage")
+
+
+every 30 minutes:
+    loop all players:
+        if block below loop-player is cut sandstone:
+            give loop-player 10 of {globaltoken}
+            execute console command "/playergotafktoken %loop-player%"
+
+# Miner Quests
+on pickup:
+    set {_uuid} to uuid of player
+    set {_clan-id} to {zclans.playerclans::%{_uuid}%}
+    {_clan-id} is set
+    if {zclans.clan-%{_clan-id}%-dailyquests::pickup} is set:
+        set {_item} to event-item
+        set {_item-amount} to item amount of {_item}
+        set {_current-damage} to {zclans.clan-%{_clan-id}%-dailyquests::pickup}
+        add {_item-amount} to {zclans.clan-%{_clan-id}%-dailyquests::pickup}
+        set {_new-damage} to {zclans.clan-%{_clan-id}%-dailyquests::pickup}
+        if {@quests menu [daily-quest-pickup-amount]} is between {_current-damage} and {_new-damage}:
+            zclans_givequestrewards({_clan-id}, "daily", "pickup")
+    delete {_item-amount}
+    if {zclans.clan-%{_clan-id}%-weeklyquests::pickup} is set:
+        set {_item} to event-item
+        set {_item-amount} to item amount of {_item}
+        set {_current-damage} to {zclans.clan-%{_clan-id}%-weeklyquests::pickup}
+        add {_item-amount} to {zclans.clan-%{_clan-id}%-weeklyquests::pickup}
+        set {_new-damage} to {zclans.clan-%{_clan-id}%-weeklyquests::pickup}
+        if {@quests menu [weekly-quest-pickup-amount]} is between {_current-damage} and {_new-damage}:
+            zclans_givequestrewards({_clan-id}, "weekly", "pickup")
+
+
+
+every minute:
+    if time since {zclans.questtimer.weekly} is greater than 7 days:
+        set {zclans.questtimer.weekly} to now
+        loop {zclans.clanlist::*}:
+            delete {zclans.clan-%loop-value%-weeklyquests::*}
+        send {@message [weekly-clan-quests-reset-broadcast]} to all players
+        send "All weekly clan quests have been reset." to console
+    if time since {zclans.questtimer.daily} is greater than 1 day:
+        set {zclans.questtimer.daily} to now
+        loop {zclans.clanlist::*}:
+            delete {zclans.clan-%loop-value%-dailyquests::*}
+        send {@message [daily-clan-quests-reset-broadcast]} to all players
+        send "All daily clan quests have been reset." to console
+
+function zclans_openquestsmenu(p: player):
+    set {_uuid} to uuid of {_p}
+    set {_clan-id} to {zclans.playerclans::%{_uuid}%}
+    if {_clan-id} is not set:
+        send {@message [you-are-not-in-a-clan]} to {_p}
+        stop
+    set {_gui} to chest inventory with {@quests menu [size]} rows named {@quests menu [name]}
+    set slot (all integers between 0 and 54) of {_gui} to {@quests menu [fill-item]}
+    set {_gui} to zclans_bordergui({_gui},  {@quests menu [size]}, {@quests menu [border-item]})
+    set slot {@quests menu [back-slot]} of {_gui} to 1 of {@quests menu [back-item]}
+
+    # Daily Quests
+    set {_quest-name} to "killpeople"
+    set {_progress} to {zclans.clan-%{_clan-id}%-dailyquests::%{_quest-name}%} ? 0
+    set {_i} to {@quests menu [daily-quest-killpeople-item]}
+    set {_slot} to {@quests menu [daily-quest-killpeople-slot]}
+    if {zclans.clan-%{_clan-id}%-dailyquests::%{_quest-name}%} is set:
+        set slot {_slot} of {_gui} to zclans_setglowing({_i})
+    else:
+        set slot {_slot} of {_gui} to {_i}
+    set {_quest-name} to "damage"
+    set {_progress} to {zclans.clan-%{_clan-id}%-dailyquests::%{_quest-name}%} ? 0
+    set {_i} to {@quests menu [daily-quest-damage-item]}
+    set {_slot} to {@quests menu [daily-quest-damage-slot]}
+    if {zclans.clan-%{_clan-id}%-dailyquests::%{_quest-name}%} is set:
+        set slot {_slot} of {_gui} to zclans_setglowing({_i})
+    else:
+        set slot {_slot} of {_gui} to {_i}
+    set {_quest-name} to "afkpool"
+    set {_progress} to {zclans.clan-%{_clan-id}%-dailyquests::%{_quest-name}%} ? 0
+    set {_i} to {@quests menu [daily-quest-afkpool-item]}
+    set {_slot} to {@quests menu [daily-quest-afkpool-slot]}
+    if {zclans.clan-%{_clan-id}%-dailyquests::%{_quest-name}%} is set:
+        set slot {_slot} of {_gui} to zclans_setglowing({_i})
+    else:
+        set slot {_slot} of {_gui} to {_i}
+    set {_quest-name} to "traitor"
+    set {_progress} to {zclans.clan-%{_clan-id}%-dailyquests::%{_quest-name}%} ? 0
+    set {_i} to {@quests menu [daily-quest-traitor-item]}
+    set {_slot} to {@quests menu [daily-quest-traitor-slot]}
+    if {zclans.clan-%{_clan-id}%-dailyquests::%{_quest-name}%} is set:
+        set slot {_slot} of {_gui} to zclans_setglowing({_i})
+    else:
+        set slot {_slot} of {_gui} to {_i}
+    set {_quest-name} to "pickup"
+    set {_progress} to {zclans.clan-%{_clan-id}%-dailyquests::%{_quest-name}%} ? 0
+    set {_i} to {@quests menu [daily-quest-pickup-item]}
+    set {_slot} to {@quests menu [daily-quest-pickup-slot]}
+    if {zclans.clan-%{_clan-id}%-dailyquests::%{_quest-name}%} is set:
+        set slot {_slot} of {_gui} to zclans_setglowing({_i})
+    else:
+        set slot {_slot} of {_gui} to {_i}
+
+
+    #Weekly Quests
+    set {_quest-name} to "killpeople"
+    set {_progress} to {zclans.clan-%{_clan-id}%-weeklyquests::%{_quest-name}%} ? 0
+    set {_i} to {@quests menu [weekly-quest-killpeople-item]}
+    set {_slot} to {@quests menu [weekly-quest-killpeople-slot]}
+    if {zclans.clan-%{_clan-id}%-weeklyquests::%{_quest-name}%} is set:
+        set slot {_slot} of {_gui} to zclans_setglowing({_i})
+    else:
+        set slot {_slot} of {_gui} to {_i}
+    set {_quest-name} to "damage"
+    set {_progress} to {zclans.clan-%{_clan-id}%-weeklyquests::%{_quest-name}%} ? 0
+    set {_i} to {@quests menu [weekly-quest-damage-item]}
+    set {_slot} to {@quests menu [weekly-quest-damage-slot]}
+    if {zclans.clan-%{_clan-id}%-weeklyquests::%{_quest-name}%} is set:
+        set slot {_slot} of {_gui} to zclans_setglowing({_i})
+    else:
+        set slot {_slot} of {_gui} to {_i}
+    set {_quest-name} to "afkpool"
+    set {_progress} to {zclans.clan-%{_clan-id}%-weeklyquests::%{_quest-name}%} ? 0
+    set {_i} to {@quests menu [weekly-quest-afkpool-item]}
+    set {_slot} to {@quests menu [weekly-quest-afkpool-slot]}
+    if {zclans.clan-%{_clan-id}%-weeklyquests::%{_quest-name}%} is set:
+        set slot {_slot} of {_gui} to zclans_setglowing({_i})
+    else:
+        set slot {_slot} of {_gui} to {_i}
+    set {_quest-name} to "traitor"
+    set {_progress} to {zclans.clan-%{_clan-id}%-weeklyquests::%{_quest-name}%} ? 0
+    set {_i} to {@quests menu [weekly-quest-traitor-item]}
+    set {_slot} to {@quests menu [weekly-quest-traitor-slot]}
+    if {zclans.clan-%{_clan-id}%-weeklyquests::%{_quest-name}%} is set:
+        set slot {_slot} of {_gui} to zclans_setglowing({_i})
+    else:
+        set slot {_slot} of {_gui} to {_i}
+    set {_quest-name} to "pickup"
+    set {_progress} to {zclans.clan-%{_clan-id}%-weeklyquests::%{_quest-name}%} ? 0
+    set {_i} to {@quests menu [weekly-quest-pickup-item]}
+    set {_slot} to {@quests menu [weekly-quest-pickup-slot]}
+    if {zclans.clan-%{_clan-id}%-weeklyquests::%{_quest-name}%} is set:
+        set slot {_slot} of {_gui} to zclans_setglowing({_i})
+    else:
+        set slot {_slot} of {_gui} to {_i}
+
+    open {_gui} to {_p}
+
+function zclans_givequestrewards(clan-id: text, type: text, quest-name: text):
+    if {_type} is "d" or "daily":
+        set {_quest} to {_quest-name}
+        set {_leader} to {zclans.clan-%{_clan-id}%::leader} parsed as offline player
+        set {_name} to {zclans.clan-%{_clan-id}%::name}
+        loop {zclans.clan-%{_clan-id}%-players::*}:
+            set {_p} to loop-value parsed as offline player
+            send {@message [daily-clan-quest-complete]} to {_p}
+        set {_commands::*} to {@quests daily reward}
+        loop {_commands::*}:
+            execute console command loop-value
+    else if {_type} is "w" or "weekly":
+        set {_quest} to {_quest-name}
+        set {_leader} to {zclans.clan-%{_clan-id}%::leader} parsed as offline player
+        set {_name} to {zclans.clan-%{_clan-id}%::name}
+        loop {zclans.clan-%{_clan-id}%-players::*}:
+            set {_p} to loop-value parsed as offline player
+            send {@message [weekly-clan-quest-complete]} to {_p}
+        set {_commands::*} to {@quests weekly reward}
+        loop {_commands::*}:
+            execute console command loop-value
+function zclans_questcheckrequest(p: player, type: text, name: text) :: boolean: # Had to make this so the script parses fast enuff for my pc
+    set {_uuid} to uuid of {_p}
+    set {_clan-id} to {zclans.playerclans::%{_uuid}%}
+    if {_clan-id} is not set:
+        send {@message [you-are-not-in-a-clan]} to {_p}
+        stop
+    if {_type} is "weekly":
+        if {zclans.clan-%{_clan-id}%-weeklyquests::%{_name}%} is set:
+            send {@message [already-started-quest]} to {_p}
+            return false
+        if size of {zclans.clan-%{_clan-id}%-weeklyquests::*} is greater than or equal to {@max weekly quests}:
+            send {@message [maximum-type-quests-started]} to {_p}
+            return false
+        return true
+    if {_type} is "daily":
+        if {zclans.clan-%{_clan-id}%-dailyquests::%{_name}%} is set:
+            send {@message [already-started-quest]} to {_p}
+            return false
+        if size of {zclans.clan-%{_clan-id}%-dailyquests::*} is greater than or equal to {@max daily quests}:
+            send {@message [maximum-type-quests-started]} to {_p}
+            return false
+        return true
+    return false
+# I am suffering
+# I'm coding on a laptop that can barely parse this skript without parsing
+# Please relieve me from this suffering, I am dying.
+
+on inventory click:
+    name of player's current inventory is {@quests menu [name]}
+    cancel event
+    clicked inventory is player's current inventory
+    set {_uuid} to uuid of player
+    set {_clan-id} to {zclans.playerclans::%{_uuid}%}
+    if {_clan-id} is not set:
+        send {@message [you-are-not-in-a-clan]} to {_p}
+        stop
+    if index of clicked slot is {@quests menu [back-slot]}:
+        zclans_openclanmenu(player)
+        stop
+    if {zclans.clan-%{_clan-id}%::leader} is not player's uuid:
+        send {@message [you-must-be-leader]}
+        stop
+    
+    #Weekly Quests
+    if index of clicked slot is {@quests menu [weekly-quest-killpeople-slot]}:
+        zclans_questcheckrequest(player, "weekly", "killpeople") is true
+        set {zclans.clan-%{_clan-id}%-weeklyquests::killpeople} to 0
+        set {_type} to "weekly"
+        set {_name} to "killpeople"
+    else if index of clicked slot is {@quests menu [weekly-quest-damage-slot]}:
+        zclans_questcheckrequest(player, "weekly", "damage") is true
+        set {zclans.clan-%{_clan-id}%-weeklyquests::damage} to 0
+        set {_type} to "weekly"
+        set {_name} to "damage"
+    else if index of clicked slot is {@quests menu [weekly-quest-afkpool-slot]}:
+        zclans_questcheckrequest(player, "weekly", "afkpool") is true
+        set {zclans.clan-%{_clan-id}%-weeklyquests::afkpool} to 0
+        set {_type} to "weekly"
+        set {_name} to "afkpool"
+    else if index of clicked slot is {@quests menu [weekly-quest-traitor-slot]}:
+        zclans_questcheckrequest(player, "weekly", "traitor") is true
+        set {zclans.clan-%{_clan-id}%-weeklyquests::traitor} to 0
+        set {_type} to "weekly"
+        set {_name} to "traitor"
+    else if index of clicked slot is {@quests menu [weekly-quest-pickup-slot]}:
+        zclans_questcheckrequest(player, "weekly", "pickup") is true
+        set {zclans.clan-%{_clan-id}%-weeklyquests::pickup} to 0
+        set {_type} to "weekly"
+        set {_name} to "pickup"
+    
+    #Daily Quests
+    else if index of clicked slot is {@quests menu [daily-quest-damage-slot]}:
+        zclans_questcheckrequest(player, "daily", "damage") is true
+        set {zclans.clan-%{_clan-id}%-dailyquests::damage} to 0
+        set {_type} to "daily"
+        set {_name} to "damage"
+    else if index of clicked slot is {@quests menu [daily-quest-killpeople-slot]}:
+        zclans_questcheckrequest(player, "daily", "killpeople") is true
+        set {zclans.clan-%{_clan-id}%-dailyquests::killpeople} to 0
+        set {_type} to "daily"
+        set {_name} to "killpeople"
+    else if index of clicked slot is {@quests menu [daily-quest-afkpool-slot]}:
+        zclans_questcheckrequest(player, "daily", "afkpool") is true
+        set {zclans.clan-%{_clan-id}%-dailyquests::afkpool} to 0
+        set {_type} to "daily"
+        set {_name} to "afkpool"
+    else if index of clicked slot is {@quests menu [daily-quest-traitor-slot]}:
+        zclans_questcheckrequest(player, "daily", "traitor") is true
+        set {zclans.clan-%{_clan-id}%-dailyquests::traitor} to 0
+        set {_type} to "daily"
+        set {_name} to "traitor"
+    else if index of clicked slot is {@quests menu [daily-quest-pickup-slot]}:
+        zclans_questcheckrequest(player, "daily", "pickup") is true
+        set {zclans.clan-%{_clan-id}%-dailyquests::pickup} to 0
+        set {_type} to "daily"
+        set {_name} to "pickup"
+
+
+    zclans_openquestsmenu(player)
+    {_type} is set
+    loop {zclans.clan-%{_clan-id}%-players::*}:
+        set {_p} to loop-value parsed as offline player
+        send {@message [leader-started-quest]} to {_p}
+
+command /playergotafktoken [<offline player>]:
+    cooldown: 30 minutes
+    permission: op
+    trigger:
+        sender is console
+        set {_uuid} to uuid of arg 1
+        set {_clan-id} to {zclans.playerclans::%{_uuid}%}
+        {_clan-id} is set
+        if {zclans.clan-%{_clan-id}%-weeklyquests::afkpool} is set:
+            add 10 to {zclans.clan-%{_clan-id}%-weeklyquests::afkpool}
+            broadcast "&6&lAll players &6in the &6&lAFK pool &6were rewarded &e10 Tokens!"
+            if {zclans.clan-%{_clan-id}%-weeklyquests::afkpool} is {@quests menu [weekly-quest-afkpool-amount]}:
+                zclans_givequestrewards({_clan-id}, "weekly", "afkpool")
+        if {zclans.clan-%{_clan-id}%-dailyquests::afkpool} is set:
+            add 10 to {zclans.clan-%{_clan-id}%-dailyquests::afkpool}
+            broadcast "&6&lAll players &6in the &6&lAFK pool &6were rewarded &e10 Tokens!"
+            if {zclans.clan-%{_clan-id}%-dailyquests::afkpool} is {@quests menu [daily-quest-afkpool-amount]}:
+                zclans_givequestrewards({_clan-id}, "daily", "afkpool")

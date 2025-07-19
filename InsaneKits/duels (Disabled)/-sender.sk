@@ -1,0 +1,434 @@
+# functions
+
+
+options:
+    server: "insanekits"
+    fileName: "duels/sender"
+    prefix: "&6&lDuels &7»&b"  
+
+on redis message:
+    redis channel is "duels"
+    redis message is "%{@server}%smsg"
+    send formatted {redisbroadcast} to all players
+    
+function sendDuelRequest(player: player, player2: player, arena: text, kit: text, customkitplayer: player = null, customkitnumber: object = null):
+    if {duelsDisabled} is set:
+        {_player} does not have permission "dueladmin.use"
+        send "%{@prefix}% &4Duels are disabled. Reason: &c%{duelsDisabledReason}%" to {_player}
+        stop
+    if {duelbanned::%{_player}%} is set:
+        send "%{@prefix}% &4You are banned from duels!" to {_player}
+        stop
+    if {duelbanned::%{_player2}%} is set:
+        send "%{@prefix}% &4This player is not allowed to recieve duel requests." to {_player}
+        stop
+    if {duelrequests::%{_player2}%} is set:
+        send "%{@prefix}% This player has duel requests disabled!" to {_player}
+        stop
+    if {duelrequests.%{_player2}%::*} contains {_player}:
+        send "%{@prefix}% This player has already been sent a duel request by you!" to {_player}
+        stop
+    send "%{@prefix}% Your duel request has been sent to &f%{_player2}%&b using kit &f%{_kit}%&b on map %{_arena}%" to {_player}
+    add {_player2} to {outgoingduel.%{_player}'s uuid%::*}
+    set {duelrequests.%{_player2}%::*} to ""
+    add {_player} to {duelrequests.%{_player2}%::*}
+    add {_arena} to {duelrequests.%{_player2}%::*}
+    add {_kit} to {duelrequests.%{_player2}%::*}
+    if {_kit} is "Custom Kit":
+        add {_customkitplayer} to {duelrequests.%{_player2}%::*} 
+        add {_customkitnumber} to {duelrequests.%{_player2}%::*} 
+        send "%{@prefix}% You have been sent a duel request by &f%{_player}%&b. %nl%  &7- Map: &f%{_arena}% %nl%  &7- Kit: &f%{_kit}%&r %nl%&bYou have 30 seconds. %nl%<ttp:&bAccept the duel><cmd:/duelaccept>&a[Accept]<reset><ttp:&bDeny the duel><cmd:/dueldeny>&c [Deny]" to {_player2}
+    else:
+        send "%{@prefix}% You have been sent a duel request by &f%{_player}%&b. %nl%  &7- Map: &f%{_arena}% %nl%  &7- Kit: &f%{_kit}% %nl%&bYou have 30 seconds. %nl%<ttp:&bAccept the duel><cmd:/duelaccept>&a[Accept]<reset><ttp:&bDeny the duel><cmd:/dueldeny>&c [Deny]" to {_player2}
+    wait 30 seconds
+    if {outgoingduel.%{_player}'s uuid%::*} contains {_player2}:
+        remove {_player2} from {outgoingduel.%{_player}'s uuid%::*}
+        send "%{@prefix}%&c The duel request has expired." to {_player}
+    if {duelrequests.%{_player2}%::*} contains {_player}:
+        delete {duelrequests.%{_player2}%::*}
+        send "%{@prefix}%&c The duel request has expired" to {_player2}
+
+# GUI
+
+function refreshArenaGUI():
+    set {_arenas} to size of {arenas::*}
+    set {_pages} to ceiling({_arenas}/14)
+    set {_page} to 0
+    loop {_pages} times:
+        delete gui with id "%{_page}%Arenas"
+        create a gui with id "%{_page}%Arenas" with virtual chest inventory with 4 rows with name "&fArenas"
+        edit gui with id "%{_page}%Arenas":
+            format gui slot 0,1,2,3,4,5,6,7 and 8 with gray stained glass pane named "&6 "
+            set {_loop} to (({_page})*18)
+            set {_loop2} to 9
+            loop 18 times:
+                set {_arena} to {arenas::%{_loop}+1%}
+                if {arenas::%{_loop}+1%} does not exist:
+                    continue
+                if {placeholder.%{_arena}%} does not exist:
+                    set {placeholder.%{_arena}%} to stone bricks named "&f%{_arena}%"
+                format gui slot {_loop2} with {placeholder.%{_arena}%}:
+                    set metadata "pickedarena" of player to {_arena}
+                    open gui with id "0Kits" to player
+                add 1 to {_loop}
+                add 1 to {_loop2}
+            format gui slot 28 with arrow named "&cLast Page":
+                open gui with id "%{_page}-1%Arenas" to player
+            format gui slot 34 with arrow named "&aNext Page":
+                open gui with id "%{_page}+1%Arenas" to player
+        add 1 to {_page}
+
+function refreshKitGUI():
+    set {_kits} to size of {kits::*}
+    set {_pages} to ceiling({_kits}/14)
+    set {_page} to 0
+    loop {_pages} times:
+        delete gui with id "%{_page}%Kits"
+        create a gui with id "%{_page}%Kits" with virtual chest inventory with 4 rows with name "&fKits"
+        edit gui with id "%{_page}%Kits":
+            format gui slot 0,1,2,3,4,5,6,7 and 8 with gray stained glass pane named "&6 " 
+            set {_loop} to (({_page})*18)
+            set {_loop2} to 9
+            loop 18 times:
+                set {_kit} to {kits::%{_loop}+1%}
+                if {kits::%{_loop}+1%} does not exist:
+                    continue
+                if {placeholderKit.%{_kit}%} does not exist:
+                    set {placeholderKit.%{_kit}%} to stone bricks named "&f%{_kit}%"
+                format gui slot {_loop2} with {placeholderKit.%{_kit}%}:
+                    set metadata "pickedkit" of player to {_kit}
+                    set {_player} to metadata "pickedplayer" of player
+                    set {_arena} to metadata "pickedarena" of player
+                    set {_kit} to metadata "pickedkit" of player
+                    sendDuelRequest(player, {_player}, {_arena}, {_kit})
+                    close player's inventory
+                add 1 to {_loop}
+                add 1 to {_loop2}
+            format gui slot 28 with arrow named "&cLast Page":
+                open gui with id "%{_page}-1%Kits" to player
+            format gui slot 30 with paper named "&aCustom Kit 1" with lore "&7Do /editor to make a custom kit!":
+                set metadata "pickedkit" of player to "Custom Kit"
+                set {_player} to metadata "pickedplayer" of player
+                set {_arena} to metadata "pickedarena" of player
+                set {_kit} to metadata "pickedkit" of player
+                set {_extra} to 1
+                close player's inventory
+                sendDuelRequest(player, {_player}, {_arena}, {_kit}, player, {_extra})
+            format gui slot 31 with paper named "&aCustom Kit 2" with lore "&7Do /editor to make a custom kit!":
+                set metadata "pickedkit" of player to "Custom Kit"
+                set {_player} to metadata "pickedplayer" of player
+                set {_arena} to metadata "pickedarena" of player
+                set {_kit} to metadata "pickedkit" of player
+                set {_extra} to 2
+                close player's inventory
+                sendDuelRequest(player, {_player}, {_arena}, {_kit}, player, {_extra})
+            format gui slot 32 with paper named "&aCustom Kit 3" with lore "&7Do /editor to make a custom kit!":
+                set metadata "pickedkit" of player to "Custom Kit"
+                set {_player} to metadata "pickedplayer" of player
+                set {_arena} to metadata "pickedarena" of player
+                set {_kit} to metadata "pickedkit" of player
+                set {_extra} to 3
+                close player's inventory
+                sendDuelRequest(player, {_player}, {_arena}, {_kit}, player, {_extra})
+            format gui slot 34 with arrow named "&aNext Page":
+                open gui with id "%{_page}+1%Kits" to player
+        add 1 to {_page}
+
+function refreshGUI():
+    delete {arenas::*}
+    loop {arenaslist::*}:
+        add loop-value to {arenas::*}
+
+    delete {kits::*}
+    loop {kitslist::*}:
+        add loop-value to {kits::*}
+    
+    refreshArenaGUI()
+    refreshKitGUI()
+        
+on command "/duels":
+    player does not have permission "duels.use"
+    cancel event
+    send "&aYou cannot use this command!"
+
+
+every 5 minutes:
+    send redis message "varsrequest" to channel "duels"
+    wait 10 ticks
+    refreshGUI()
+
+on load:
+    refreshGUI()
+
+# GENERAL COMMANDS
+
+command /duel [<offline player>]:
+    permission: duels.use
+    usage: /duel <player>
+    trigger:
+        if {duelsDisabled} is set:
+            player does not have permission "dueladmin.use"
+            send "%{@prefix}% &4Duels are disabled. Reason: &c%{duelsDisabledReason}%"
+            stop
+        if {duelrequests::%arg 1%} is set:
+            send "%{@prefix}% This player has duel requests disabled!"
+            stop
+        if arg 1 is not set:
+            send "%{@prefix}% Please specify a player to duel!"
+            stop
+        if arg 1 is offline:
+            send "%{@prefix}% This player is not online!"
+            stop
+        if arg 1 is player:
+            player does not have permission "dueladmin.use"
+            send "%{@prefix}% You cannot duel yourself!"
+            stop
+        set metadata "pickedplayer" of player to arg 1
+        open gui with id "0Arenas" to player
+
+command /duelaccept:
+    trigger:
+        if {duelrequests.%player%::*} is set:
+            set {_loop} to 0
+            loop {duelrequests.%player%::*}:
+                
+                if {_loop} is 1:
+                    set {_player} to loop-value
+                else if {_loop} is 2:
+                    set {_map} to loop-value
+                else if {_loop} is 3:
+                    set {_kit} to loop-value
+                else if {_loop} is 4:
+                    set {_customkitplayer} to loop-value
+                else if {_loop} is 5:
+                    set {_customkitnumber} to loop-value
+                add 1 to {_loop}
+            send "%{@prefix}%&b Duel has been accepted."
+            if {_player} is online:
+                clear {duelrequests.%player%::*}
+                remove player from {outgoingduel.%{_player}'s uuid%::*}
+                if {_kit} is "Custom Kit":
+                    startDuel(player, {_player}, {_map}, {_kit}, {_customkitplayer}, {_customkitnumber})
+                else:
+                    startDuel(player, {_player}, {_map}, {_kit})
+
+
+    
+
+
+command /dueldeny:
+    trigger:
+        if {duelrequests.%player%::*} is set:
+            set {_loop} to 0
+            set {_player} to {duelrequests.%player%::1}
+            if {_player} is online:
+                send "%{@prefix}%&c Your duel request has been denied." to {_player}
+            remove player from {outgoingduel.%{_player}'s uuid%::*}
+            delete {duelrequests.%player%::*}
+            send "%{@prefix}%&c You have denied this duel request."
+
+command /duelrequeststoggle:
+    trigger:
+        if {duelrequests::%player%} is set:
+            delete variable "duelrequests::%player%" in channel "duels"
+            send "%{@prefix}% You are now able to recieve duel requests."
+        else:
+            set variable "duelrequests::%player%" in channel "duels" to false
+            send "%{@prefix}%&c You are no longer able to recieve duel requests."
+
+function startDuel(player: player, player2: player, map: text, kit: text, customkitplayer: player = null, customkitnumber: object = null):
+    set variable "p" in channel "duels" to {_player}
+    set variable "p2" in channel "duels" to {_player2}
+    set variable "kit" in channel "duels" to {_kit} if {_customkitnumber} is null
+    set variable "customkitnumber" in channel "duels" to {_customkitnumber} if {_customkitnumber} is not null
+    set variable "customkitplayer" in channel "duels" to {_customkitplayer} if {_customkitplayer} is not null
+    set variable "usingcustomkit" in channel "duels" to true if {_customkitnumber} is not null
+    set variable "usingcustomkit" in channel "duels" to false if {_customkitnumber} is null
+    set variable "kit" in channel "duels" to "Custom Kit" if {_customkitnumber} is not null
+    set variable "map" in channel "duels" to {_map} 
+    set variable "originalserver" in channel "duels" to {@server}   
+    send redis message "startingDuel" to channel "duels"
+    send {_player} to server "duels"
+    send {_player2} to server "duels"
+
+command /dueladmin [<text>] [<text>] [<text>] [<text>]:
+    permission: dueladmin.use
+    trigger:
+        if arg 1 is "help":
+            send "%{@prefix}% Commands:"
+            send "  &aKit Creation"
+            send "   &7- &b/dueladmin createKit <kit>"
+            send "   &7- &b/dueladmin deleteKit <kit>"
+            send "   &7- &b/dueladmin setKitItems <kit>"
+            send "   &7- &b/dueladmin loadKitItems <kit>"
+            send "   &7- &b/dueladmin setKitPlaceholder <kit>"
+            send "  &aPlayer Interaction"
+            send "   &7- &b/dueladmin banPlayer <player> <reason>"
+            send "   &7- &b/dueladmin unbanPlayer <player> <reason>"
+            send "   &7- &b/dueladmin checkBanReason <player>"
+            send "   &7- &b/dueladmin disableDuels <reason>"
+            send "  &aMisc"
+            send "   &7- &b/dueladmin reload"
+            send "   &7- &b/dueladmin credits"
+            send "   &7- &b/dueladmin loadCustomKit <number> [<player>]"
+            
+            
+        # Misc
+
+        else if arg 1 is "credits":
+            send "%{@prefix}% This was made by TheProB (TheProB##4834)"
+        else if arg 1 is "reload":
+            set metadata "duelreloadcheck" of player to true
+            execute console command "/sk reload %{@fileName}%"
+            wait 1 second
+            metadata "duelreloadcheck" of player is set
+            send "%{@prefix}%&c Did not reload properly. Are you sure the filename variable is set properly? (%{@fileName}%)"
+        # Player Interaction
+        else if arg 1 is "banPlayer":
+            set {_player} to arg 2 parsed as offline player
+            if arg 3 is set:
+                set {_reason} to arg 3
+            else:
+                send "%{@prefix}% No reason set."
+                set {_reason} to "None"
+            if {duelban::%{_player}'s uuid%} is set:
+                send "%{@prefix}% &cThis player was already banned, so you are re-applying the reason."
+            set variables "duelban::%{_player}'s uuid%" in channel "duels" to {_reason}
+            loop all players where [input has permission "dueladmin.use"]:
+                send "%{@prefix}% &c%player% has banned %{_player}% from duels for reason %{_reason}%" to loop-player
+        else if arg 1 is "unbanPlayer":
+            set {_player} to arg 2 parsed as offline player
+            if {duelban::%{_player}'s uuid%} is set:
+                if arg 3 is set:
+                    set {_reason} to arg 3
+                else:
+                    send "%{@prefix}% No reason set."
+                    set {_reason} to "None"
+                delete variable "duelban::%{_player}'s uuid%" in channel "duels"
+                loop all players where [input has permission "dueladmin.use"]:
+                    send "%{@prefix}% &a%player% has unbanned %{_player}% from duels for reason %{_reason}%" to loop-player
+            else:
+                send "%{@prefix}% &cThis player is not banned."
+        else if arg 1 is "checkBanReason":
+            set {_player} to arg 2 parsed as offline player
+            if {duelban::%{_player}'s uuid%} is set:
+                send "%{@prefix}% Player banned - %{_player}%. Reason: %{duelban::%{_player}'s uuid%}%"
+            else:
+                send "%{@prefix}% &cThis player is not banned."
+        else if arg 1 is "disableDuels":
+            if {duelsDisabled} is not set:
+                if arg 3 is set:
+                    set {_reason} to arg 3
+                else:
+                    send "%{@prefix}% No reason set."
+                    set {_reason} to "None"
+                set variables "duelsDisabled" and "duelsDisabledReason" in channel "duels" to {_reason}
+                send "%{@prefix}% &cDuels have been disabled."          
+            else:
+                delete variables "duelsDisabled" and "duelsDisabledReason" in channel "duels"
+                send "%{@prefix}% &aDuels have been enabled."
+                
+        #Kit Creation
+        else if arg 1 is "createKit":
+            if arg 2 is set:
+                if {kitslist::*} does not contain arg 2:
+                    add arg 2 to {kitslist::*}
+                    loop {kitslist::*}:
+                        set variable "kitslist::%loop-index%" in channel "duels" to loop-value
+                    
+                    send "%{@prefix}% Created kit %arg 2%" 
+                else:
+                    send "%{@prefix}% &cA kit with this name already exists."
+            else:
+                send "%{@prefix}% &cKit name not specified."
+        else if arg 1 is "deleteKit":
+            if arg 2 is set:
+                if {kitslist::*} does not contain arg 2:
+                    send "%{@prefix}% &cKit already does not exist."
+                else:
+                    remove arg 2 from {kitslist::*}
+                    set {_kits::*} to {kitslist::*}
+                    delete variable "kitslist::*" in channel "duels"
+                    wait 2 ticks
+                    loop {_kits::*}:
+                        set variable "kitslist::%loop-index%" in channel "duels" to loop-value
+                    remove arg 2 from {kitslist::*}
+
+                    send "%{@prefix}% &cSuccessfully deleted kit %arg 2%"
+            else:
+                send "%{@prefix}% &cKit name not specified."
+        else if arg 1 is "setKitItems":
+            if arg 2 is set:
+                if {kitslist::*} contains arg 2:
+                    send "%{@prefix}% Kit inventory set to current inventory."
+                    inventorySetup(player, "saveKit", arg 2)
+                else:
+                    send "%{@prefix}% &cKit does not exist."
+            else:
+                send "%{@prefix}% &cKit name not specified."
+        else if arg 1 is "loadKitItems":
+            if arg 2 is set:
+                if {kitslist::*} contains arg 2:
+                    inventorySetup(player, "loadKit", arg 2)
+                    send "%{@prefix}% Loaded kit %arg 2%"
+                else:
+                    send "%{@prefix}% &cKit does not exist."
+            else:
+                send "%{@prefix}% &cKit name not specified."
+        else if arg 1 is "setKitPlaceholder":
+            if arg 2 is set:
+                if {kitslist::*} contains arg 2:
+                    set variable "placeholderKit.%arg 2%" in channel "duels" to player's tool
+                    send "%{@prefix}% Set placeholder for kit %arg 2% to your current tool."
+                else:
+                    send "%{@prefix}% Kit does not exist."
+            else:
+                send "%{@prefix}% &cKit name not specified."
+        else if arg 1 is "loadCustomKit":
+            if arg 2 is "1" or "2" or "3":
+                if arg 3 is set:
+                    inventorySetup(player, "loadCustomKit", "null", arg 2, arg 3)
+                else:
+                    inventorySetup(player, "loadCustomKit", "null", arg 2, player's name)
+                send "%{@prefix}% Successfully loaded custom kit."
+            else:
+                send "%{@prefix}% &cPlease pick custom kit 1, 2, or 3"
+        else:
+            send "%{@prefix}% Unknown function, do /dueladmin help to see all of the commands."
+
+on tab complete of "/dueladmin":
+    player has permission "dueladmin.use"
+    set tab completions for position 1 to "help", "createKit", "deleteKit", "setKitItems", "loadKitItems", "setKitPlaceholder", "reload", "credits", "banPlayer", "unbanPlayer", "disableDuels", "checkBanReason", "loadCustomKit", and "setArenaPlaceholder"
+    if tab arg-1 is "deleteKit" or "setKitItems" or "loadKitItems" or "setKitPlaceholder":
+        set tab completions for position 2 to {kitslist::*}
+    else if tab arg-1 is "setSpawnPositions":
+        set tab completions for position 2 to {arenaslist::*}
+        set tab completions for position 3 to "1" and "2"
+    else if tab arg-1 is "banPlayer" or "unbanPlayer" or "checkBanReason":
+        set tab completions for position 2 to all players
+    else if tab arg-1 is "loadCustomKit":
+        set tab completions for position 2 to "1", "2", and "3"
+        set tab completions for position 3 to all players
+
+function inventorySetup(p: player, settings: text, kit: text, extra: text = "", extrap: text = ""):
+    if {_settings} is "saveKit":
+        set {_loop} to 0
+        loop 41 times:
+            set {_item} to slot {_loop} of {_p}'s inventory
+            set variable "slot%{_loop}%.%{_kit}%" in channel "duels" to {_item}
+            add 1 to {_loop}
+    else if {_settings} is "loadCustomKit":
+        set {_loop} to 0
+        loop 41 times:
+            set {_item} to {customkit%{_extra}%.%{_extrap} parsed as player's uuid%::%{_loop}%}
+            set slot {_loop} of {_p}'s inventory to {_item}
+            add 1 to {_loop}
+    else if {_settings} is "loadKit":
+        set {_loop} to 0
+        loop 41 times:
+            set {_item} to {slot%{_loop}%.%{_kit}%}
+            set slot {_loop} of {_p}'s inventory to {_item}
+            add 1 to {_loop}
+
+
+#set variables "test::1", "othervariable::*" in channel %string% to %any value%

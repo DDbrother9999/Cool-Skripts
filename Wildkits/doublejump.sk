@@ -1,0 +1,41 @@
+# You have to be in survival for the book application to work
+# The book applies by going into your inventory and clicking on  the boot you wish to apply it to
+
+on load:
+	set {dbjbook} to enchanted book with lore "&7Double-Jump"
+
+
+command /givedbj:
+	permission: op
+	trigger:
+		give player {dbjbook}
+
+every 8 seconds:
+	loop all players:
+		if loop-player's boots' lore contains "&7Double-Jump":
+			if flight mode of loop-player is false:
+				send action bar "&9You can now double jump again" to loop-player
+			set flight mode of loop-player to true
+
+on flight toggle:
+	if player's boots' lore contains "&7Double-Jump":
+		if player's gamemode is survival:
+			wait 1 tick
+			set flight mode of player to false
+			push player forwards at speed 1
+	else:
+		if player's gamemode is survival:
+			if regions at player contains "arena":
+				set flight mode of player to false
+			
+on inventory click:
+	if player's cursor slot is enchanted book with lore "&7Double-Jump":
+		if clicked slot is a boots:
+			cancel event
+			add "&7Double-Jump" to lore of clicked slot
+			set player's cursor slot to air
+			
+every second:
+	loop all players:
+		loop-player's gamemode is survival
+		set loop-player's flying state to false

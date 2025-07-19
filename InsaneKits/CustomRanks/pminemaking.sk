@@ -1,0 +1,291 @@
+import:
+    com.sk89q.worldedit.bukkit.WorldEditPlugin
+    com.sk89q.worldedit.regions.Region
+    com.sk89q.worldedit.regions.CuboidRegion
+    com.sk89q.worldedit.IncompleteRegionException
+    com.sk89q.worldedit.LocalSession
+    com.sk89q.worldedit.WorldEdit
+    com.sk89q.worldedit.bukkit.BukkitAdapter
+    com.sk89q.worldedit.math.BlockVector3
+    de.c4t4lysm.catamines.CataMines
+    de.c4t4lysm.catamines.schedulers.MineManager
+    de.c4t4lysm.catamines.utils.Utils
+    de.c4t4lysm.catamines.utils.mine.mines.CuboidCataMine
+    de.c4t4lysm.catamines.utils.mine.components.CataMineBlock
+    org.bukkit.Bukkit
+    org.bukkit.block.data.BlockData
+    org.bukkit.Location
+    org.bukkit.World
+    org.bukkit.plugin.Plugin
+    net.leonemc.neon.spigot.Neon
+    java.lang.System
+
+on load:
+    set {schemorigin::testingmine} to location(500, 0, 1000, "world")
+    set {schemorigin::VIP} to location(500, 0, 1100, "world")
+    set {schemheight::testingmine} to 10
+    set {schemheight::VIP} to 10
+    set {mineposition1::testingmine::*} to 10, -4, 4
+    set {mineposition1::VIP::*} to 10, -4, 4
+    set {mineposition2::testingmine::*} to 7, -3, 7
+    set {mineposition2::VIP::*} to 7, -3, 7
+    set {warpposition::testingmine::*} to 3, -7, 7
+    set {warpposition::VIP::*} to 3, -7, 7
+
+on join:
+    if {RankMines::%player's uuid%::*} is set:
+        loop {RankMines::%player's uuid%::*}:
+            enableMine(player, {RankMines::%player's uuid%::%loop-value%::name})
+
+on leave:
+    if {RankMines::%player's uuid%::*} is set:
+        loop {RankMines::%player's uuid%::*}:
+            disableMine(player, {RankMines::%player's uuid%::%loop-value%::name})
+
+command /getweselection:
+    trigger:
+        set {_worldEditPlugin} to CataMines.getInstance().getWorldEditPlugin()
+        send Utils.getWorldEditSelectionOfPlayer({_worldEditPlugin}, player)
+
+function createRankedMine(p: player, type: text):
+    debug("Called %{_p}% ""%{_type}%""")
+    set {_name} to "%{_p}%mine%{_type}%"
+
+    if {currentminepos::%{_type}%} is not set:
+        debug("Not set %{schemorigin::%{_type}%}%")
+        set {currentminepos::%{_type}%} to {schemorigin::%{_type}%}
+
+    set {_loc} to {currentminepos::%{_type}%}
+    add {schemheight::%{_type}%} to y coordinate of {_loc}
+    set {_ogloc} to {_loc}
+
+    set {currentminepos::%{_type}%} to {_loc}
+
+    if {currentminepos::%{_type}%}'s y coordinate+{schemheight::%{_type}%} is greater than 320:
+        debug("Position wrapped over")
+        set {currentminepos::%{_type}%}'s y coordinate to -60
+        add 70 to {currentminepos::%{_type}%}'s x coordinate
+
+
+    paste schematic "%{_type}%" at {_loc}
+    debug("Schematic pasted at %{_loc}%")
+
+    remove {mineposition1::%{_type}%::1} from x coordinate of {_loc}
+    add {mineposition1::%{_type}%::2} to y coordinate of {_loc}
+    remove {mineposition1::%{_type}%::3} from z coordinate of {_loc}
+
+    set {_pos1} to {_loc}
+    
+    remove {mineposition2::%{_type}%::1} from x coordinate of {_loc}
+    add {mineposition2::%{_type}%::2} to y coordinate of {_loc}
+    remove {mineposition2::%{_type}%::3} from z coordinate of {_loc}
+
+    set {_pos2} to {_loc}
+    
+    lazyMine({_name}, 20, {_pos1}, {_pos2})
+    debug("Mine created")
+
+    wait 20 ticks
+    execute console command "cm reset %{_name}%"
+    
+    set {_loc} to {_ogloc}
+
+    remove {warpposition::%{_type}%::1} from x coordinate of {_loc}
+    add {warpposition::%{_type}%::2} to y coordinate of {_loc}
+    remove {warpposition::%{_type}%::3} from z coordinate of {_loc}
+    set yaw of {_loc} to -180
+    set pitch of {_loc} to 0
+
+    set {RankMines::%{_p}'s uuid%::%{_type}%} to {_loc}
+    set {RankMines::%{_p}'s uuid%::%{_loc}%::name} to {_type}
+    debug("Warp created at %{RankMines::%{_p}'s uuid%::%{_type}%}%")
+
+function deleteRankedMine(p: player, type: text):
+    set {_name} to "%{_p}%mine%{_type}%"
+    execute console command "cm delete %{_name}%"
+    clear {RankMines::%{_p}'s uuid%::%{_type}%}
+
+function disableMine(p: player, type: text):
+    set {_name} to "%{_p}%mine%{_type}%"
+    execute console command "cm stop %{_name}%"
+
+function enableMine(p: player, type: text):
+    set {_name} to "%{_p}%mine%{_type}%"
+    execute console command "cm start %{_name}%"
+    set {_user} to Neon.getInstance().getUserManager().get({_p})
+    if System.currentTimeMillis() - {_user}.getLastPlayed() is greater than 1800000:
+        execute console command "cm reset %{_name}%"
+    else:
+        send "Cooldown not over yet. %(1800000 - (System.currentTimeMillis() - {_user}.getLastPlayed()))/1000% seconds left." to console
+
+function createMine(name: text, loc1: location, loc2: location):
+    set {_world} to world of {_loc1}
+    if {_world} is not world of {_loc2}:
+        send "&c&lERROR:&c You cannot create a mine between two different worlds." to console
+        stop
+
+    if MineManager.getInstance().getMineListNames().contains({_mineID}):
+        send "&c&lERROR:&c This mine already exists." to console
+        stop
+
+    set {_loc1} to BlockVector3.at({_loc1}.getX(), {_loc1}.getY(), {_loc1}.getZ())
+    set {_loc2} to BlockVector3.at({_loc2}.getX(), {_loc2}.getY(), {_loc2}.getZ())
+    
+    set {_region} to new CuboidRegion(BukkitAdapter.adapt({_world}), {_loc1}, {_loc2})
+
+    set {_mine} to new CuboidCataMine({_name}, {_region}.clone())
+
+    try MineManager.getInstance().getMines().add({_mine})
+    if MineManager.getInstance().getMineListNames().contains({_mineID}):
+        send "&a&lMine has been created. %{_name}%" to console
+
+function setBlocksofMine(mineID: text, block: text, chance: integer = -1):
+    # chance is 1 to 100, -1 is disabled, and just fills in the rest with that block. Also the default, btw.
+    if !MineManager.getInstance().getMineListNames().contains({_mineID}):
+        send "&c&lERROR:&c This mine does not exist" to console
+        stop
+
+    set {_blockData} to Bukkit.createBlockData({_block}.toLowerCase())
+    set {_mine} to MineManager.getInstance().getMine({_mineID})
+
+    if {_chance} is -1:
+        try {_mine}.addBlock(new CataMineBlock({_blockData}, 100 - {_mine}.getCompositionChance()))
+    else if {_chance} is greater than 0:
+        if {_chance} is less than or equal to 100:
+            if {_chance} + {_mine}.getCompositionChance() is greater than 100:
+                send "&c&lERROR:&c New percentage is over 100. Not applied." to console
+                stop
+            try {_mine}.addBlock(new CataMineBlock({_blockData}, {_chance}))
+        else:
+            send "&c&lERROR:&c Range is 1 - 100." to console
+
+    {_mine}.save()
+    send "&a&lBlock set. %{_blockData}% %{_chance}%%%" to console
+
+function setMineResetDelay(mineID: text, time: text):
+    # DELAY IS IN SECONDS
+    set {_time} to {_time} parsed as integer
+    if !MineManager.getInstance().getMineListNames().contains({_mineID}):
+        send "&c&lERROR:&c This mine does not exist" to console
+        stop
+
+    set {_mine} to MineManager.getInstance().getMine({_mineID})
+
+    {_mine}.setResetDelay({_time})
+    {_mine}.setCountdown({_time})
+    try {_mine}.save()
+    send "&a&lReset Delay set. %{_time}%" to console
+
+function lazyMine(name: text, time: integer, loc1: location, loc2: location):
+    execute console command "cm delete %{_name}%"
+    wait 1 tick
+    createMine({_name}, {_loc1}, {_loc2})
+    wait 1 tick
+    setBlocksofMine({_name}, "diamond_ore", 50)
+    setBlocksofMine({_name}, "emerald_ore", 50)
+    wait 1 tick
+    set {_time} to {_time}*60
+    setMineResetDelay({_name}, "%{_time}%")
+
+function setUpPMine(target: player, executor: offline player = "Notch" parsed as player):
+    set {_t} to "%{_target}%"
+    replace all "." in {_t} with "0"
+    set {_id} to size of {pmines::%{_target}'s uuid%::*} + 1
+    set {_name} to "%{_t}%pmine%{_id}%"
+
+    if {pminecurrentpos} is not set:
+        set {pminecurrentpos} to {pmineorigin}
+
+    set {_ogloc} to {pminecurrentpos}
+    add 13 to y coordinate of {pminecurrentpos}
+    if {pminecurrentpos}'s y coordinate+20 is greater than 320:
+        set {pminecurrentpos}'s y coordinate to -60
+        add 54 to {pminecurrentpos}'s x coordinate
+
+    paste schematic "ddpmine" at {_ogloc}
+
+    # MINE
+
+    set {_loc} to {_ogloc}
+    add 21 to x coordinate of {_loc}
+    add 1 to y coordinate of {_loc}
+    add 16 to z coordinate of {_loc}
+
+    set {_pos1} to {_loc}
+
+    set {_loc} to {_ogloc}
+    add 32 to x coordinate of {_loc}
+    add 4 to y coordinate of {_loc}
+    add 27 to z coordinate of {_loc}
+
+    set {_pos2} to {_loc}
+
+    lazyMine({_name}, 20, {_pos1}, {_pos2})
+
+    wait 20 ticks 
+    execute console command "cm reset %{_name}%"
+    # P MINE SPAWN
+
+    set {_loc} to {_ogloc}
+    add 16.9 to x coordinate of {_loc}
+    add 2 to y coordinate of {_loc}
+    add 35.9 to z coordinate of {_loc}
+    set yaw of {_loc} to -180
+    set pitch of {_loc} to 0
+
+    set {pmines::%{_target}'s uuid%::%{_id}%} to {_loc}
+
+    send "&c&lPMine created." to {_executor} and console
+
+command /givepminetoplayer [<player>]:
+    permission: pmine.givetoplayer
+    trigger:
+        if player is a player:
+            setUpPMine(arg 1, player)
+        else:
+            setUpPMine(arg 1)
+
+command /setuppmine [<text>]:
+    permission: op
+    trigger:
+        if arg 1 is "getSchematic":
+            set {numberofschems} to 0 if {numberofschems} is not set
+            add 1 to {numberofschems}
+            if {pminel1} and {pminel2} are set:
+                save schematic "PMineSchematic.%{numberofschems}%" from {pminel1} and {pminel2}
+
+            else:
+                send "&aDo /setuppmine <getPositions>"
+        else if arg 1 is "setOriginLocation":
+            if player's y coordinate is between -59 and -61:
+                
+                set {pmineorigin} to player's location 
+            else:
+                send "&aY coordinate = -60 pls"
+            send "&aSet."
+        else if arg 1 is "getPositions":
+            give stick of mending 77 named "&aGet pmine positions" with lore "&aGet positions" with all flags hidden to player
+
+on tab complete of "/setuppmine":
+    set tab completions for position 1 to "getSchematic" and "setOriginLocation" and "getPositions"
+
+on left click:
+    player has permission "*"
+    player's tool is stick of mending 77 named "&aGet pmine positions" with lore "&aGet positions"
+    cancel event
+    set {pminel1} to event-block's location
+    send "set"
+
+on right click:
+    player has permission "*"
+    player's tool is stick of mending 77 named "&aGet pmine positions" with lore "&aGet positions"
+    cancel event
+    set {pminel2} to event-block's location
+    send "set"
+
+on break with priority lowest:
+	event-block is not diamond ore or emerald ore
+	player's gamemode is not creative
+	"%region at event-block%" is "<none>"
+	cancel event
+	

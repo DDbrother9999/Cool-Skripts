@@ -1,0 +1,731 @@
+
+import:
+  net.leonemc.core.Core
+  net.leonemc.core.manager.quests.impl.daily.CustomItemQuest
+  java.lang.System
+
+#-------------BESERK EGG----------------
+on right click with an egg:
+    if {egg.%player's uuid%} is not set:
+        set {egg.%player's uuid%} to now
+    else:
+        if difference between now and {egg.%player's uuid%} < 10 seconds:
+            cancel Event
+            send "&5Please wait to use this again!"
+            play sound "entity.villager.trade" to player
+        else:
+            delete {egg.%player's uuid%}
+                    
+
+command /givequestprogressthingy:
+    permission: *
+    trigger:
+        increaseQuestProgress(player)
+        send "&aDone"
+
+
+on damage:
+    if damage was caused by a projectile:
+        if projectile is an egg:
+            #if colored name of event-projectile contains "Swap":
+            set {_vic} to victim's location
+            teleport attacker to {_vic}
+            damage victim by 4 hearts            
+            send "&9You have been egged!" to victim
+            play sound "entity.enderman.teleport" at pitch 2 to attacker
+			
+			
+on spawn of a chicken:
+    cancel event
+
+#FIREBALL
+
+on right click:
+    if event-block is not set:
+        if player's tool is fire charge:
+            player is in the region "arena"
+            cancel event
+            shoot a fireball from the player
+            remove 1 of player's tool from player's inventory
+    else if event-block is set:
+        if player's tool is fire charge:
+            player is in the region "arena"
+            cancel event
+            shoot a fireball from the player
+            remove 1 of player's tool from player's inventory
+			
+on right click with a fire charge:
+        if event-block is set:
+                cancel event
+				
+on right click with a fire charge:
+        if event-block is any ore:
+                cancel event
+
+
+on projectile hit:
+    if event-projectile is large fireball:
+        cancel event
+
+        play sound "entity.generic.explode" at event-block
+        play large explosion on event-block
+
+        if "%region at event-block%" does not contain "eewall" or "nwall" or "swall" or "wwall" or "bedrock" or "roof" or "spawn":
+
+            if event-block is not stone or any ore or bedrock or end portal frame or barrier or command block or sand or spruce wood or spruce stair or stripped spruce log or spruce slab or ender chest or gray wool or banner or light gray wool or oak stair or oak trapdoor or oak wood or obsidian or respawn anchor:
+
+                loop blocks in radius 1.5 around the event-block:
+                    if "%region at loop-block%" contains "eewall" or "nwall" or "swall" or "wwall" or "bedrock" or "roof" or "spawn":
+                        cancel event
+                    else:
+                        if loop-block is not stone or any ore or bedrock or end portal frame or barrier or command block or sand or spruce wood or spruce stair or stripped spruce log or spruce slab or ender chest or gray wool or banner or light gray wool or oak stair or oak trapdoor or oak wood or obsidian or respawn anchor:
+                            set loop-block to air
+                    
+				
+            else:
+                if event-block is any ore:
+                    set event-block to air
+                
+                if event-block is stone:
+                    loop blocks in radius 1 around the event-block:
+                        if "%region at event-block%" contains "eewall" or "nwall" or "swall" or "wwall" or "bedrock" or "roof":
+                            cancel event
+                        else:
+                            set event-block to air
+                            
+#ENDERPEARL
+on join:
+    set {-endercooldown::%player's uuid%} to now
+
+on right click:
+    set {_pass} to false
+    if player's tool is ender pearl item:
+        set {_pass} to true
+    else if player's offhand tool is ender pearl item:
+        set {_pass} to true
+    {_pass} is true
+    set {_d} to difference between {-endercooldown::%player's uuid%} and now
+    if {_d} < 5 seconds: # any time
+        cancel event
+        play sound "entity.villager.no" for player
+        send "&cPlease wait with doing that! [%difference between (5 seconds) and {_d}%]"
+    else:
+        set {-endercooldown::%player's uuid%} to now
+        
+#SUGARS
+
+on load:
+    set {speedsugar} to sugar of mending named "&9&lSpeed Sugar" with lore "&eGives Speed III for 3 seconds" with enchants flag hidden
+    set {strengthsugar} to sugar of mending named "&c&lStrength Sugar" with lore "&eGives Strength II for 3 seconds" with enchants flag hidden
+
+on right click with sugar:
+    if colored name of player's tool contains "&9&lSpeed Sugar":
+        remove 1 sugar named "&9&lSpeed Sugar" from player's inventory
+        apply speed 3 to player for 3 seconds
+        
+		
+on right click with sugar:
+    if colored name of player's tool contains "&c&lStrength Sugar":
+        remove 1 sugar named "&c&lStrength Sugar" from player's inventory   
+        apply strength 2 to the player for 3 seconds
+        
+#SWAPPER BALLS
+on right click:
+	if player's tool is snowball:
+		if player is in the region "koth":
+			send "&c You can't use these in KOTH"
+			cancel event
+		else if {swap.%player's uuid%} is not set:
+			set {swap.%player's uuid%} to now
+		else:
+			if difference between now and {swap.%player's uuid%} < 5 seconds:
+				cancel Event
+				send "&5Please wait to use this again!"
+				play sound "entity.villager.trade" to player
+			else:
+				delete {swap.%player's uuid%}
+                    
+on damage:
+	if attacker's tool is golden sword:
+		if attacker is in the region "koth":
+			send "&c You can't use these in KOTH" to attacker
+			cancel event
+on damage:
+    if damage was caused by a projectile:
+        if projectile is a snowball:
+            #if colored name of event-projectile contains "Swap":
+            set {_vic} to victim's location
+            set {_att} to attacker's location
+            teleport victim to {_att}
+            teleport attacker to {_vic}
+
+            send "&5Swapped!" to attacker
+            send "&5Swapped!" to victim
+
+            play sound "entity.enderman.teleport" at pitch 2 to victim
+            play sound "entity.enderman.teleport" at pitch 2 to attacker
+#TNT
+
+on place of TNT:
+    cancel the event
+    remove 1 TNT from player's inventory
+    spawn 1 primed TNT at event-location
+
+#MAGIC FRUIT
+
+on right click with a chorus flower:
+  cancel event
+  remove 1 chorus flower from player's inventory
+  play sound "block.honey_block.step" at volume 3 at pitch 1 to player
+  apply strength 1 to the player for 10 seconds
+  apply speed 2 to player for 10 seconds
+  apply haste 2 to the player for 10 seconds
+
+#INFINITY CRYSTAL
+on right click on obsidian or bedrock:
+    if name of player's tool is "&aInfinity Crystal":
+        wait 1 tick
+        set player's tool to an end crystal named "&aInfinity Crystal"
+
+# FLOOD
+command /giveflood:
+    permission: op
+    trigger:
+        give player glowing water bucket named "&9&lFlood"
+
+on right click:
+    if name of player's tool is "&9&lFlood":
+        cancel event
+        if clicked block is sandstone:
+            # stop if clicked block's y location is greater than 71 -- If players start griefing with it
+            delete player's tool
+            play sound "block.conduit.activate" at pitch 2 to player
+            if player is in the region "arena":
+                set {_loc} to location of event-block
+                set block at {_loc} to water
+                set {_flood::%clicked block%} to {_loc}
+                loop blocks in radius 10 around {_loc}:
+                    if loop-block is sandstone:    
+                        set {_loc2} to location of loop-block
+                        set {_flood::%loop-block%} to {_loc2}
+                        # set block at {_loc2} to water
+                push player upwards with speed 1
+                push player forwards with speed 1
+                loop {_flood::*}:
+                    set block at loop-value to water
+                wait 5 ticks
+                loop {_flood::*}:
+                    set {_ran} to random integer between 1 and 2
+                    make player see block at loop-value as light blue stained glass if {_ran} is 1
+                    make player see block at loop-value as blue stained glass if {_ran} is 2
+                wait 5 seconds
+                loop {_flood::*}:
+                    set {_loc3} to loop-value
+                    set block at {_loc3} to sandstone
+                    wait 1 tick
+
+# POUND      
+command /givepound [<offlineplayer>]:
+    permission: op
+    trigger:
+        if arg-1 is set:
+            give player glowing blaze rod named "&x&f&b&a&0&0&0&lPound" with lore "&eCollector's Edition &7- Belongs to &a%arg-1%"
+        else:
+            give player glowing stick named "&c&lPound"
+
+on damage:
+    if {immune::%victim's uuid%} is true:
+        cancel event
+
+on click:
+    if name of player's tool is "&c&lPound" or "&x&f&b&a&0&0&0&lPound":
+        if player is in the region "arena":
+            if {poundcooldown::%player's uuid%} is set:
+                send "&cYou are on cooldown!" to player
+                stop
+            set {poundcooldown::%player's uuid%} to now
+            loop players in radius 10 around player:
+                send "&c&l&m==========================" to loop-player
+                send "&e&l%player% &c&lIS USING A POUND STICK! RUN!" to loop-player
+                send "&c&l&m==========================" to loop-player
+            push player upwards with speed 5
+            wait 1 second
+            push player downwards with speed 10
+            set {_hit} to false
+            while {_hit} is false:
+                if block below player is not air:
+                    set {_hit} to true
+                wait 1 ticks
+            set {immune::%player's uuid%} to true
+            if player is in the region "arena":
+                create a safe explosion with force 0 at player
+                loop players in radius 10 around player:
+                    if loop-player is not player:
+                        push loop-player upwards with speed 1.5
+                        set {_loc} to loop-player's location
+                        #send "d: %distance between player and loop-player%" to player
+                        make player damage loop-player by 10 if distance between player's location and {_loc} is greater than or equal to 8
+                        make player damage loop-player by 15 if distance between player's location and {_loc} is greater than or equal to 6
+                        make player damage loop-player by 20 if distance between player's location and {_loc} is greater than or equal to 4
+                        make player damage loop-player by 25 if distance between player's location and {_loc} is greater than or equal to 1
+                        make player damage loop-player by 35 if distance between player's location and {_loc} is less than 1
+            wait 3 ticks
+            delete {immune::%player's uuid%}
+            wait 15 seconds
+            delete {poundcooldown::%player's uuid%}
+            send "&aYour pound stick is ready!" to player
+on load:
+    delete {poundcooldown::*}
+
+# RAVAGE
+command /giveravage:
+    permission: op
+    trigger:
+        give player glowing stone axe named "&4&lRavage"
+
+on click:
+    if name of player's tool is "&4&lRavage":
+        send "&cThis item is temporarily disabled."
+        stop
+        if player is in the region "arena":
+            delete player's tool
+            set {immune::%player's uuid%} to true
+            loop 15 times:
+                push player forwards with speed 1
+                create an explosion with force 3 at player
+                push player downwards with speed 10
+                wait 3 ticks
+            delete {immune::%player's uuid%}
+
+# Blaze Bow
+on leftclick with bow:
+	if tool of shooter is bow:
+		if name of shooter's tool is "&c&lBlaze Bow":
+			cancel event
+			if shooter is in the region "arena":
+				loop 25 times:
+					make shooter shoot a fireball
+
+# Attack Dog
+command /givebone:
+    permission: op
+    trigger:
+        give player glowing stone axe named "&b&lAttack Dogs"
+
+command /testdog:
+    permission: op
+    trigger:
+        summon a wolf at player
+
+on right click on wolf:
+    cancel event
+    set {_meta} to metadata value "Owner" of clicked entity
+    set {_meta} to "%{_meta}%" parsed as player
+    if {_meta} is not online:
+        tame clicked entity to player
+        apply glowing without particles to clicked entity for 999999 seconds
+        apply resistance 1 without particles to clicked entity for 999999 seconds
+        set display name of clicked entity to "&e%player%&c's Attack Dog"
+        set metadata value "Owner" of clicked entity to player
+        set {_meta} to metadata value "Owner" of clicked entity
+        wait 1 tick
+        make player damage clicked entity by 1
+    else if {_meta} is player:
+        send "&aThis is your attack wolf."
+    else:
+        send "&cThis is &e%{_meta}%&c's attack wolf."
+    
+on click:
+    if name of player's tool is "&b&lAttack Dogs":
+        if player is in the region "arena":
+            send "test"
+# Bug Hunter
+command /givebh <offlineplayer> <boolean>:
+    permission: op
+    trigger:
+        if arg-2 is true:
+            give player golden axe of mending and sharpness 10 and unbreaking 255 and curse of vanishing named "&x&f&f&e&d&0&0&lBug Hunter" with lore "&6Use this golden bug hunter axe to slay bugs!%nl%&7This weapon belongs to &e%arg-1%" with enchants flag hidden
+        else:
+            give player iron axe of mending and sharpness 3 and unbreaking 255 and curse of vanishing named "&x&d&c&f&f&b&4&lBug Hunter" with lore "&fUse this bug hunter axe to slay bugs!%nl%&7This weapon belongs to &e%arg-1%" with enchants flag hidden
+
+# Heavenly Shard
+command /giveashard [<offlineplayer>]:
+    permission: op
+    trigger:
+        arg-1 is not set:
+            give player glowing amethyst shard named "&d&lHeavenly Shard" with lore "&r&7Left-Click: Teleport Barrage%nl%&r&7Right-Click: Rush%nl%&r&7Sneak + Left-Click: Reset%nl%&r&7Sneak + Right-Click: Ascend"
+        else:
+            give player glowing echo shard named "&x&0&3&6&1&9&4&lHeavenly Shard" with lore "&r&7Left-Click: Teleport Barrage%nl%&r&7Right-Click: Rush%nl%&r&7Sneak + Left-Click: Reset%nl%&r&7Sneak + Right-Click: Ascend%nl%%nl%&eCollector's Edition &7- Belongs to &a%arg-1%"
+
+command /giveresetrose:
+    permission: op
+    trigger:
+        give player glowing wither rose named "&r&bReset Rose" with lore "&r&fUsed with &dHeavenly Shard &fto reset the map."
+
+on damage:
+    if {hsreset::%victim's uuid%} is true:
+        delete {hsreset::%victim's uuid%}
+
+on left click:
+    if name of player's tool is "&d&lHeavenly Shard" or "&x&0&3&6&1&9&4&lHeavenly Shard":
+        if player is in the region "arena":
+            if player is sneaking:
+                if player's inventory contains 5 wither rose named "&r&bReset Rose":
+                    loop players in radius 10 of player:
+                        set {_resetp::%loop-player%} to true
+                    if player's name is "Proyo9":
+                        set {_bp} to 1
+                        loop 5 times:
+                            set {_resetp::%{_bp}%} to {_bp}
+                            add 1 to {_bp}
+                    if size of {_resetp::*} is less than 5:
+                        send "&cReset failed, need more people."
+                        stop
+                    set {hsreset::%player's uuid%} to true
+                    loop all players:
+                        if loop-player is in the region "arena":
+                            set {_resetarenaplr::%loop-player%} to loop-player
+                    remove 5 wither rose named "&r&bReset Rose" from player's inventory
+                    loop {_resetarenaplr::*}:
+                        set {_plr} to "%loop-value%" parsed as player
+                        play sound "entity.wither.death" at volume 0.1 at pitch -1 to {_plr}
+                        play sound "ambient.basalt_deltas.loop" at volume 5 at pitch 1 to {_plr} # 44 seconds
+                        send action bar "&cYou are now in combat!" to player
+                        set {actplus.time.%player's uuid%} to 60
+                    apply levitation 1 without particles to player for 44 seconds
+                    loop 430 times: # seconds * 10 - 440
+                        if {hsreset::%player's uuid%} is not set:
+                            execute console command "/stopsound @a"
+                            execute console command "/effect clear @a levitation"
+                            send "&cReset failed, someone hit you." to player
+                            stop
+                        #lerp 100 of light at player ~ vector(0, 0, 0) with extra 0.5
+                        lerp 100 of enchant at player ~ vector(0, 1, 0) with extra 0.5
+                        lerp 1 of flash at player ~ vector(0, 1, 0) with extra 0.5
+                        wait 2 ticks
+                    if player's y coordinate is less than 100:
+                        send "&cReset failed, not high enough."
+                        stop
+                    loop {_resetarenaplr::*}:
+                        set {_plr} to "%loop-value%" parsed as player
+                        apply blindness 10 without particles to {_plr} for 7 seconds
+                        play sound "block.conduit.deactivate" at volume 10 at pitch -1 to {_plr}
+                    execute console command "resetmap"
+                    wait 5.5 seconds
+                    loop {_resetarenaplr::*}:
+                        set {_plr} to "%loop-value%" parsed as player
+                        play sound "block.beacon.activate" at volume 5 at pitch -1 to {_plr}
+                    delete {hsreset::%player's uuid%}
+                else:
+                    send "&cYou must have 5 reset roses."
+            else:
+                if {ascd.%player's uuid%::tpb} is greater than or equal to 0 seconds after now:
+                    send "&cYou can use &eTeleport Barrage &cagain in %difference between now and {ascd.%player's uuid%::tpb}%"
+                    stop
+                send action bar "&cYou are now in combat!" to player
+                set {actplus.time.%player's uuid%} to 15
+                set {ascd.%player's uuid%::tpb} to 30 seconds from now
+                apply glowing without particles to player for 5 seconds
+                play sound "block.beacon.power_select" at pitch -1 at player
+                set {_y} to y coordinate of player
+                set {_ploc} to location of player
+                wait 2 second
+                loop blocks in radius 10 around player:
+                    if loop-block is air:
+                        if loop-block is in the region "arena":
+                            if y coordinate of loop-block is less than {_y} +1:
+                                # send "p: %{_y}%, b: %y coordinate of loop-block%"
+                                set {_bloc::%loop-block%} to location of loop-block
+                set {immune::%player's uuid%} to true
+                set {_oloc} to location of player
+                set {_pitch} to player's pitch
+                set {_yaw} to player's yaw
+                loop 15 times:
+                    play sound "block.conduit.activate" at pitch 1 at player
+                    set {_bloc2} to random element out of {_bloc::*}
+                    set pitch of {_bloc2} to {_pitch}
+                    set yaw of {_bloc2} to {_yaw}
+                    teleport player to {_bloc2}
+                    loop players in radius 10 of player:
+                        if loop-player's uuid is not player's uuid:
+                            make player damage loop-player by 10
+                    lerp 50 of cloud at player ~ vector(0, 1, 0) with extra 0.5
+                    lerp 50 of end_rod at player ~ vector(0, 1, 0) with extra 0.5
+                    wait 2 ticks
+                teleport player to {_oloc}
+                delete {immune::%player's uuid%}
+
+on right click:
+    if name of player's tool is "&d&lHeavenly Shard" or "&x&0&3&6&1&9&4&lHeavenly Shard":
+        if player is in the region "arena":
+            if player is sneaking:
+                if {ascd.%player's uuid%::ascend} is greater than or equal to 0 seconds after now:
+                    send "&cYou can use &eAscend &cagain in %difference between now and {ascd.%player's uuid%::ascend}%"
+                    stop
+                send action bar "&cYou are now in combat!" to player
+                set {actplus.time.%player's uuid%} to 30
+                set {ascd.%player's uuid%::ascend} to 120 seconds from now
+                set {ascd.%player's uuid%::tpb} to 45 seconds from now
+                set {ascd.%player's uuid%::rush} to 45 seconds from now
+                apply levitation 1 without particles to player for 20 seconds
+                loop blocks in radius 25 of player:
+                    if loop-block is not air:
+                        set {_b::%loop-block%} to location of loop-block
+                loop 5 times:
+                    play sound "block.amethyst_cluster.break" at pitch -1 at player
+                    play sound "block.beacon.deactivate" at pitch -1 at player
+                    lerp 25 of cloud at player ~ vector(0, 1, 0) with extra 0.5
+                    lerp 25 of end_rod at player ~ vector(0, 1, 0) with extra 0.5
+                    wait 3 second
+                play sound "item.trident.thunder" with pitch 1 at player
+                set {immune::%player's uuid%} to true
+                loop 25 times:
+                    set {_rloc} to random element out of {_b::*}
+                    strike lightning at {_rloc}
+                    loop players in radius 20 of {_rloc}:
+                        if loop-player's name is not player's name:
+                            make player damage loop-player by 15
+                    lerp 500 of cloud at player ~ vector(0, 1, 0) with extra 0.5
+                    lerp 500 of end_rod at player ~ vector(0, 1, 0) with extra 0.5
+                    play sound "item.totem.use" at pitch -2 at {_rloc}
+                    wait 3 tick
+                delete {immune::%player's uuid%}
+                
+            else:
+                if {ascd.%player's uuid%::rush} is greater than or equal to 0 seconds after now:
+                    send "&cYou can use &eRush &cagain in %difference between now and {ascd.%player's uuid%::rush}%"
+                    stop
+                send action bar "&cYou are now in combat!" to player
+                set {actplus.time.%player's uuid%} to 10
+                set {ascd.%player's uuid%::rush} to 30 seconds from now
+                #play sound "entity.elder_guardian.curse" at pitch -1 at player
+                play sound "block.beacon.power_select" at pitch -1 at player
+                wait 2 seconds
+                play sound "item.trident.riptide_3" at pitch -1 at player
+                #apply speed 10 without particles to player for 5 seconds
+                set walk speed of player to 0.7
+                apply blindness 10 without particles to player for 5 seconds
+                loop 5 times:
+                    lerp 50 of cloud at player ~ vector(0, 1, 0) with extra 0.5
+                    lerp 50 of end_rod at player ~ vector(0, 1, 0) with extra 0.5
+                    lerp 50 of explosion at player ~ vector(0, 1, 0) with extra 0.5
+                    play sound "item.trident.riptide_3" at pitch -2 at player
+                    wait 1 second
+                set walk speed of player to 0.2
+
+on damage:
+    if victim's tool is amethyst shard named "&d&lHeavenly Shard" or "&x&0&3&6&1&9&4&lHeavenly Shard":
+        if attacker is player:
+            if projectile is set:
+                cancel event
+                set {_y} to victim's y coordinate
+                set {_pitch} to victim's pitch
+                set {_yaw} to victim's yaw
+                loop blocks in radius 5 around victim:
+                    if loop-block is air:
+                        if loop-block is in the region "arena":
+                            if y coordinate of loop-block is less than {_y} +1:
+                                #send "p: %{_y}%, b: %y coordinate of loop-block%"
+                                set {_bloc::%loop-block%} to location of loop-block
+                set {_bloc2} to random element out of {_bloc::*}
+                play sound "block.conduit.activate" at pitch 1 at victim
+                set {_x} to x coordinate of {_bloc2}
+                set {_z} to z coordinate of {_bloc2}
+                set pitch of {_bloc2} to {_pitch}
+                set yaw of {_bloc2} to {_yaw}
+                lerp 50 of cloud at victim ~ vector(0, 1, 0) with extra 0.5
+                lerp 50 of end_rod at victim ~ vector(0, 1, 0) with extra 0.5
+                teleport victim to {_bloc2}
+                wait 1 second
+                set {immune::%victim's uuid%} to true
+                strike lightning at location of attacker
+                make victim damage attacker by 3
+                wait 3 ticks
+                delete {immune::%victim's uuid%}
+
+on leave:
+    delete {ascd.%player's uuid%::rush} and {ascd.%player's uuid%::tpb} and {ascd.%player's uuid%::ascend}
+
+on join:
+    set player's walkspeed to 0.2
+    execute console command "minecraft:effect clear %player% levitation"
+
+command /givehsquest [<text>]:
+    permission: op
+    trigger:
+        if arg-1 is "shardfragment":
+            give player small amethyst bud named "&d&lShard Fragment"
+        if arg-1 is "shard":
+            give player amethyst shard named "&d&lShard"
+        if arg-1 is "holyeye":
+            give player glowing eye of ender named "&e&lHoly Eye"
+        if arg-1 is "holybook":
+            give player glowing book named "&e&lHoly Book"
+
+on tab complete of "/givehsquest":
+	add "shardfragment", "shard", "holyeye", and "holybook" to {_tabs::*}
+	set tab completions for position 1 to {_tabs::*}
+
+on death:
+    if attacker's tool is amethyst shard named "&d&lHeavenly Shard" or "&x&0&3&6&1&9&4&lHeavenly Shard":
+        set {_ran} to random integer between 1 and 10
+        if {_ran} = 1:
+            send "&e%victim% &rdropped a &bReset Rose" to attacker
+            drop glowing wither rose named "&r&bReset Rose" with lore "&r&fUsed with &dHeavenly Shard &fto reset the map." at location of victim
+            stop
+    else:
+        stop if victim's name is attacker's name
+        #attacker has permission "rank.staff" # Dev mode
+        set {_ran} to random integer between 1 and 15
+        victim has permission "rank.staff"
+        send "%attacker% killed %victim%: %{_ran}%" to "Proyo9" parsed as player if "Proyo9" parsed as player is online
+        if {_ran} = 1:
+            send "&e%victim% &rdropped a &eHoly Eye" to attacker
+            drop glowing eye of ender named "&e&lHoly Eye" at location of victim
+            stop
+
+on place of small amethyst bud:
+    cancel event
+
+on break:
+    #player has permission "rank.staff" # Dev mode
+    player is in the region "arena"
+    if event-block is diamond ore or emerald ore:
+        set {_ran} to random integer between 1 and 100
+        #send "&7%player% mined diamond/emerald: %{_ran}%" to "Proyo9" parsed as player if "Proyo9" parsed as player is online
+        if {_ran} = 1:
+            cancel event
+            set event-block to air
+            drop small amethyst bud named "&d&lShard Fragment" at location of event-block
+
+command /killself:
+    permission: op
+    trigger:
+        set player's gamemode to survival
+        make player damage player by 100
+
+# Love Train (I have no plans on releasing this to the public, just making this for fun)
+command /givelt:
+    permission: op
+    trigger:
+        give player glowing blaze rod named "&e&lLove Train" with lore "&r&fA fun test item."
+
+on load:
+    delete {lt::*}
+
+on click:
+    if player's tool is blaze rod named "&e&lLove Train":
+        if player is in the region "arena":
+            if {lt::%player's uuid%} is not set:
+                set {lt::%player's uuid%} to true
+                while {lt::%player's uuid%} = true:
+                    if {lt::%player's uuid%} is true:
+                        draw 50 glow at player with offset vector(0.5, 2, 0.5) with extra 0
+                        wait 5 ticks
+                    else:
+                        delete {lt::%player's uuid%}
+                        stop loop
+            else:
+                delete {lt::%player's uuid%}
+
+on damage:
+    if {lt::%victim's uuid%} is true:
+        cancel event
+        if {ltdebounce::%victim's uuid%} is not set:
+            set {ltdebounce::%victim's uuid%} to true
+            loop all players:
+                loop-player's name is not victim's name
+                loop-player is in the region "arena"
+                set {_plr::%loop-player%} to loop-player
+            set {_selected} to random element out of {_plr::*}
+            set {_a} to victim's location
+            set {_b} to location of {_selected}
+            set {_v} to vector from {_a} to {_b}
+            set {_count} to 0
+            play sound "block.amethyst_cluster.break" at pitch -1 at victim
+            loop (vector length of {_v} / 0.1) times:
+                make 0 of dust_color_transition using dustTransition(white, white, 3) at {_a} ~ {_v}
+                set vector length of {_v} to loop-number * 0.1
+                add 1 to {_count}
+                if {_count} is 10:
+                    set {_count} to 0
+                    lerp 1 of dust_color_transition using dustTransition(blue, green, 3) at {_a} ~ {_v} with offset vector(0, 1, 0) with extra 1
+                    lerp 1 of firework at {_a} ~ {_v} with extra 1
+            make victim damage {_selected} by 1
+            wait 1 second
+            delete {ltdebounce::%victim's uuid%}
+    else if {lt::%attacker's uuid%} is true:
+        cancel event
+
+            
+# CMD Set
+
+on inventory click:
+    if item is a command block:
+        delete item
+
+# Other
+
+command /givecmd <integer>:
+    permission: op
+    trigger:
+        if arg-1 is 1:
+            give player command block of curse of vanishing named "&6&lCommand Block" with enchant flags hidden
+        if arg-1 is 2:
+            give player repeating command block of curse of vanishing named "&d&lCommand Block" with enchant flags hidden
+        if arg-1 is 3:
+            give player chain command block of curse of vanishing named "&a&lCommand Block" with enchant flags hidden
+
+on place of command block:
+    if name of player's tool is "&6&lCommand Block":
+        set {_loc} to location of event-block
+        cancel event
+        wait 1 tick
+        play sound "ui.button.click" at {_loc}
+        set block at location {_loc} to command block[facing=up]
+        wait 3 ticks
+        wait 3 seconds
+        set block at location {_loc} to air
+
+on place of repeating command block:
+    if name of player's tool is "&d&lCommand Block":
+        set {_loc} to location of event-block
+        cancel event
+        wait 1 tick
+        play sound "ui.button.click" at {_loc}
+        set block at location {_loc} to repeating command block[facing=up]
+        wait 3 ticks
+        wait 3 seconds
+        set block at location {_loc} to air
+
+on place of chain command block:
+    if name of player's tool is "&a&lCommand Block":
+        set {_loc} to location of event-block
+        cancel event
+        wait 1 tick
+        play sound "ui.button.click" at {_loc::1}
+        set block at location {_loc::1} to chain command block[facing=up]
+        wait 4 ticks
+        set {_t} to 2
+        loop 3 times:
+            set {_loc::%{_t}%} to location above {_loc::%{_t} - 1%}
+            set block at location above {_loc::%{_t}%} to chain command block[facing=up]
+            play sound "ui.button.click" at {_loc::%{_t}%}
+            wait 4 ticks
+        wait 3 seconds
+        loop {_loc::*}:
+            set block at location loop-value to air
+
+
+on block mine:
+	if player's tool's efficiency level is greater than 7:
+		set player's tool's efficiency level to 7
+	if player's tool's fortune level is greater than 4:
+		set player's tool's fortune level to 4
+
+
+function increaseQuestProgress(player: player):
+    set {_user} to Core.getInstance().getUserManager().get({_player})
+    set {_quest} to {_user}.getQuestByClass(CustomItemQuest.class)
+    
+    {_quest}.incrementProgress({_player})

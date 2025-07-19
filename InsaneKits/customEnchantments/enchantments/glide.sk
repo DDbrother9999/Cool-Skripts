@@ -1,0 +1,9 @@
+on sneak toggle:
+    hasCEnchant(player's boots, "glide") is true
+    if player is sneaking:
+        remove slow falling from player's potion effects
+    else if player is not sneaking:
+        apply slow falling without any particles to player for 9999 years
+
+
+

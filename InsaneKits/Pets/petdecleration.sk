@@ -1,0 +1,34 @@
+function loadPets():
+	set {Pets::BanditKing::Stats::1} to "+10%% Damage;10 Seconds"
+	set {Pets::BanditKing::Stats::2} to "+10%% Damage;20 Seconds"
+	set {Pets::BanditKing::Stats::3} to "+20%% Damage;10 Seconds"
+	set {Pets::BanditKing::Stats::4} to "+20%% Damage;20 Seconds"
+	set {Pets::BanditKing::Stats::5} to "+30%% Damage;20 Seconds"
+	set {Pets::BanditKing::DisplayName} to "&6&lBandit King"
+	set {Pets::BanditKing} to configurePet(2542,"Bandit King","%{Pets::BanditKing::DisplayName}%","&7Increased Damage to Players!","%{Pets::BanditKing::Stats::1}%",5,true)
+	loop 5 times:
+		set {Pets::Blaze::Stats::%loop-value%} to "%loop-value% Blazes"
+	set {Pets::Blaze::DisplayName} to "&c&lBlaze"
+	set {Pets::Blaze} to configurePet(47778,"Blaze","%{Pets::Blaze::DisplayName}%","&7Spawns Blaze Companions to%nl%&7shoot fireballs and burn your%nl%&7enemies","%{Pets::Blaze::Stats::1}%",5,true)
+	loop 5 times:
+		set {Pets::Horse::Stats::%loop-value%} to "Blindness Radius: %loop-value% blocks"
+	set {Pets::SpiritWolf::DisplayName} to "&b&lSpirit Wolf"
+	set {Pets::SpiritWolf} to configurePet(53471,"SpiritWolf","%{Pets::SpiritWolf::DisplayName}%","&7Spawns Wolf Companions to%nl%&7tear up your enemies","%{Pets::SpiritWolf::Stats::1}%",5,true)
+	set {Pets::Pig::DisplayName} to "&6&lPig"
+	set {Pets::Pig::Stats::1} to "None"
+	set {Pets::Pig} to configurePet(6016, "Pig", "%{Pets::Pig::DisplayName}%", "&7Opens your piggybank", "None", 0, false)
+	set {Pets::Haste::DisplayName} to "&e&lHaste"
+	set {Pets::Haste::baseLength} to 30
+	loop 5 times:
+		set {Pets::Haste::Stats::%loop-value%} to "Effect length: %{Pets::Haste::baseLength} * loop-value% seconds"
+	set {Pets::Haste} to configurePet(6843, "Haste", "%{Pets::Haste::DisplayName}%", "&7Increases your mining speed.", "%{Pets::Haste::Stats::1}%", 5, true)
+	set {Pets::Luck::DisplayName} to "&a&lLuck"
+	set {Pets::Luck::baseLength} to 30
+	set {Pets::Luck::mult} to 1.5
+	loop 5 times:
+		set {Pets::Luck::Stats::%loop-value%} to "Effect length: %{Pets::Luck::baseLength}*loop-value% seconds"
+	set {Pets::Luck} to configurePet(4663, "Luck", "%{Pets::Luck::DisplayName}%", "&7Boosts your luck.", "%{Pets::Luck::Stats::1}%", 5, true)
+	set {Pets::PlagueDoctor::DisplayName} to "&c&lPlague Doctor"
+	loop 5 times:
+		set {Pets::PlagueDoctor::Stats::%loop-value%} to "%loop-value% Zombies"
+	set {Pets::PlagueDoctor} to configurePet(68258, "PlagueDoctor", "%{Pets::PlagueDoctor::DisplayName}%", "&7Spawns a hoard zombies%nl%&7that poison enemies.", "%{Pets::PlagueDoctor::Stats::1}%", 5, true)

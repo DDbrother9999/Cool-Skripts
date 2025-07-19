@@ -1,0 +1,6 @@
+on right click:
+    event-block is anvil or chipped anvil or damaged anvil:
+        set event-block to anvil
+        stop
+    else:
+        stop

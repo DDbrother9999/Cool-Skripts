@@ -1,0 +1,14 @@
+command /ping:
+	trigger:
+		if player's ping < 50:
+			send "§6Your ping is: %player's ping%§6 ms, no lag." to player
+		else if player's ping <125:
+			send "§bYour ping is: %player's ping%§b ms, almost no lag." to player
+		else if player's ping <300:
+			send "§aYour ping is: %player's ping%§a ms, little laggy." to player
+		else if player's ping <1000:
+			send "§cYour ping is: %player's ping%§c ms, laggy" to player
+		else:
+			send "§4Your ping is: %player's ping%§4 ms, very laggy." to player
+			wait 1 second
+			send "§4Your wifi or the server could be laggy or you're far away from the server."

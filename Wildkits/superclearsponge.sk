@@ -1,0 +1,27 @@
+on load:
+	set {sponge} to sponge named "&aSponge" with lore "&aPlace me down to clear tons of water!"
+
+function clearWater(l: location, n: number):
+	if {_n} is 50:
+		stop
+	add 1 to {_n}
+	loop blocks in radius 1.75 of {_l}:
+		if "%loop-block's type%" contains "water":
+			set loop-block to air
+			wait 3 ticks
+			clearWater(loop-block's location, {_n})
+
+on place of sponge:
+	player is in the region "arena"
+	if player's inventory contains {sponge}:
+		cancel event
+		set block at block to air
+		remove {sponge} from player's inventory
+		clearWater(block's location, 0)
+	else:
+		cancel event
+
+command /givesponge:
+	permission: op
+	trigger:
+		give {sponge} to player

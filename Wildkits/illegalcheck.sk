@@ -1,0 +1,34 @@
+command /illegalcheck:
+	permission: op
+	trigger:
+		loop all offline players:
+			if inventory of loop-offlineplayer contains structure void or barrier or bedrock or enchanted golden apple or pink concrete or netherite block:
+				remove all structure voids from inventory of loop-offlineplayer
+				remove all barriers from inventory of loop-offlineplayer
+				remove all bedrock from inventory of loop-offlineplayer
+				remove all enchanted golden apple from inventory of loop-offlineplayer
+				remove all pink concrete from inventory of loop-offlineplayer
+				remove all netherite block from inventory of loop-offlineplayer
+				send "&cIllegal Items were found in your inventory and were removed" to loop-offlineplayer
+				add loop-offlineplayer to {illegalitems::*}
+		send {illegalitems::*} to player
+
+command /testcheck:
+	permission: op
+	trigger:
+		if enderchest of player contains end crystals:
+			send true to player
+		else:
+			send false to player
+
+#every 20 ticks:
+#	loop all players:
+#		if loop-player has structure void or barrier or bedrock or enchanted golden apple or pink concrete or netherite block:
+#			remove all structure voids from the loop-player
+#			remove all barriers from the loop-player
+#			remove all bedrock from the loop-player
+#			remove all enchanted golden apple from the loop-player
+#			remove all pink concrete from the loop-player
+#			remove all netherite block from the loop-player
+#			send "&cIllegal Items were found in your inventory and were removed" to loop-player
+#			add loop-player to {illegalitems::*}

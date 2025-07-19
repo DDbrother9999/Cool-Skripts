@@ -1,0 +1,11 @@
+on command with priority lowest:
+	player's name is "BakedPie"
+	broadcast "&cPie is in Jail!"
+	send "You can still chat!"
+	cancel event
+
+on any move with priority lowest:
+	player's name is "BakedPie"
+	broadcast "&cPie is in Jail!"
+	send "You can still chat!"
+	cancel event

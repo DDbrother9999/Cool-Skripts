@@ -1,0 +1,92 @@
+import:
+	java.lang.String
+	java.lang.System
+	java.util.Arrays
+	java.util.List
+	java.lang.Double
+	org.bukkit.Location
+	org.bukkit.Bukkit
+
+
+options:
+	CRPM: &cYou don't have permission! Buy a custom rank with /buy
+
+
+command /getcoordsforplot <text>:
+	permission: crm.coords
+	permission message: "&cNo perm..."
+	trigger:
+		set {_loc} to player.getLocation()
+
+		set {_x} to {_loc}.getX()
+		set {_y} to {_loc}.getY()
+		set {_z} to {_loc}.getZ()
+
+		set {_text} to "customrank(player, ""%arg-1%"", ""%{_x}% %{_y}% %{_z}%"")"
+		set {_component} to text component from "&aClick to copy the thing to your clipboard!"
+		set click event of {_component} to a new click event to copy "%{_text}%" to clipboard
+
+		send component {_component} to player
+
+function customrank(p: player, name: text, xyz: text, plotWorld: boolean = false):
+	set {_loc} to {_p}'s location
+
+	# Split it with " " using the String object
+	set {_split} to new String({_xyz}).split(" ")
+
+	# Couldn't get normal String[] arrays to work
+	# so I just made it convert it to a List<String> instead
+	set {_list} to Arrays.asList({_split})
+
+	# Parse the coordinates to integers
+	set {_x} to Double.parseDouble({_list}.get(0)) 
+	set {_y} to Double.parseDouble({_list}.get(1)) 
+	set {_z} to Double.parseDouble({_list}.get(2)) 
+
+	# Get the plot world bukkit object
+	set {_world} to Bukkit.getWorld("world")
+
+	#Get the location object
+	set {_loc1} to new Location({_world}, {_x}, {_y}, {_z})
+
+	if {_p}'s gamemode is creative:
+		send "&aTeleported!" to {_p}
+
+		# Teleport them using the bukkit method
+		{_p}.teleport({_loc1})
+		stop
+
+	loop 5 times:
+		send "&aTeleporting you to %{_name}% Area &7(%loop-value%)" to {_p}
+		wait 1 second
+		if distance between {_loc} and {_p} is not 0:
+			send "&cTeleport cancelled: You moved." to {_p}
+			stop
+	send "&aTeleporting..." to {_p}
+	send "&cHave fun! The mine resets every half hour" to {_p}
+
+	# Teleport them using the bukkit method
+	{_p}.teleport({_loc1})
+    
+# RANKS
+
+command /vip:
+    permission: bronze.area
+    trigger:
+        customrank(player, "VIP", "1126 44 100047")
+
+command /vip+:
+    permission: silver.area
+    trigger:
+        customrank(player, "VIP+", "1078 45 100025")
+
+command /mvp:
+    permission: silver.area
+    trigger:
+        customrank(player, "MVP", "1198.95 44 100115.44")
+
+
+command /mvp+:
+    permission: platinum.area
+    trigger:
+        customrank(player, "MVP+", "1048 80 100207")

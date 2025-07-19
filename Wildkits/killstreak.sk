@@ -1,0 +1,81 @@
+options:
+	blank: gray stained glass pane named "&7"
+
+on join:
+	set {killstreak::%player's uuid%} to {killstreak::%player's uuid%} ? 0
+
+on death of a player:
+	metadata "inDuel" of victim is not set
+	metadata "inDuel" of attacker is not set
+	attacker is a player
+	set {killstreak::%victim's uuid%} to 0
+	add 1 to {killstreak::%attacker's uuid%}
+	set {_randomxp} to a random integer from 1 to 5
+	if mod({killstreak::%attacker's uuid%}, 5) is 0:
+		broadcast formatted "&6[!] &c%attacker% &7is on a &6%{killstreak::%attacker's uuid%}% kill streak!"
+	if {killstreaktype::%attacker's uuid%} is 1:
+		if {killstreak::%attacker's uuid%} > 50:
+			give attacker 1 tnt
+			send "&aYou gained a tnt from &cDemolitionist&a!" to attacker
+	if {killstreaktype::%attacker's uuid%} is 2:
+		if {killstreak::%attacker's uuid%} > 100:
+			add 1 to {eTokens::%attacker%}
+			send "&aYou gained an eToken from &eToken Mania&a!" to attacker
+	if {killstreaktype::%attacker's uuid%} is 3:
+		if {killstreak::%attacker's uuid%} > 100:
+			set {_per} to 100
+		else:
+			set {_per} to {killstreak::%attacker's uuid%}
+		chance of {_per}%:
+			give chorus flower of mending named "&d&lMagic Fruit" with enchants flag hidden to attacker
+			send "&aYou gained a magic fruit from &dJust like Magic&a!" to attacker
+	if {killstreaktype::%attacker's uuid%} is 4:
+		if {killstreak::%attacker's uuid%} > 500:
+			add 1 to {_randomxp}
+			set {_msg} to true
+	if {killstreaktype::%attacker's uuid%} is 5:
+		if mod({killstreak::%attacker's uuid%}, 100) is 0:
+			chance of 30%:
+				add 500 to {bounty::%attacker%}
+				send "&aYou gained 500 bounty from &6Bounty Hunter&a!" to attacker
+	if {xpmult.%attacker's uuid%} is not set:
+		add {_randomxp} to {xp::%attacker's uuid%}
+	if {xpmult.%attacker's uuid%} is set:
+		set {_randomxp} to {_randomxp}*{xpmult.%attacker's uuid%}
+		add {_randomxp} to {xp::%attacker's uuid%}
+	if {_msg} is true:
+		send "&aYou received %{_randomxp}% xp from killing %victim% [&9Experienced&a]" to attacker
+	else:
+		send "&aYou received %{_randomxp}% xp from killing %victim%" to attacker
+	play sound "entity.experience_orb.pickup" at volume 1 at pitch 1 to attacker
+	checkForLevelUp(attacker)
+
+		
+command /killstreak:
+	trigger:
+		set (metadata tag "KillstreakGUI" of player) to chest inventory with 4 rows named "&aKillstreak Selection"
+		set slot (integers between 0 and 35) of (metadata tag "KillstreakGUI" of player) to {@blank}
+		set slot 11 of (metadata tag "KillstreakGUI" of player) to tnt named "&cDemolitionist" with lore "&eEvery kill after a 50 killstreak will give you 1 tnt." and "&c&l[Click to select]"
+		set slot 21 of (metadata tag "KillstreakGUI" of player) to sunflower named "&eToken Mania" with lore "&eAfter 100 kills, you will get 1 eToken after every kill." and "&c&l[Click to select]"
+		set slot 13 of (metadata tag "KillstreakGUI" of player) to chorus flower named "&dJust like Magic" with lore "&eGain a 1%% chance per kill to gain +2 magic fruit", "&eon a kill (This would max at 100%%)" and "&c&l[Click to select]"
+		set slot 23 of (metadata tag "KillstreakGUI" of player) to xp bottle named "&9Experienced" with lore "&eFor every kill on your killstreak after 500", "&eyou gain +1 xp per kill." and "&c&l[Click to select]"
+		set slot 15 of (metadata tag "KillstreakGUI" of player) to diamond sword named "&6Bounty Hunter" with lore "&eEvery 100 kills, have a 30%% chance of", "&egetting 500 eTokens added to your Bounty" and "&c&l[Click to select]"
+		if {killstreaktype::%player's uuid%} is 1:
+			set slot 11 of (metadata tag "KillstreakGUI" of player) to tnt of lure 1 named "&cDemolitionist" with lore "&eEvery kill after a 50 killstreak will give you 1 tnt." and "&a&l[Selected]" with all flags hidden
+		if {killstreaktype::%player's uuid%} is 2:
+			set slot 21 of (metadata tag "KillstreakGUI" of player) to sunflower of lure 1 named "&eToken Mania" with lore "&eAfter 100 kills, you will get 1 eToken after every kill." and "&a&l[Selected]" with all flags hidden
+		if {killstreaktype::%player's uuid%} is 3:
+			set slot 13 of (metadata tag "KillstreakGUI" of player) to chorus flower of lure 1 named "&dJust like Magic" with lore "&eGain a 1%% chance per kill to gain +2 magic fruit", "&eon a kill (This would max at 100%%)" and "&a&l[Selected]" with all flags hidden
+		if {killstreaktype::%player's uuid%} is 4:
+			set slot 23 of (metadata tag "KillstreakGUI" of player) to xp bottle of lure 1 named "&9Experienced" with lore "&eFor every kill on your killstreak after 500", "&eyou gain +1 xp per kill." and "&a&l[Selected]" with all flags hidden
+		if {killstreaktype::%player's uuid%} is 5:
+			set slot 15 of (metadata tag "KillstreakGUI" of player) to diamond sword of lure 1 named "&6Bounty Hunter" with lore "&eEvery 100 kills, have a 30%% chance of", "&egetting 500 eTokens added to your Bounty" and "&a&l[Selected]" with all flags hidden
+		open (metadata tag "KillstreakGUI" of player) to player
+
+on inventory click:
+	if event-inventory is (metadata tag "KillstreakGUI" of player):
+		cancel event
+		if event-slot isn't {@blank}:
+			set {killstreaktype::%player's uuid%} to (first character of "%index of event-slot%" parsed as number) + (last character of "%index of event-slot%" parsed as number) - 1
+			execute player command "/killstreak"
+			play sound "block.note_block.pling" at pitch 2 for player

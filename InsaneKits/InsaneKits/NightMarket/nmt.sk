@@ -1,0 +1,140 @@
+# Minecraft Skript
+
+function getNMT(p: player) :: number:
+	return {NMT::%uuid of {_p}%} ? 0
+
+function addNMT(p: player, amount: number):
+	set {NMT::%uuid of {_p}%} to getNMT({_p}) + {_amount}
+
+function removeNMT(p: player, amount: number):
+	set {NMT::%uuid of {_p}%} to getNMT({_p}) - {_amount}
+
+function setNMTP(p: player, amount: number):
+	set {NMT::%uuid of {_p}%} to {_amount}
+
+function openConversionGUI(p: player):
+	create a gui with virtual chest inventory with 1 row named "&rNMT Conversion"
+	edit last gui:
+		loop 9 times:
+			format gui slot loop-value -1 with purple glass pane named " ":
+				cancel event
+		format gui slot 2 with amethyst cluster named "&r&5&lConvert Gems" with lore "&r&fConvert gems to NMT.%nl%&r&f1 gem = 1 NMT":
+			cancel event
+			openGemConversionGUI({_p})
+		format gui slot 4 with gold block named "&r&f&lBalance - %getNMT({_p})%" with lore "&r&fYour current NMT balance.":
+			cancel event
+		format gui slot 6 with sunflower named "&r&5&lConvert Tokens" with lore "&r&fConvert tokens to NMT.%nl%&r&f10 token = 1 NMT":
+			cancel event
+			openTokenConversionGUI({_p})
+	open last gui to {_p}
+
+function openGemConversionGUI(p: player, amount: number = 1):
+	create a gui with virtual chest inventory with 3 row named "&rGem Conversion"
+	# Has an amount input and a confirm button
+	edit last gui:
+		loop 27 times:
+			format gui slot loop-value -1 with purple glass pane named " ":
+				cancel event
+		format gui slot 11 with green wool named "&r&5&lConfirm" with lore "&r&fConfirm the conversion.":
+			cancel event
+			close the player's inventory
+			if getGems({_p}) is less than {_amount}:
+				send "&r&cYou do not have enough gems!" to {_p}
+				stop
+			removeGems({_p}, {_amount}, "Night Market Conversion - IK")
+			addNMT({_p}, {_amount})
+			send "&r&fYou have converted %{_amount}% gems to NMT." to {_p}
+		format gui slot 15 with red wool named "&r&5&lCancel" with lore "&r&fCancel the conversion.":
+			cancel event
+			openConversionGUI({_p})
+		format gui slot 13 with amethyst cluster named "&r&5&lAmount - %{_amount}%" with lore "&r&fYou have %getGems({_p})% gems.":
+			cancel event
+		format gui slot 3 with red stained glass pane named "&r&5&l-1" with lore "&r&fRemove 1 gem from the amount.%nl%&r&f1 gem = 1 NMT":
+			cancel event
+			set {_amount} to {_amount} - 1
+			if {_amount} is less than 1:
+				set {_amount} to 1
+			openGemConversionGUI({_p}, {_amount})
+		format gui slot 4 with red stained glass pane named "&r&5&l-10" with lore "&r&fRemove 10 gems from the amount.%nl%&r&f1 gem = 1 NMT":
+			cancel event
+			set {_amount} to {_amount} - 10
+			if {_amount} is less than 1:
+				set {_amount} to 1
+			openGemConversionGUI({_p}, {_amount})
+		format gui slot 5 with red stained glass pane named "&r&5&l-100" with lore "&r&fRemove 100 gems from the amount.%nl%&r&f1 gem = 1 NMT":
+			cancel event
+			set {_amount} to {_amount} - 100
+			if {_amount} is less than 1:
+				set {_amount} to 1
+			openGemConversionGUI({_p}, {_amount})
+		format gui slot 21 with green stained glass pane named "&r&5&l+1" with lore "&r&fAdd 1 gem to the amount.%nl%&r&f1 gem = 1 NMT":
+			cancel event
+			set {_amount} to {_amount} + 1
+			openGemConversionGUI({_p}, {_amount})
+		format gui slot 22 with green stained glass pane named "&r&5&l+10" with lore "&r&fAdd 10 gems to the amount.%nl%&r&f1 gem = 1 NMT":
+			cancel event
+			set {_amount} to {_amount} + 10
+			openGemConversionGUI({_p}, {_amount})
+		format gui slot 23 with green stained glass pane named "&r&5&l+100" with lore "&r&fAdd 100 gems to the amount.%nl%&r&f1 gem = 1 NMT":
+			cancel event
+			set {_amount} to {_amount} + 100
+			openGemConversionGUI({_p}, {_amount})
+	open last gui to {_p}
+
+function openTokenConversionGUI(p: player, amount: number = 1):
+	create a gui with virtual chest inventory with 3 row named "&rToken Conversion"
+	# Has an amount input and a confirm button
+	edit last gui:
+		loop 27 times:
+			format gui slot loop-value -1 with purple glass pane named " ":
+				cancel event
+		format gui slot 11 with green wool named "&r&5&lConfirm" with lore "&r&fConfirm the conversion.":
+			cancel event
+			close the player's inventory
+			if getcoins({_p}) is less than {_amount} * 10:
+				send "&r&cYou do not have enough tokens!" to {_p}
+				stop
+			coins({_p}, {_amount} * -10)
+			addNMT({_p}, {_amount})
+			send "&r&fYou have converted %{_amount} * 10% tokens to %{_amount}% NMT." to {_p}
+		format gui slot 15 with red wool named "&r&5&lCancel" with lore "&r&fCancel the conversion.":
+			cancel event
+			openConversionGUI({_p})
+		format gui slot 13 with amethyst cluster named "&r&5&lAmount - %{_amount}%" with lore "&r&fYou have %getcoins({_p})% tokens.":
+			cancel event
+		format gui slot 3 with red stained glass pane named "&r&5&l-1" with lore "&r&fRemove 1 token from the amount.%nl%&r&f10 token = 1 NMT":
+			cancel event
+			set {_amount} to {_amount} - 1
+			if {_amount} is less than 1:
+				set {_amount} to 1
+			openTokenConversionGUI({_p}, {_amount})
+		format gui slot 4 with red stained glass pane named "&r&5&l-10" with lore "&r&fRemove 10 tokens from the amount.%nl%&r&f10 token = 1 NMT":
+			cancel event
+			set {_amount} to {_amount} - 10
+			if {_amount} is less than 1:
+				set {_amount} to 1
+			openTokenConversionGUI({_p}, {_amount})
+		format gui slot 5 with red stained glass pane named "&r&5&l-100" with lore "&r&fRemove 100 tokens from the amount.%nl%&r&f10 token = 1 NMT":
+			cancel event
+			set {_amount} to {_amount} - 100
+			if {_amount} is less than 1:
+				set {_amount} to 1
+			openTokenConversionGUI({_p}, {_amount})
+		format gui slot 21 with green stained glass pane named "&r&5&l+1" with lore "&r&fAdd 1 token to the amount.%nl%&r&f10 token = 1 NMT":
+			cancel event
+			set {_amount} to {_amount} + 1
+			openTokenConversionGUI({_p}, {_amount})
+		format gui slot 22 with green stained glass pane named "&r&5&l+10" with lore "&r&fAdd 10 tokens to the amount.%nl%&r&f10 token = 1 NMT":
+			cancel event
+			set {_amount} to {_amount} + 10
+			openTokenConversionGUI({_p}, {_amount})
+		format gui slot 23 with green stained glass pane named "&r&5&l+100" with lore "&r&fAdd 100 tokens to the amount.%nl%&r&f10 token = 1 NMT":
+			cancel event
+			set {_amount} to {_amount} + 100
+			openTokenConversionGUI({_p}, {_amount})
+		
+	open last gui to {_p}
+
+command /nmtconvert:
+	trigger:
+		openConversionGUI(player)

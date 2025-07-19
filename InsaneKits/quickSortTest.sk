@@ -1,0 +1,55 @@
+# Code from https://www.geeksforgeeks.org/quick-sort/
+# Transferred from Java to Skript
+
+function swap(list: objects, index1: integer, index2: integer) :: objects:
+    set {_arr1} to {_list::%{_index1}%}
+
+    set {_list::%{_index1}%} to {_list::%{_index2}%}
+    set {_list::%{_index2}%} to {_arr1}
+    return {_list::*}
+
+
+function partition(arr: ints, low: int, high: int) :: int:
+
+    set {_pivot} to {_arr::%{_high}%}
+    
+    
+    set {_i} to ({_low}-1) # removed -1
+
+    set {_j} to {_low}
+    #broadcast {_j}
+    while {_j} <= {_high}-1: # removed -1
+        #broadcast {_j}
+        add 1 to {_j}
+        if {_arr::%{_j}%} < {_pivot}:
+            add 1 to {_i}
+            #broadcast {_i}
+            broadcast "Swapped %{_arr::%{_i}%}% with %{_arr::%{_j}%}%"
+            set {_arr::*} to swap({_arr::*}, {_i}, {_j})
+            
+    broadcast "Swapped %{_arr::%{_i}+1%}% with %{_arr::%{_high}%}%"
+    set {-quickSortArray::*} to swap({_arr::*}, {_i} + 1, {_high}) # removed +1 on {_i}
+    
+    broadcast "Returned %{_i}+1% (%{_arr::%{_i}+1%}%)"
+    return {_i} + 1 # removed +1
+
+function quickSort(arr: ints, low: int = -1, high: int = -1) :: objects:
+    if {_low} is -1:
+        set {_low} to 1
+        
+    if {_high} is -1:
+        set {_high} to size of {_arr::*} # removed -1 from {_arr}
+        
+    if {_low} < {_high}:
+        set {_pi} to partition({_arr::*}, {_low}, {_high})
+        set {_arr::*} to {-quickSortArray::*}
+
+        quickSort({_arr::*}, {_low}, {_pi} - 1) # removed -1 from pi
+        quickSort({_arr::*}, {_pi} + 1, {_high})
+
+    return {_arr::*}
+
+
+        
+
+

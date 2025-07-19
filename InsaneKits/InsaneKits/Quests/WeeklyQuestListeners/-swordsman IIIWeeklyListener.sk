@@ -1,0 +1,2 @@
+on death of player:
+	addprogressquest(attacker,"Weekly","Swordsman III")

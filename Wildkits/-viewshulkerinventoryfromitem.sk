@@ -1,0 +1,18 @@
+function openShulker(i: item, p: player):
+	set {_nbt} to nbt compound of {_i}
+	set {_tags::*} to tag "BlockEntityTag;Items" of {_nbt}
+	if {_i}'s name is set:
+		set {_name} to {_i}'s name
+	else:
+		set {_name} to "Shulker Box"
+	create gui with virtual chest inventory with 4 rows with name {_name}
+	edit last gui:
+		format gui slot 0,1,2,3,5,6,7,8 with gray stained glass pane named ""
+		format gui slot 4 with {_i}
+		set {_f} to 0
+		loop 27 times:
+			set {_tag} to tag "Slot" of {_tags::%{_f}+1%}
+			add 9 to {_tag}
+			format gui slot {_tag} with item from nbt {_tags::%{_f}+1%}
+			add 1 to {_f}
+	open last gui to {_p}

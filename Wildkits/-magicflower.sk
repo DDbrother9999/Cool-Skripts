@@ -1,0 +1,7 @@
+on right click with a chorus flower:
+  cancel event
+  remove 1 chorus flower from player's inventory
+  play sound "block.honey_block.step" at volume 3 at pitch 1 to player
+  apply strength 1 to the player for 10 seconds
+  apply speed 2 to player for 10 seconds
+  apply haste 2 to the player for 10 seconds

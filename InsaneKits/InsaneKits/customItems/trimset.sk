@@ -1,0 +1,37 @@
+# Minecraft Skript to make armor trim sets
+on load:
+    clear {TrimSet::*}
+    set {TrimSet::1} to chest named "&r&aTrim Set 1" with lore "&r&7Right click to get the Trim Set 1"
+    set {TrimSet::2} to chest named "&r&aTrim Set 2" with lore "&r&7Right click to get the Trim Set 2"
+    set {TrimSet::3} to chest named "&r&aTrim Set 3" with lore "&r&7Right click to get the Trim Set 3"
+    set {TrimSet::4} to chest named "&r&aTrim Set 4" with lore "&r&7Right click to get the Trim Set 4"
+
+on right click:
+    if name of player's tool is name of {TrimSet::1}:
+        give the player sentry armor smithing template
+        give the player vex armor smithing template
+        give the player wild armor smithing template
+        give the player coast armor smithing template
+    else if name of player's tool is name of {TrimSet::2}:
+        give the player dune armor smithing template
+        give the player wayfinder armor smithing template
+        give the player raiser armor smithing template
+        give the player shaper armor smithing template
+    else if name of player's tool is name of {TrimSet::3}:
+        give the player host armor smithing template
+        give the player ward armor smithing template
+        give the player silence armor smithing template
+        give the player tide armor smithing template
+    else if name of player's tool is name of {TrimSet::4}:
+        give the player snout armor smithing template
+        give the player rib armor smithing template
+        give the player eye armor smithing template
+        give the player spire armor smithing template
+    else:
+        stop
+    remove 1 of player's tool from player
+
+command /givetrimset <number>:
+    permission: op
+    trigger:
+        give the player {TrimSet::%arg 1%}

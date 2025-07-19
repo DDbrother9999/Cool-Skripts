@@ -1,0 +1,10 @@
+function resetFlatArea():
+	replace blocks between location(0,0,0) and location(1,1,1) with air
+
+on load:
+	wait 20 ticks
+	make console execute command "resetmap"
+
+every 30 minutes:
+	make console execute command "resetmap"
+	resetFlatArea()

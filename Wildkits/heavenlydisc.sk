@@ -1,0 +1,149 @@
+command /givehdisc:
+    permission: op
+    trigger:
+        give player music disc 5 named "&b&lHeavenly Disc" with lore "&7Left-Click: Insert%nl%&7Right-Click: Extract" with all flags hidden
+
+command /givehdfrag:
+    permission: op
+    trigger:
+        give player disc fragment named "&bHeavenly Disc Fragment" with all flags hidden
+
+on right click:
+    name of player's tool is "&b&lHeavenly Disc"
+    clicked player is set
+    player is in the region "arena"
+    if {hdisccd::%player%::extract} is greater than or equal to 0 seconds after now:
+        send "&cYou can use &eExtract &cagain in %difference between now and {hdisccd::%player%::extract}%" to player
+        stop
+    set {hdisccd::%player%::extract} to 15 seconds from now
+    # Movement, Sight, Player Sight
+    set {_ran} to random integer between 1 and 3
+    {_ran} = 1:
+        set {disceffects::%clicked player%::movement} to false
+        send "&cYour ability to move has been stolen from you." to clicked player
+        send "&aYou stole the ability to move from %clicked player%." to player
+    {_ran} = 2:
+        apply blindness 255 without particles to clicked player for 5 seconds
+        apply darkness 255 without particles to clicked player for 5 seconds
+        send "&cYour ability to see has been stolen from you." to clicked player
+        send "&aYou stole the ability to see from %clicked player%." to player
+    {_ran} = 3:
+        hide player from clicked player
+        send "&cYour ability to see %player% has been stolen from you." to clicked player
+        send "&aYou stole the ability to see %player% from %clicked player%." to player
+    set {_loc} to clicked player's location
+    drop music disc stal 1 block above {_loc}
+    wait 5 seconds
+    {_ran} = 1:
+        delete {disceffects::%clicked player%::movement}
+        send "&c%clicked player% can now move again." to player
+        send "&aYou can now move again." to clicked player
+    {_ran} = 2:
+        send "&c%clicked player% can now see again." to player
+        send "&aYou can now see again." to clicked player
+    {_ran} = 3:
+        reveal player to clicked player
+        send "&c%clicked player% can now see you again." to player
+        send "&aYou can now see %player% again." to clicked player
+
+on damage:
+    name of attacker's tool is "&b&lHeavenly Disc"
+    attacker is in the region "arena"
+    if {hdisccd::%attacker%::insert} is greater than or equal to 0 seconds after now:
+        send "&cYou can use &eInsert &cagain in %difference between now and {hdisccd::%attacker%::insert}%" to attacker
+        stop
+    set {hdisccd::%attacker%::insert} to 15 seconds from now
+    play sound "entity.warden.attack_impact" at volume 1 at pitch -1 at victim
+    lerp 10 of cloud at location of victim ~ vector(0, 1, 0) with extra 0.5
+    lerp 10 of end_rod at location of victim ~ vector(0, 1, 0) with extra 0.5
+    set {_ran} to random integer between 1 and 4
+    {_ran} = 1:
+        apply glowing 1 without particles to victim for 5 seconds
+        send "&cYou have been given the ability to glow." to victim
+        send "&aYou gave the ability to glow to %victim%." to attacker
+    {_ran} = 2:
+        set victim's flight mode to true
+        send "&cYou have been given the ability to fly." to victim
+        send "&aYou gave the ability to fly to %victim%." to attacker
+    {_ran} = 3:
+        apply poison 3 without particles to victim for 5 seconds
+        send "&cYou are now alergic to everything." to victim
+        send "&aYou made %victim% alergic to everything." to attacker
+    {_ran} = 4:
+        apply slowness 2 without particles to victim for 5 seconds
+        send "&cYou have been given bad walking genetics." to victim
+        send "&aYou gave %victim% bad walking genetics." to attacker
+    wait 5 seconds
+    {_ran} = 1:
+        send "&aYou no longer have the ability to glow." to victim
+        send "&c%victim% no longer has the ability to glow." to attacker
+    {_ran} = 2:
+        victim's gamemode is survival:
+            set victim's flight mode to false
+        send "&aYou no longer have the ability to fly." to victim
+        send "&c%victim% no longer has the ability to fly." to attacker
+    {_ran} = 3:
+        send "&aYou are no longer alergic." to victim
+        send "&c%victim% is no longer alergic." to attacker
+    {_ran} = 4:
+        send "&aYou no longer have bad walking genetics." to victim
+        send "&c%victim% no longer has bad walking genetics." to attacker
+
+
+on any movement:
+    {disceffects::%player%::movement} is false
+    cancel event
+
+on click:
+    if {disceffects::%player%::movement} is false:
+        cancel event
+
+on pickup:
+    if event-item is music disc stal:
+        cancel event
+        play sound "block.glass.break" at volume 1 at pitch -1 at location of event-dropped item
+        clear event-dropped item
+        lerp 4 of cloud at location of event-dropped item ~ vector(0, 1, 0) with extra 0.5
+        lerp 4 of end_rod at location of event-dropped item ~ vector(0, 1, 0) with extra 0.5
+
+on break:
+    event-block is jukebox or sculk
+    cancel event
+    uncancel event if player's gamemode is creative
+
+on right click:
+    clicked block is set
+    if clicked block is jukebox:
+        name of player's tool is "&b&lHeavenly Disc":
+            cancel event
+            player is in the region "arena":
+                delete player's tool
+                play sound "block.end_portal.spawn" at volume 1 at pitch -1 at clicked block
+                set clicked block to sculk
+                strike lightning 1 block below clicked block
+                set clicked block to air
+                set {_n} to nbt compound from "{Invulnerable:1b,Invisible:1b}"
+                spawn armor stand 1 block below clicked block with nbt {_n}
+                set {_as} to last spawned armor stand
+                summon falling jukebox at clicked block
+                set {_block} to last spawned entity
+                make {_block} ride {_as}
+                apply levitation 2 without particles to {_as} for 20 seconds
+                loop 80 times:
+                    play sound "particle.soul_escape" at volume 1 at pitch 1 at clicked block
+                    lerp 100 of enchant at {_block} ~ vector(0, 1, 0) with extra 0.5
+                    lerp 1 of flash at {_block} ~ vector(0, 1, 0) with extra 0.5
+                    wait 5 ticks
+                    loop blocks in radius 3 around {_block}:
+                        if loop-block is in the region "arena":
+                            set loop-block to air
+                    loop players in radius 4 around {_block}:
+                        strike lightning at loop-player
+                        play sound "entity.lightning_bolt.thunder" at volume 1 at pitch 1 at loop-player
+                create an explosion with force 5 at {_as}
+                set {_i} to nether star named "&f&lHeavenly Star" with lore "&r&7Left-Click: Repulsion%nl%&r&7Right-Click: Quake Shift%nl%&r&7Sneak + Left-Click: Bind%nl%&r&7Sneak + Right-Click: Gravitational Displacement"
+                set tag "GravityGun" of nbt compound of {_i} to 1
+                #drop {_i} at {_block}
+                kill {_as}
+                kill {_block}
+                

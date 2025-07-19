@@ -1,0 +1,80 @@
+#
+# Ranks 
+#
+
+# Bronze 0-100
+# Silver 101-200
+# Gold 201-300
+# Diamond 301-400
+# Platinum 401-500
+# Master 501-999
+# Grand Master 1000+ 
+
+#
+# Variables 
+#t
+
+# {wkrank::%player's uuid%}
+# {wkrank::%player's uuid%::xp}
+# {wkrank::%player's uuid%::wins}
+# {wkrank::%player's uuid%::losses}
+
+#
+# Functions 
+#
+
+function rank_duelAward(winner: player, loser: player):
+    add 1 to {wkrank::%{_winner}'s uuid%::wins}
+    add 1 to {wkrank::%{_loser}'s uuid%::losses}
+    rank_addXP({_winner}, random integer between 3 and 6)
+    rank_removeXP({_loser}, random integer between 3 and 6)
+
+function rank_addXP(plr: player, amt: integer):
+    add {_amt} to {wkrank::%{_plr}'s uuid%::xp}
+
+function rank_removeXP(plr: player, amt: integer):
+    remove {_amt} from {wkrank::%{_plr}'s uuid%::xp}
+    delete {wkrank::%{_plr}'s uuid%::xp} if {wkrank::%{_plr}'s uuid%::xp} < 0
+
+function rank_get(plr: player, color: boolean) :: text:
+    set {_rank} to "&x&c&d&7&f&3&2&lBronze&r" if {wkrank::%{_plr}'s uuid%::xp} is not set
+    set {_rank} to "&x&c&d&7&f&3&2&lBronze&r" if {wkrank::%{_plr}'s uuid%::xp} is between 0 and 100
+    set {_rank} to "&x&e&b&e&8&e&8Silver&r" if {wkrank::%{_plr}'s uuid%::xp} is between 101 and 200
+    set {_rank} to "&x&f&b&b&b&0&0Gold&r" if {wkrank::%{_plr}'s uuid%::xp} is between 201 and 300
+    set {_rank} to "&x&0&1&f&f&f&fDiamond&r" if {wkrank::%{_plr}'s uuid%::xp} is between 301 and 400
+    set {_rank} to "&x&4&e&f&f&c&3Platinum&r" if {wkrank::%{_plr}'s uuid%::xp} is between 401 and 500
+    set {_rank} to "&x&0&0&5&f&e&fMaster&r" if {wkrank::%{_plr}'s uuid%::xp} is between 501 and 999
+    if {_color} is true:
+        set {_rank} to "&x&0&0&5&f&e&f&k|&x&0&0&3&5&e&fGrand Master&x&0&0&5&f&e&f&k|&r" if {wkrank::%{_plr}'s uuid%::xp} >= 1000
+    else:
+        set {_rank} to "Grand Master" if {wkrank::%{_plr}'s uuid%::xp} >= 1000
+        set {_rank} to uncolored {_rank}
+    return {_rank}
+
+function rank_gui(plr: player) :: object:
+    set {_xp} to {wkrank::%{_plr}'s uuid%::xp}
+    set {_xp} to 0 if {_xp} is not set
+    set {_rank} to rank_get({_plr}, true)
+    set {_gui} to a new chest inventory with 5 rows with name "&6&lWildKits Rank"
+    set slots (integers between 0 and 44) of {_gui} to gray glass pane named " "
+    set slots (integers between 0 and 8) of {_gui} to black glass pane named " " 
+    set slot 9, 18, 27, 17, 26, and 35 of {_gui} to black glass pane named " "
+    set slots (integers between 36 and 44) of {_gui} to black glass pane named " "
+    set slot 20 of {_gui} to skull of {_plr} named "&aViewing stats of &e%{_plr}%"
+    set slot 22 of {_gui} to xp bottle named "&eExperience" with lore "&8「&fRank: %{_rank}%&8」%nl%&8「&fXP: &e%{_xp}%&8」"
+    set slot 23 of {_gui} to iron sword named "&eStats" with lore "&8「&fDuel Wins: &e%{wkrank::%{_plr}'s uuid%::wins}%&8」%nl%&8「&fDuel Losses: &e%{wkrank::%{_plr}'s uuid%::losses}%&8」%nl%&8「&fW/L: &e%{wkrank::%{_plr}'s uuid%::wins}/{wkrank::%{_plr}'s uuid%::losses}%&8」" with all flags hidden
+    set slot 24 of {_gui} to end crystal named "&cChallenge &e%{_plr}%" with lore "&7Send a duel request to &e%{_plr}%" with all flags hidden
+    return {_gui}
+
+on inventory click:
+    if name of event-inventory is "&6&lWildKits Rank":
+        cancel event
+        if index of event-slot is 24:
+            set {_split::*} to name of event-slot split at "&e"
+            execute player command "/duel %{_split::2}%"
+
+on right click:
+    clicked player is set
+    player is not sneaking
+    player is in the region "spawn"
+    open rank_gui(clicked player) to player

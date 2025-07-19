@@ -1,0 +1,79 @@
+on join:
+    if {eTokens::%player's uuid%} is not set:
+        set {eTokens::%player's uuid%} to 0
+    if player has not played before:
+        set {level::%player's uuid%} to 0
+        set {xp::%player's uuid%} to 0
+
+on death of player:
+  metadata "inDuel" of victim is not set
+  metadata "inDuel" of attacker is not set
+  if attacker is player:
+    if {max::%attacker's uuid%} is not set:
+      set {max::%attacker's uuid%} to 10 
+      set {level::%attacker's uuid%} to 0 
+
+command /getpres:
+	trigger:
+		send "%{prestige::%UUID OF PLAYER%}%" to player
+command /setpres <int>:
+	permission:OP
+	trigger:
+		set {prestige::%uuid of player%} to arg-1
+		
+command /setxp <int>:
+	permission:OP
+	trigger:
+		set {xp::%uuid of player%} to arg-1
+		
+command /getxp:
+	trigger:
+		send "%{xp::%UUID OF PLAYER%}%" to player
+		
+command /setlevel <int>:
+	permission:OP
+	trigger:
+		set {level::%uuid of player%} to arg-1
+
+command /getlevel:
+	trigger:
+		send "%{level::%UUID OF PLAYER%}%" to player
+
+function checkForLevelUp(p: player):
+    if {xp::%{_p}'s uuid%} is higher or equal to 75:
+        #set {xp::%{_p}'s uuid%} to {xp::%{_p}'s uuid%} - 75
+        set {xp::%{_p}'s uuid%} to 0
+        add 1 to {level::%{_p}'s uuid%}
+        send title "&a↑ &6LEVEL UP &a↑" with subtitle "&fLevel &6%{level::%{_p}'s uuid%}%" to {_p}
+        play sound "entity.player.levelup" at volume 1 at pitch 1 to {_p}
+        set {_r} to 200
+        add ({prestige::%{_p}'s uuid%} * 50) to {_r}
+        add {_r} to {eTokens::%{_p}'s uuid%}
+        send "&eYou gained &6%{_r}% tokens &efor your level-up!" to {_p}
+        #checkForLevelUp({_p}) - I don't think this is necessary...
+
+command /level:
+	trigger:
+		set {_gui} to a new chest inventory with 6 row with name "&6&lLevels Info Page"
+		set slots (integers between 26 and 37 and integers between 0 and 33) of {_gui} to black glass pane named " "
+		set slots (integers between 32 and 33 and integers between 35 and 44 and integers between 44 and 55) of {_gui} to black glass pane named " "
+		set slot 18 of {_gui} to black glass pane named " " 
+		set slot 37 of {_gui} to experience bottle named "&2Current XP: &a%{xp::%uuid of player%}%/75" with lore " ", "&7The XP left for you to gain a level" and " "
+		set slot 40 of {_gui} to enchanting table named "&2Your Level: &c%{level::%uuid of player%}%" with lore " ", "&7Your level based on the XP you get from kills" and " "
+		set slot 43 of {_gui} to written book named "&2Info" with lore " ", "&7You can get a &erandom amount of XP&7 from each kill", "&7Once you reach &e75 XP &7you level up", "&7Each time you level up you instantly recieve a reward" , "&7Once you reach &elevel 50 &7you can prestige" , "&7Prestiging gives you &e50 more eTokens &7each level up" and " " with all flags hidden
+		set slot 13 of {_gui} to diamond block named "&a&lPrestige" with lore " ", "&cRequires &4level 50&c: " , " ", "&eIncreases future level-up rewards by &650 eTokens" , "&7This stacks &8&lindefinitely&r&7 so make sure to prestige!" and " "
+		open {_gui} to player
+
+on inventory click:
+	if name of event-inventory is "&6&lLevels Info Page":
+		cancel event
+		if index of event-slot = 13:
+			if {level::%uuid of player%} is greater than 49:
+				add 1 to {prestige::%uuid of player%}
+				set {level::%uuid of player%} to 1
+				set {xp::%uuid of player%} to 0
+				send "&6[&ePRESTIGE&6]: &e&l%player%&r &6Just reached prestige &e&l%{Prestige::%uuid of player%}%&r&6. &lGG!" to all players
+				play sound "entity.ender_dragon.death" at volume 1 at pitch 1 to all players
+				send title "&a↑ &6PRESTIGE &a↑" with subtitle "&fYou reached prestige &6%{prestige::%uuid of player%}%" to player
+			else:
+				send "&cError! You cannot prestige yet!" to player

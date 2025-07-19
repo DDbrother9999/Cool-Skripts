@@ -1,0 +1,15 @@
+import:
+	me.arcaniax.hdb.api.HeadDatabaseAPI
+
+on load:
+	set {HDBA} to new HeadDatabaseAPI()
+	# Declaration for pet skins
+	# Starlight, I **will** document my code even though you don't
+	# You're welcome
+
+	# headID, displayName, pet,actual item (just {PetSkins::Phoenix})
+	set {PetSkins::Phoenix::headID} to "683"
+	set {PetSkins::Pheonix::displayName} to "&c&lPhoenix"
+	set {PetSkins::Phoenix::pet} to "&cBlaze"
+	set {PetSkins::Phoenix} to {HDBA}.getItemHead({PetSkins::Phoenix::headID}) named {PetSkins::Phoenix::displayName} with lore "&8Drag and drop to use!%nl%&8Consumed on use!","","&7Pet skins change the look of the pet","&7in some way!","&7Only one skin can be active!","","&7This skin can only be applied to %uncolored {PetSkins::Phoenix::pet}%."
+	set string tag "Skin;Pet" of nbt compound of {PetSkins::Phoenix} to "Blaze"

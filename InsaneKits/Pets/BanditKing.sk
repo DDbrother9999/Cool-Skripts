@@ -1,0 +1,27 @@
+function BanditKingPet(p: text):
+	set {_p} to {_p} parsed as player
+	stop if metadata "PetBanditKing;stat" of {_p} is set
+	stop if checkPetCD({_p}'s tool, {_p}) is false
+	set {_level} to int tag "Pet;level" of nbt compound of {_p}'s tool
+	set {Pets::BanditKing::%{_p}'s uuid%::lastUsed} to unix timestamp of now
+	set metadata "Pet%int tag "Pet;id" of nbt compound of {_p}'s tool%;spawned" of {_p} to metadata "Pet%int tag "Pet;id" of nbt compound of {_p}'s tool%;spawned" of {_p} + 1
+	set {_data::*} to {Pets::BanditKing::Stats::%{_level}%} split at ";"
+	set metadata "PetBanditKing;stat" of {_p} to {_data::1}
+	wait "%{_data::2}%" parsed as timespan
+	delete metadata "PetBanditKing;stat" of {_p}
+
+# Move this function to another skript
+
+function getPercentageNumber(number: number, percentage: number) :: number:
+	set {_number} to {_number} / 100
+	set {_per} to {_number} * {_percentage}
+	return {_per}
+
+on damage:
+	attacker is a player
+	metadata "PetBanditKing;stat" of attacker is set
+	if metadata "PetBanditKing;stat" of attacker contains "%%" and "Damage":
+		set {_stat} to metadata "PetBanditKing;stat" of attacker
+		replace all "%%" and " Damage" and "+" with "" in {_stat}
+		set {_stat} to {_stat} parsed as number
+		set damage to damage + getPercentageNumber(damage, {_stat})

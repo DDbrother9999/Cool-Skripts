@@ -1,0 +1,650 @@
+#REQUIRES SKRIPT FAWE API -- https://www.spigotmc.org/resources/fawe-skript-api.89529/ (is a .sk file, so) & skmirror which we already have
+# Made by TheProB for WildKits
+
+#FUNCTIONS - L. 12
+# EVENTS - L. 129
+# COMMANDS - L. 265
+
+options: #dont change these
+	defaultPermission: "duels.use"
+	adminPermission: "dueladmin.use"
+    #you can change this one
+	fileName: "duelSkript"
+	
+
+	
+#FUNCTIONS
+
+function duelSetup(p: player, step: integer, extra: text):
+	if {_step} is 1:
+		open gui with id "0Arenas" to {_p}
+	else if {_step} is 2:
+		open gui with id "0Kits" to {_p}
+		set {duelSettingsArena::%{_p}%} to {_extra}
+		
+	else if {_step} is 3:
+		set {duelSettingsKits::%{_p}%} to {_extra}
+		set {_kit} to {duelSettingsKits::%{_p}%}
+		set {_arena} to {duelSettingsArena::%{_p}%}
+		set {_p2} to {duelSettingsPlayer::%{_p}%}
+		make {_p} execute command "duelRequest %{_p2}% %{_arena}% %{_kit}%" 
+		close {_p}'s inventory
+
+function inventoryManagement(p: player, settings: text, kit: text) :: text:
+	if {_settings} is "saveKit":
+		set {_loop} to 0
+		loop 41 times:
+			set {slot%{_loop}%.%{_kit}%} to slot {_loop} of {_p}'s inventory
+			add 1 to {_loop}
+		return "&6&lDuels &8»&b Successfully set inventory to kit inventory."
+	else if {_settings} is "loadKit":
+		set {_loop} to 0
+		loop 41 times:
+			set slot {_loop} of {_p}'s inventory to {slot%{_loop}%.%{_kit}%}
+			add 1 to {_loop}
+		return "&6&lDuels &8»&b Successfully set your inventory to the kit's inventory"
+	else if {_settings} is "savePlayerInventory":
+		set {_loop} to 0
+		loop 41 times:
+			set {slot%{_loop}%.%{_p}'s uuid%} to slot {_loop} of {_p}'s inventory
+			add 1 to {_loop}
+		return "&6&lDuels &8»&b Successfully saved player's inventory."
+	else if {_settings} is "loadPlayerInventory":
+		set {_loop} to 0
+		loop 41 times:
+			set slot {_loop} of {_p}'s inventory to {slot%{_loop}%.%{_p}'s uuid%}
+			
+			add 1 to {_loop}
+		wait 10 seconds
+		set {_loop} to 0
+		loop 41 times:
+			delete {slot%{_loop}%.%{_p}'s uuid%}
+			add 1 to {_loop}
+	else:
+		return "&6&lDuels &8»&c Something has gone wrong with your settings for this function."
+	
+function midPoint(l1: location, l2: location) :: location:
+	set {_midpointX} to ({_l1}'s x coordinate + {_l2}'s x coordinate)/2
+	set {_midpointY} to ({_l1}'s y coordinate + {_l2}'s y coordinate)/2
+	set {_midpointZ} to ({_l1}'s z coordinate + {_l2}'s z coordinate)/2
+	set {_midpoint} to the location at {_midpointX}, {_midpointY}, {_midpointZ} of the world "world"
+	return {_midpoint}
+
+    
+function startDuel(p: player, p2: player, map: text, kit: text):
+	{arenaInUse::%{_map}%} is not true
+	metadata "inDuel" of {_p} is not true
+	metadata "inDuel" of {_p2} is not true
+	{_p} is online
+	{_p2} is online
+	edit gui with id "0Arenas":
+		set {_loop} to 0
+		loop 27 times:
+			if slot {_loop} of gui's name is {placeholder.%{_map}%}'s name:
+				format gui slot {_loop} with {placeholder.%{_map}%} with lore "&cIn Use"
+			add 1 to {_loop}
+	if {_p} has metadata "vanished" or "staffmode":
+		send "&6&lDuels &8»&c Something has gone wrong. Someone you dueled may be in vanish/modmode." to {_p} and {_p2}
+		stop
+	else if {_p2} has metadata "vanished" or "staffmode":
+		send "&6&lDuels &8»&c Something has gone wrong. Someone you dueled may be in vanish/modmode." to {_p} and {_p2}
+		stop
+	execute console command "/dueladmin killEntitiesinArena %{_map}%"
+	clear {_p}'s potion effects
+	clear {_p2}'s potion effects
+	inventoryManagement({_p}, "savePlayerInventory", "none")
+	inventoryManagement({_p2}, "savePlayerInventory", "none")
+	wait 1 tick
+	execute console command "dueladmin resetArenaMap %{_map}%"
+	teleport {_p} to {spawnPosition1.%{_map}%}
+	teleport {_p2} to {spawnPosition2.%{_map}%}
+	inventoryManagement({_p}, "loadKit", {_kit})
+	inventoryManagement({_p2}, "loadKit", {_kit})
+	set metadata "inDuel" of {_p} to {_p2}
+	set metadata "inDuel" of {_p2} to {_p}
+	set {inDuelMap::%{_p}%} to {_map}
+	set {inDuelMap::%{_p2}%} to {_map}
+	set {arenaInUse::%{_map}%} to true
+	set {_loop} to 0
+	loop 9 times:
+		wait 1 second
+		add 1 to {_loop}
+		set {beforeduel::%{_p2}%} to true
+		set {beforeduel::%{_p}%} to true
+		if {_p} or {_p2} is not online:
+			delete {beforeduel::%{_p}%}
+			delete {beforeduel::%{_p2}%}
+			stop loop
+		send title "&a%10-{_loop}%" to {_p2} and {_p}
+	if {_p} or {_p2} is not online:
+		stop
+	if metadata "inDuel" of {_p} or metadata "inDuel" of {_p2} is not set:
+		stop
+	wait 1 second
+	send title "&aGO" to {_p} and {_p2}
+	delete {beforeduel::%{_p}%}
+	delete {beforeduel::%{_p2}%}
+	teleport {_p} to {spawnPosition1.%{_map}%}
+	teleport {_p2} to {spawnPosition2.%{_map}%}
+	heal {_p}
+	heal {_p2}
+	teleport {_p} to {spawnPosition1.%{_map}%}
+	teleport {_p2} to {spawnPosition2.%{_map}%}
+
+function endDuel(loser: player, winner: player):
+	wait 5 ticks
+	set {_map} to {inDuelMap::%{_loser}%}
+	edit gui with id "0Arenas":
+		set {_loop} to 0
+		loop 27 times:
+			if slot {_loop} of gui's name is {placeholder.%{_map}%}'s name:
+				format gui slot {_loop} with {placeholder.%{_map}%}:
+					duelSetup(player, 2, {_map})
+			add 1 to {_loop}
+	set {_healthremaining} to {_winner}'s health
+	clear {_winner}'s inventory
+	kill {_winner}
+	clear {_loser}'s inventory
+	kill {_loser}
+	wait 2 second
+	execute console command "/dueladmin killEntitiesinArena %{_map}%"
+	if {_loser} is online:
+		inventoryManagement({_loser}, "loadPlayerInventory", "none")
+	if {_winner} is online:
+		inventoryManagement({_winner}, "loadPlayerInventory", "none")
+	if {_loser} is online:
+		broadcast "&6&lDuels &8»&b %{_winner}% has won against %{_loser}% in a duel! &c[❤%{_healthremaining}%]"
+	if {duels::%{_winner}%} is not set:
+		set {duelwins::%{_winner}%} to 0
+		set {duellosses::%{_winner}%} to 0
+		set {duels::%{_winner}%} to 0
+	if {duels::%{_loser}%} is not set:
+		set {duelwins::%{_loser}%} to 0
+		set {duellosses::%{_loser}%} to 0
+		set {duels::%{_loser}%} to 0
+	wait 1 tick
+	add 1 to {duelwins::%{_winner}%}
+	add 1 to {duellosses::%{_loser}%}
+	add 1 to {duels::%{_winner}%}
+	add 1 to {duels::%{_loser}%}
+	clear metadata "inDuel" of {_loser}
+	clear metadata "inDuel" of {_winner}
+	delete {inDuelMap::%{_loser}%}
+	delete {inDuelMap::%{_winner}%}
+	delete {arenaInUse::%{_map}%}
+	
+#EVENTS
+
+on right click with mushroom stew:
+	metadata "inDuel" of player is set
+	heal player by 3.5
+	if player's health is 10:
+		add 3.5 to player's hunger
+		add 2 to player's saturation
+	set player's tool to bowl
+
+on left click:
+	if {beforeduel::%player%} is set:
+		cancel event
+
+on right click:
+	if {beforeduel::%player%} is set:
+		cancel event
+        
+on damage:
+	if {beforeduel::%attacker%} is set:
+		cancel event
+
+on skript load:
+	clear {arenaInUse::*}
+	clear {inDuelMap::*}
+
+
+on death:
+	if metadata "inDuel" of victim is set:
+		metadata "NoExtraEndDuel" of victim is not set
+		set metadata "NoExtraEndDuel" of victim to true
+		cancel drops
+		set {_player} to metadata "inDuel" of victim
+		endDuel(victim, {_player})
+		wait 10 seconds
+		clear metadata "NoExtraEndDuel" of victim
+
+		
+on quit:
+	if metadata "inDuel" of player is set:
+		set {_player} to metadata "inDuel" of player
+		endDuel(player, {_player})
+		set {giveItemsOnJoin.%player's uuid%} to true
+
+on join:
+	delete {beforeduel::%player%}
+	if {giveItemsOnJoin.%player's uuid%} is set:
+		wait 5 ticks
+		clear player's inventory
+		execute console command "kill %player%"
+		wait 20 ticks
+		inventoryManagement(player, "loadPlayerInventory", "none")
+		delete {giveItemsOnJoin.%player's uuid%}
+	else if metadata "inDuel" of player is set:
+		wait 5 ticks
+		clear player's inventory
+		execute console command "kill %player%"
+		wait 20 ticks
+		inventoryManagement(player, "loadPlayerInventory", "none")
+		clear metadata "inDuel" of player
+
+
+				
+on command:
+	if metadata "inDuel" of player is set:
+		player does not have permission {@adminPermission}
+		cancel event
+		
+on left click:
+	player's tool's lore contains "&aSet the positions of the duel."
+	cancel event
+	distance between player and event-block is less than 5
+	if player has permission {@adminPermission}:
+		if {arenas::*} contains player's tool's name:
+			set {arenapos1.%player's tool's name%} to event-block's location
+			send "&6&lDuels &8»&b Position 1 set successfully."
+		else:
+			send "&6&lDuels &8»&c This arena does not exist. Not setting position."
+			
+on right click:
+	player's tool's lore contains "&aSet the positions of the duel."
+	cancel event
+	distance between player and event-block is less than 5
+	if player has permission {@adminPermission}:
+		if {arenas::*} contains player's tool's name:
+			set {arenapos2.%player's tool's name%} to event-block's location
+			send "&6&lDuels &8»&b Position 2 set successfully."
+		else:
+			send "&6&lDuels &8»&c This arena does not exist. Not setting position."
+			
+on tab complete of "/dueladmin":
+	player has permission {@adminPermission}
+	set tab completions for position 1 to "help", "createArena", "deleteArena", "setPositions", "createSchematic", "setSpawnPositions", "createKit", "deleteKit", "setKitItems", "loadKitItems", "resetArenaMap", "setKitPlaceholder", "reload", "tpToArena", "killEntitiesinArena" and "setArenaPlaceholder"
+	if tab arg-1 is "deleteArena" or "testArena" or "setPositions" or "createSchematic" or "resetArenaMap" or "setArenaPlaceholder" or "tpToArena" or "killEntitiesinArena":
+		set tab completions for position 2 to {arenas::*}
+	else if tab arg-1 is "deleteKit" or "setKitItems" or "loadKitItems" or "setKitPlaceholder":
+		set tab completions for position 2 to {kits::*}
+	else if tab arg-1 is "setSpawnPositions":
+		set tab completions for position 2 to {arenas::*}
+		set tab completions for position 3 to "1" and "2"
+		
+on tab complete of "/duelRequest":
+	player has permission {@defaultPermission}
+	set tab completions for position 1 to all players
+	set tab completions for position 2 to {arenas::*}
+	set tab completions for position 3 to {kits::*}
+
+
+
+on load:
+	loop {kits::*}:
+		add loop-value to {_kits::*}
+	set {kits::*} to {_kits::*}
+	loop {arenas::*}:
+		add loop-value to {_arenas::*}
+	set {arenas::*} to {_arenas::*}
+	set {_arenas} to size of {arenas::*}
+	set {_pages} to ceiling({_arenas}/14)
+	set {_page} to 0
+	loop {_pages} times:
+		create a gui with id "%{_page}%Arenas" with virtual chest inventory with 3 rows with name "&fArenas"
+		edit last gui:
+			set {_loop} to (({_page})*18)
+			set {_loop2} to 0
+			loop 18 times:
+				set {_arena} to {arenas::%{_loop}+1%}
+				if {arenas::%{_loop}+1%} does not exist:
+					continue
+				if {placeholder.%{_arena}%} does not exist:
+					set {placeholder.%{_arena}%} to stone bricks named "%{_arena}%"
+				format gui slot {_loop2} with {placeholder.%{_arena}%}:
+					duelSetup(player, 2, {_arena})
+				add 1 to {_loop}
+				add 1 to {_loop2}
+			format gui slot 19 with arrow named "&cLast Page":
+				open gui with id "%{_page}-1%Arenas" to player
+			format gui slot 25 with arrow named "&aNext Page":
+				open gui with id "%{_page}+1%Arenas" to player
+		add 1 to {_page}
+	# this is kits not arenas i was just too lazy to change vars
+	set {_arenas} to size of {kits::*}
+	set {_pages} to ceiling({_arenas}/14)
+	set {_page} to 0
+	loop {_pages} times:
+		create a gui with id "%{_page}%Kits" with virtual chest inventory with 3 rows with name "&fKits"
+		edit last gui:
+			set {_loop} to (({_page})*18)
+			set {_loop2} to 0
+			loop 18 times:
+				set {_arena} to {kits::%{_loop}+1%}
+				if {kits::%{_loop}+1%} does not exist:
+					continue
+				if {placeholderKit.%{_arena}%} does not exist:
+					set {placeholderKit.%{_arena}%} to iron sword named "%{_arena}%"
+				format gui slot {_loop2} with {placeholderKit.%{_arena}%}:
+					duelSetup(player, 3, {_arena})
+				add 1 to {_loop}
+				add 1 to {_loop2}
+			format gui slot 19 with arrow named "&cLast Page":
+				open gui with id "%{_page}-1%Kits" to player
+			format gui slot 25 with arrow named "&aNext Page":
+				open gui with id "%{_page}+1%Kits" to player
+		add 1 to {_page}
+
+# COMMANDS
+
+command /duel <player>:
+	permission: duels.use
+	cooldown: 10 seconds
+	trigger:
+		duelSetup(player, 1, "none")
+		set {duelSettingsPlayer::%player%} to arg 1
+
+command /duelstats [<offline player>]:
+	trigger:
+		open rank_gui(arg-1) to player
+		stop
+		set {_player} to arg 1
+		if arg 1 is not set:
+			set {_player} to player
+		set {_duelwins} to {duelwins::%{_player}%}
+		if {duelwins::%{_player}%} is not set:
+			set {_duelwins} to 0
+		set {_duels} to {duels::%{_player}%}
+		if {duels::%arg 1%} is not set:
+			set {_duels} to 0
+		set {_duellosses} to {duellosses::%{_player}%}
+		if {duellosses::%arg 1%} is not set:
+			set {_duellosses} to 0
+		send "&6&lDuels &8»&b %{_player}%'s Duel Stats %nl%&7  - &bWins: %{duelwins::%{_player}%}% %nl%&7  - &bLosses: %{duellosses::%{_player}%}% %nl%&7  - &bTotal Duels: %{duels::%{_player}%}%" to player
+
+command /dueldeny:
+	trigger:
+		if {duelrequests.%player%::*} is set:
+			set {_loop} to 0
+			loop {duelrequests.%player%::*}:
+				if {_loop} is 1:
+					set {_player} to loop-value
+				else if {_loop} is 2:
+					set {_loop} to loop-value
+				else if {_loop} is 3:
+					set {_loop} to loop-value
+				add 1 to {_loop}
+			if {_player} is online:
+				send "&6&lDuels &8»&c Your duel request has been denied." to {_player}
+			remove player from {outgoingduel.%{_player}'s uuid%::*}
+			delete {duelrequests.%player%::*}
+			send "&6&lDuels &8»&c You have denied this duel request."
+			
+command /duelaccept:
+	trigger:
+		if {duelrequests.%player%::*} is set:
+			set {_loop} to 0
+			loop {duelrequests.%player%::*}:
+				if {_loop} is 1:
+					set {_player} to loop-value
+				else if {_loop} is 2:
+					set {_map} to loop-value
+				else if {_loop} is 3:
+					set {_kit} to loop-value
+				add 1 to {_loop}
+			if metadata "inDuel" of {_player} is set:
+				send "&6&lDuels &8»&c An error has occured. The player is already in a duel."
+				stop
+			else if metadata "inDuel" of player is set:
+				send "&6&lDuels &8»&c An error has occured. You are already in a duel."
+				stop
+			send "&6&lDuels &8»&b Duel has been accepted."
+			if {_player} is online:
+				heal {_player}
+				heal player
+				startDuel(player, {_player}, {_map}, {_kit})
+				send "&6&lDuels &8»&b Duel has been started."
+				send "&6&lDuels &8»&b Duel has been started." to {_player}
+				delete {duelrequests.%{_player}%::*}
+				remove player from {outgoingduel.%{_player}'s uuid%::*}
+	
+command /duelRequest <player> <text> <text>:
+	permission: duels.use
+	cooldown: 10 seconds
+	usage: /duelRequest <player> <map> <kit>
+	trigger:
+		if {arenas::*} contains arg 2:
+			if {kits::*} contains arg 3:
+				if arg 1 is player:
+					send "&6&lDuels &8»&c You cannot duel yourself."
+					stop
+				if {duelrequests::%arg 1%} is set:
+					send "&6&lDuels &8»&c This player has duel requests disabled."
+					stop
+				if {outgoingduel.%player's uuid%::*} contains arg 1:
+					send "&6&lDuels &8»&c You already have an outgoing duel request to this player"
+					stop
+				if {arenaInUse::%arg 2%} is set:
+					send "&6&lDuels &8»&c Sorry, this arena is currently in use!"
+					stop
+				send "&6&lDuels &8»&b Your duel request has been sent to &f%arg 1%&b using kit &f%arg 3%&b on map %arg 2%"
+				add arg 1 to {outgoingduel.%player's uuid%::*}
+				set {duelrequests.%arg 1%::*} to ""
+				add player to {duelrequests.%arg 1%::*}
+				add arg 2 to {duelrequests.%arg 1%::*}
+				add arg 3 to {duelrequests.%arg 1%::*}
+				# long duel message
+				send "&6&lDuels &8»&b You have been sent a duel request by &f%player%&b. %nl%  &7- Map: &f%arg 2% %nl%  &7- Kit: &f%arg 3% %nl%&bYou have 30 seconds. %nl%<ttp:&bAccept the duel><cmd:/duelaccept>&a[Accept]<reset><ttp:&bDeny the duel><cmd:/dueldeny>&c [Deny]" to arg 1
+				
+				#afterwards,
+				wait 30 seconds
+				if {outgoingduel.%player's uuid%::*} contains arg 1:
+					remove arg 1 from {outgoingduel.%player's uuid%::*}
+					send "&6&lDuels &8»&c The duel request has expired."
+				if {duelrequests.%arg 1%::*} contains player:
+					delete {duelrequests.%arg 1%::*}
+					send "&6&lDuels &8»&c The duel request has expired" to arg 1
+			else:
+				send "&6&lDuels &8»&c This kit does not exist."
+		else:
+			send "&6&lDuels &8»&c This arena does not exist."
+			
+command /duelrequeststoggle:
+	trigger:
+		if {duelrequests::%player%} is set:
+			delete {duelrequests::%player%}
+			send "&6&lDuels &8»&b You are now able to recieve duel requests."
+		else:
+			set {duelrequests::%player%} to false
+			send "&6&lDuels &8»&c You are no longer able to recieve duel requests."
+	
+command /dueladmin [<text>] [<text>] [<text>]:
+	permission:  dueladmin.use
+	trigger:
+		if arg 1 is "help":
+			send "&6&lDuels &8»&b Here is a list of commands."
+			send "  &aArena Creation"
+			send "   &7- &b/dueladmin createArena <arena>"
+			send "   &7- &b/dueladmin deleteArena <arena>"
+			send "   &7- &b/dueladmin setPositions <arena>"
+			send "   &7- &b/dueladmin createSchematic <arena>"
+			send "   &7- &b/dueladmin resetArenaMap <arena>"
+			send "   &7- &b/dueladmin setSpawnPositions <arena> <1 or 2>"
+			send "   &7- &b/dueladmin setPlaceholder <arena>"
+			send "  &aKit Creation"
+			send "   &7- &b/dueladmin createKit <kit>"
+			send "   &7- &b/dueladmin deleteKit <kit>"
+			send "   &7- &b/dueladmin setKitItems <kit>"
+			send "   &7- &b/dueladmin loadKitItems <kit>"
+			send "   &7- &b/dueladmin setKitPlaceholder <kit>"
+			send "  &aMisc"
+			send "   &7- &b/dueladmin reload"
+			send "   &7- &b/dueladmin tpToArena <arena>"
+			send "   &7- &b/dueladmin killEntitiesinArena <arena>"
+		else if arg 1 is "reload":
+			execute console command "/sk reload %{@fileName}%"
+			send "&6&lDuels &8»&b Successfully reloaded."
+		else if arg 1 is "setArenaPlaceholder":
+			if arg 2 is set:
+				if {arenas::*} contains arg 2:
+					if player's tool is air:
+						send "&6&lDuels &8»&c You cannot set the placeholder to air."
+					else:
+						set {placeholder.%arg 2%} to player's tool
+						send "&6&lDuels &8»&b Successfully set placeholder to your tool. Do /dueladmin reload"
+				else:
+					send "&6&lDuels &8»&c Arena does not exist."
+			else:
+				send "&6&lDuels &8»&c Arena name not specified."
+		else if arg 1 is "setKitPlaceholder":
+			if arg 2 is set:
+				if {kits::*} contains arg 2:
+					if player's tool is air:
+						send "&6&lDuels &8»&c You cannot set the placeholder to air."
+					else:
+						set {placeholderKit.%arg 2%} to player's tool
+						send "&6&lDuels &8»&b Successfully set placeholder to your tool. Do /dueladmin reload"
+				else:
+					send "&6&lDuels &8»&c Kit does not exist."
+			else:
+				send "&6&lDuels &8»&c Kit name not specified."
+		#KIT THINGS
+		else if arg 1 is "killEntitiesinArena":
+			if arg 2 is set:
+				if {arenas::*} contains arg 2:
+					send "&6&lDuels &8»&b Killed entities in arena ""%arg 2%"""
+					loop blocks within {arenapos1.%arg 2%} to {arenapos2.%arg 2%}:
+						loop dropped items in radius 2 of loop-value's location:
+							kill loop-entity
+						loop entities in radius 2 of loop-value's location:
+							loop-entity is not a player
+							kill loop-entity
+				else:
+					send "&6&lDuels &8»&c Arena does not exist."
+		else if arg 1 is "createKit":
+			if arg 2 is set:
+				if {kits::*} contains arg 2:
+					send "&6&lDuels &8»&c Kit name already defined"
+					stop
+				add arg 2 to {kits::*}
+				send "&6&lDuels &8»&b Kit created."
+			else:
+				send "&6&lDuels &8»&c Kit name not specified."
+		else if arg 1 is "deleteKit":
+			if arg 2 is set:
+				if {kits::*} contains arg 2:
+					send "&6&lDuels &8»&b Successfully deleted kit &f%arg 2%"
+					remove arg 2 from {kits::*}
+					
+				else:
+					send "&6&lDuels &8»&c Kit &b%arg 2% doesn't exist."
+		else if arg 1 is "setKitItems":
+			if arg 2 is set:
+				if {kits::*} contains arg 2:
+					send inventoryManagement(player, "saveKit", arg 2)
+				else:
+					send "&6&lDuels &8»&c This kit does not exist."
+			else:
+				send "&6&lDuels &8»&c Please specify a kit name."
+		else if arg 1 is "loadKitItems":
+			if arg 2 is set:
+				if {kits::*} contains arg 2:
+					send inventoryManagement(player, "loadKit", arg 2)
+				else:
+					send "&6&lDuels &8»&c This kit does not exist."
+			else:
+				send "&6&lDuels &8»&c Please specify a kit"
+		# ARENA THINGS
+		else if arg 1 is "createArena":
+			if arg 2 is set:
+				if {arenas::*} contains arg 2:
+					send "&6&lDuels &8»&c This arena name is already taken."
+					stop
+				add arg 2 to {arenas::*}
+				if {arenas::*} contains arg 2:
+					send "&6&lDuels &8»&b Arena created successfully."
+				else:
+					send "&6&lDuels &8»&c Something went wrong."
+			else:
+				send "&6&lDuels &8»&c Please mention the name of the arena you wish to create."
+				stop
+		else if arg 1 is "deleteArena":
+			if arg 2 is set:
+				if {arenas::*} does not contain arg 2:
+					send "&6&lDuels &8»&c This arena name does not exist."
+					stop
+				else:
+					remove arg 2 from {arenas::*}
+					if {arenas::*} contains arg 2:
+						send "&6&lDuels &8»&c Something went wrong."
+						stop
+					send "&6&lDuels &8»&b Successfully deleted arena &f%arg 2%&b."
+					delete {arenapos1.%arg 2%}
+					delete {arenapos2.%arg 2%}
+					
+			else:
+				send "&6&lDuels &8»&c Please mention the name of the arena you are trying to erase."
+				
+				
+		else if arg 1 is "setPositions":
+			if arg 2 is set:
+				if {arenas::*} doesn't contain arg 2:
+					send "&6&lDuels &8»&c This arena does not exist."
+					stop
+				if player can hold 1 stick named arg 2:
+					give stick named arg 2 with lore "&aSet the positions of the duel." to player
+					send "&6&lDuels &8»&b Given you position setter item." to player
+				else:
+					send "&6&lDuels &8»&c Please clear a space in your inventory."
+			else:
+				send "&6&lDuels &8»&c Arena not mentioned."
+		else if arg 1 is "createSchematic":
+			if arg 2 is set:
+				if {arenas::*} contains arg 2:
+					if {duelSchematicNumber.%arg 2%} is not set:
+						set {duelSchematicNumber.%arg 2%} to 0
+					else:
+						add 1 to {duelSchematicNumber.%arg 2%}
+					save schematic "duelSchematic---%arg 2 in lowercase%%{duelSchematicNumber.%arg 2%}%" from {arenapos1.%arg 2%} and {arenapos2.%arg 2%}
+					send "&6&lDuels &8»&b Schematic saved successfully."
+				else:
+					send "&6&lDuels &8»&c This arena does not exist."
+			else:
+				send "&6&lDuels &8»&c Arena not mentioned."			
+				
+		else if arg 1 is "resetArenaMap":
+			if arg 2 is set:
+				if {arenas::*} contains arg 2:
+					paste schematic "duelSchematic---%arg 2 in lowercase%%{duelSchematicNumber.%arg 2%}%" at {arenapos1.%arg 2%}
+					send "&6&lDuels &8»&b Arena reloaded."
+				else:
+					send "&6&lDuels &8»&c Arena does not exist."
+			else:
+				send "&6&lDuels &8»&c Arena not mentioned."
+		else if arg 1 is "setSpawnPositions":
+			if arg 2 is set:
+				if {arenas::*} contains arg 2:
+					if arg 3 is "1":
+						set {spawnPosition1.%arg 2%} to player's location
+						send "&6&lDuels &8»&b Successfully set duel location 1 of &f%arg 2%&b to your current location"
+					else if arg 3 is "2":
+						set {spawnPosition2.%arg 2%} to player's location
+						send "&6&lDuels &8»&b Successfully set duel location 2 of &f%arg 2%&b to your current location"
+				else:
+					send "&6&lDuels &8»&c Arena does not exist."
+			else:
+				send "&6&lDuels &8»&c Arena not mentioned."
+		else if arg 1 is "tpToArena":
+			if arg 2 is set:
+				if {arenas::*} contains arg 2:
+					teleport player to {spawnPosition1.%arg 2%}
+					send "&6&lDuels &8»&b Teleported"
+				else:
+					send "&6&lDuels &8»&c Arena does not exist."
+			else:
+				send "&6&lDuels &8»&c Arena not mentioned."
+		else:
+			send "&6&lDuels &8»&c Invalid command. Do /dueladmin help to see all available commands."
+			

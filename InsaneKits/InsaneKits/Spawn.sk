@@ -1,0 +1,33 @@
+on respawn:
+    teleport player to {setspawn}
+
+command /setspawn:
+    permission: op
+    trigger:
+        set {setspawn} to location of player
+
+command /spawn:
+    trigger:
+        set {_x} to player's x coordinate
+        set {_y} to player's y coordinate
+        set {_z} to player's z coordinate
+        set {_health} to player's health
+        if player's gamemode is creative:
+            teleport player to {setspawn}
+            send "&aYou have been successfully teleported to spawn."
+            stop
+        loop 5 times:
+            send "&aTeleporting you to spawn &7(%loop-value%)"
+            wait 1 second
+            if player's x coordinate is not {_x}:
+                send "&4Teleport cancelled. You moved..."
+                stop
+            if player's y coordinate is not {_y}:
+                send "&4Teleport cancelled. You moved..."
+                stop
+            if player's z coordinate is not {_z}:
+                send "&4Teleport cancelled. You moved..."
+                stop
+        teleport player to {setspawn}
+        send "&aYou have been successfully teleported to spawn."
+   

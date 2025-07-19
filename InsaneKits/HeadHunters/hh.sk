@@ -1,0 +1,27 @@
+# options are the 'textures' nbt of skull
+
+# wip project dk if i'll complete it -TheProB
+
+options:
+	acquiredHead: "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvYTI0ZjNjODQ2ZDU1MmNiZGMzNjZkODc1MWRkNGJmYWJkZTYwYTNhZGFkNTM1YzM2MjBiMWEwYWY1ZDNmNTUzYSJ9fX0="
+	unacquiredHead: "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvODlhOTk1OTI4MDkwZDg0MmQ0YWZkYjIyOTZmZmUyNGYyZTk0NDI3MjIwNWNlYmE4NDhlZTQwNDZlMDFmMzE2OCJ9fX0="
+
+on load:
+	set {-acquiredHead} to giveHead({@acquiredHead})
+	set {-unacquiredHead} to giveHead({@unacquiredHead})
+
+local function createHeadHunterHead(list: objects):
+	# 1 = location
+	# 2 = name
+	# 3 = reward
+	# 4 = description
+	
+	
+function giveHead(id: string) :: item:
+	set {_item} to player head
+	set compound list tag "SkullOwner;Properties;textures" of nbt compound of {_item} to nbt compound from "{Value:""%{_id}%""}"
+	return {_item}
+	
+	
+	
+ 

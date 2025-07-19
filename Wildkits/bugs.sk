@@ -1,0 +1,17 @@
+on craft of gold ingot:
+	cancel event
+command /forcecloseinv <player>:
+	permission: op
+	trigger:
+		close arg-1's inventory
+
+on portal enter:
+	loop blocks in radius 10 around player:
+		loop-block is obsidian
+		loop-block is in the region "arena"
+		set loop-block to air
+	#execute console command "tpspawn %player%"
+
+on join:
+	player does not have permission "op"
+	set player's gamemode to survival

@@ -1,0 +1,156 @@
+function loadItemsFromTable(table: text, chest: block) :: text:
+	clear {_chest}'s inventory
+	set {_loop} to 0
+	set {_size} to slots of {_chest}
+	loop {_size} times:
+	
+		# The chance determines the amount of items in the chest
+		chance of {lootbox.%{_table}%.chance}:
+		
+			set {_l} to random integer between 1 and {lootbox.totalweight.%{_table}%}
+			loop {lootbox.table.%{_table}%::*}:
+				set {_item} to loop-value-2
+				if {_l} is between {lootbox.itemweight1.%{_item}%} and {lootbox.itemweight2.%{_item}%}:
+					set slot {_loop} of {_chest}'s inventory to {_item}
+				
+		add 1 to {_loop}
+		
+function loadItemsFromTableGUI(table: text, p: player, r: integer) :: text:
+	open virtual chest inventory with {_r} rows to {_p}
+	clear {_p}'s current inventory
+	set {_loop} to 0
+	set {_size} to slots of {_p}'s current inventory
+	loop {_size} times:
+	
+		# The chance determines the amount of items in the chest
+		chance of {lootbox.%{_table}%.chance}:
+		
+			set {_l} to random integer between 1 and {lootbox.totalweight.%{_table}%}
+			loop {lootbox.table.%{_table}%::*}:
+				set {_item} to loop-value-2
+				if {_l} is between {lootbox.itemweight1.%{_item}%} and {lootbox.itemweight2.%{_item}%}:
+					set slot {_loop} of {_p}'s current inventory to {_item}
+				
+		add 1 to {_loop}
+		
+		
+function removeItemFromTable(table: text, p: player):
+	create a gui with virtual chest inventory with 6 rows named "&c%{_table}% - Removing"
+	edit last gui:
+		set {_loop} to 0
+		loop {lootbox.table.%{_table}%::*}:
+			set {_item} to loop-value
+			set {_item2} to {_item}
+			add "%{lootbox.itemweight2.%{_item}%}-{lootbox.itemweight1.%{_item}%}% / %{lootbox.totalweight.%{_table}%}% Weight" to lore of {_item2}
+			format gui slot {_loop} with {_item2}:
+				remove {lootbox.itemweight2.%{_item}%}-{lootbox.itemweight1.%{_item}%} from {lootbox.totalweight.%{_table}%}
+				delete {lootbox.itemweight1.%{_item}%}
+				delete {lootbox.itemweight2.%{_item}%}
+				remove {_item} from {lootbox.table.%{_table}%::*}
+				give {_item} to {_p}
+				send "&aSuccessfully removed!"
+				removeItemFromTable({_table}, {_p})
+			add 1 to {_loop}
+	open last gui to {_p}
+	
+command /removeitemfromtable <text>:
+	permission: chesttable
+	usage: /removeitemfromtable <table>
+	trigger:
+		removeItemFromTable(arg 1, player)
+		
+function addItemToTable(table: text, item: item, weight: integer):
+	if {lootbox.tables::*} does not contain {_table}:
+		add {_table} to {lootbox.tables::*}
+		set {lootbox.totalweight.%{_table}%} to 0
+	add {_item} to {lootbox.table.%{_table}%::*}
+	add {_weight} to {lootbox.totalweight.%{_table}%}
+	set {lootbox.itemweight1.%{_item}%} to {lootbox.totalweight.%{_table}%}-({_weight})
+	set {lootbox.itemweight2.%{_item}%} to {lootbox.totalweight.%{_table}%}
+
+command /setlootboxchance <text> <number>:
+	permission: chesttable
+	usage: /setlootboxchance <table> <chance>
+	trigger:
+		set {_chance} to arg 2/100
+		if arg 2 is greater than 100:
+			send "&cPlease make it less than 100."
+		else if arg 2 is less than 0.1:
+			send "&cPlease make it greater than 0.1"
+		else:
+			set {lootbox.%arg 1%.chance} to {_chance}
+			send "&aSet loot chance of table ""%arg 1%"" to %arg 2%%%"
+			
+command /additemtotable <text> <integer>:
+	permission: chesttable
+	usage: /additemtotable <table> <weight>
+	trigger:
+		send action bar "&6Added item &c""%player's tool%""&6 to table &c""%arg 1%""&6 with weight &c%arg 2%." to player
+		addItemToTable(arg 1, player's tool, arg 2)
+
+on place of chest:
+	player has permission "chesttable"
+	set display name of block to "&0Chest"
+	if tag "chesttable" of nbt compound of player's tool is set:
+		set {_box} to tag "chesttable" of nbt compound of player's tool
+		make 55 of happy_villager at block with offset vector(0.4, 0.4, 0.4) for player
+		play sound "entity.experience_orb.pickup" with volume 0.5 with pitch 2 at block to the player
+		send action bar "&aYou have placed lootbox with tag ""%{_box}%""." to player
+		loadItemsFromTable({_box}, block)
+
+command /givechesttable <text>:
+	permission: chesttable
+	trigger:
+		set {_e} to chest named "&6Chest Table" with lore "&aTag: ""%arg 1%""."
+		set tag "chesttable" of nbt compound of {_e} to arg 1
+		give {_e} to player
+		
+
+	
+command /regeneratechesttable <text> <integer>:
+	permission: chesttable
+	usage: /regeneratechesttable <table> <seconds> - look at a chest to add
+	trigger:
+		set {regeneratechest::%target block%} to arg 1
+		add target block to {regentable::%arg 1%::*}
+		set {regeneratechestdelayseconds.%target block%} to arg 2
+		set {regeneratechestdelay.%target block%} to now
+		loadItemsFromTable(arg 1, target block)
+		
+on break:
+	if {regeneratechest::%target block%} is set:
+		delete {regentable::%{regeneratechest::%block%}%::%block%}
+		delete {regeneratechest::%block%}
+		delete {regeneratechestdelayseconds.%block%}
+		delete {regeneratechestdelay.%block%}
+
+on right click on chest:
+	if {regeneratechest::%block%} is set:
+		if difference between {regeneratechestdelay.%block%} and now is greater than "%{regeneratechestdelayseconds.%target block%}% seconds" parsed as timespan:
+			loadItemsFromTable({regeneratechest::%target block%}, block)
+			
+every hour:
+	loop {lootbox.tables::*}:
+		loop {regentable::%loop-value%::*}:
+			if block at loop-value-2 is not chest or shulker box:
+				delete {regeneratechestdelayseconds.%loop-value-2%}
+				delete {regeneratechestdelay.%loop-value-2%}
+				delete {regeneratechest::%loop-value-2%}
+				delete {regentable::%loop-value-1%::%loop-value-2%}
+			
+command /opentabletoplayer <text> <player> <integer>:
+	permission: chesttable
+	usage: /opentabletoplayer <table> <player> <rows>
+	trigger:
+		loadItemsFromTableGUI(arg 1, player, arg 3)
+		
+command /opentabletoallplayers <text> <integer>:
+	permission: op
+	usage: /opentabletoplayer <table> <rows>
+	trigger:
+		loop all players:
+			loadItemsFromTableGUI(arg 1, player, arg 2)	
+		
+on tab complete of "givechesttable" or "additemtotable" or "setlootboxchance" or "removeitemfromtable" or "regeneratechesttable" or "opentabletoplayer" or "opentabletoallplayers":
+	set tab completions for position 1 to {lootbox.tables::*}
+		

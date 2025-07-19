@@ -1,0 +1,106 @@
+command /claim [<text>] [<offlineplayer>]:
+	trigger:
+		set {_p} to arg-2
+		if arg-1 is "add":
+			player has permission "*"
+			add player's tool to {claim::%{_p}'s uuid%::*}
+			send "&aAdded tool to player's claims."
+		else if arg 1 is "view":
+			player has permission "*"
+			send {claim::%{_p}'s uuid%::*} to player
+		else if arg-1 is "addinventory":
+			player has permission "*"
+			loop 45 times:
+				set {_n} to loop-value - 1
+				add slot {_n} of player's inventory to {claim::%arg-2's uuid%::*}
+		else if arg-1 isn't set:
+			if {claim::%player's uuid%::*} is set:
+				loop {claim::%player's uuid%::*}:
+					if player can hold loop-value:
+						give loop-value to player
+						remove loop-value from {claim::%player's uuid%::*}
+				send "&aItems have been collected."
+				play sound "entity.experience_orb.pickup" with volume 1 and pitch 2 to player
+				notifyPlayerofClaim(player)
+			else:
+				send "&cNo items to collect!" to player
+				play sound "entity.experience_orb.pickup" with volume 1 and pitch 2 to player
+
+function notifyPlayerofClaim(player: player):
+	loop {claim::%{_player}'s uuid%::*}:
+		loop-value is not air
+		add item amount of loop-value to {_loop}
+	{_loop} is greater than 0
+	send "&7---------------------------------" to {_player}
+	send "&aYou have &c%{_loop}%&a item(s) to collect! <cmd:/claim><ttp:&aClaim your items!>&c&l[CLICK]" to {_player}
+	send "&7---------------------------------" to {_player}
+	play sound "entity.experience_orb.pickup" with volume 1 and pitch 2 to {_player}
+
+
+every 2 minutes:
+	loop all players:
+		notifyPlayerofClaim(loop-player)
+
+on join:
+	wait 50 ticks
+	notifyPlayerofClaim(player)
+
+on join:
+	clear metadata tag "claimPlayer" of player
+
+command /claimclearall:
+	permission: op
+	trigger:
+		clear {claim::*}
+
+
+on tab complete of "/claim":
+	player has permission "*"
+	set tab completions for position 1 to "add" and "addinventory" and "view"
+    
+    
+# IRP INTEGRATION
+
+on inventory open:
+    wait 2 ticks
+    name of player's current inventory is "Player Data"
+    set {_playerhead} to slot 0 of player's current inventory
+    set {_player} to tag "SkullOwner;Name" of nbt compound of {_playerhead}
+    set {_player} to {_player} parsed as offline player
+    set metadata "claimplayer" of player to {_player}
+
+on inventory open:
+    wait 1 tick
+    if name of player's current inventory is "Main Inventory Backup":
+        set slot 47 of player's current inventory to gold block of mending 1 named "&aSet Claimables to Backup" with lore "&cAdds items to /claim of player (removes on click just in case)" with all flags hidden
+        
+on inventory click:
+    name of player's current inventory is "Main Inventory Backup"
+    event-slot is 47
+    event-slot is gold block
+    set event-slot to redstone block named "&cSet Claimables to Backup" with lore "&cDisabled for 2 seconds"
+    set {_gui} to virtual chest inventory with 6 rows
+    # set player's inventory to the claimable thing
+
+    set {_slot} to 0
+    loop 36 times:
+        set slot {_slot} of {_gui} to slot {_slot} of player's current inventory
+        add 1 to {_slot}
+
+    set slot 40 of {_gui} to slot 40 of player's current inventory
+    set slot 39 of {_gui} to slot 41 of player's current inventory
+    set slot 38 of {_gui} to slot 42 of player's current inventory
+    set slot 37 of {_gui} to slot 43 of player's current inventory
+    set slot 36 of {_gui} to slot 44 of player's current inventory
+
+    set {_player} to metadata "claimplayer" of player
+
+    loop 45 times:
+        set {_n} to loop-value - 1
+        add slot {_n} of {_gui} to {claim::%{_player}'s uuid%::*} if slot {_n} of {_gui} is not air
+    
+    wait 1 tick
+    send "&aAdded to claimables of player." if {_player} is set
+    send "&cError: Player not set. Try restoring again." if {_player} is not set
+    wait 39 ticks
+    set event-slot to gold block of mending 1 named "&aSet Claimables to Backup" with lore "&cAdds items to /claim of player (removes on click just in case)" with all flags hidden

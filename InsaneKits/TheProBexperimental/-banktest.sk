@@ -1,0 +1,312 @@
+on load:
+	set {globaltoken} to sunflower of mending named "&bToken" with lore "&5Used to buy items at the shop" with enchants flag hidden
+	set {comptoken} to gold block of mending named "&b&lCompressed Token" with lore "&5Currency" with enchants flag hidden
+	set {crystal} to large amethyst bud of mending 0 named "&5&lCrystal" with hidden enchants flag
+
+on join:
+	log "[+] %player% logged on with %getcoins(player)% eTokens" to "tokens/connections.log"
+
+on disconnect:
+	log "[-] %player% logged off with %getcoins(player)% eTokens" to "tokens/connections.log"
+
+command /etokencirculation:
+	permission: op
+	trigger:
+		loop all offline players:
+			add getcoins(loop-offlineplayer) to {_total}
+		send "&aThere are &e%{_total}% &aeTokens in circulation."
+
+function withdrawTokens(amount: integer, player: player, comp: boolean = false) :: text:
+    if {_comp} is false:
+        if getcoins({_player}) is greater than or equal to {_amount}:
+            if {_player} can hold {_amount} of {globaltoken}:
+                coins({_player}, 0-{_amount})
+                give {_amount} of {globaltoken} to {_player}
+            else:
+                set {_potentialslot} to 0
+                set {_slots} to 36
+                loop {_player}'s inventory:
+                    remove 1 from {_slots}
+                    if loop-slot's name is {globaltoken}'s name:
+                        add 64-(loop-slot's item amount) to {_potentialslot}
+                add {_slots}*64 to {_potentialslot}
+                give {_potentialslot} of {globaltoken} to {_player}
+                coins({_player}, 0-{_potentialslot})            
+                return "&aWithdrew %addCommastoNumber({_potentialslot})% Tokens."
+        else:
+            withdrawTokens(getcoins({_player}), {_player})
+            return "&aWithdrew %addCommastoNumber(getcoins({_player}))% Tokens."
+    else if {_comp} is true:
+        if getcoins({_player}) is greater than or equal to {_amount}*64:
+            if {_player} can hold {_amount} of {comptoken}:
+                coins({_player}, 0-{_amount}*64)
+                give {_amount} of {comptoken} to {_player}
+                return "&aWithdrew %addCommastoNumber({_amount})% Compressed Tokens."
+            else:
+                set {_potentialslot} to 0
+                set {_slots} to 36
+                loop {_player}'s inventory:
+                    remove 1 from {_slots}
+                    if loop-slot's name is {comptoken}'s name:
+                        add 64-(loop-slot's item amount) to {_potentialslot}
+                add {_slots}*64 to {_potentialslot}
+                give {_potentialslot} of {comptoken} to {_player}
+                coins({_player}, 0-({_potentialslot}*64))
+                return "&aWithdrew %addCommastoNumber({_potentialslot})% Compressed Tokens."
+        else:
+            return "&cCould not withdraw %addCommastoNumber({_amount})% Compressed Tokens."
+
+function depositAllTokens(player: player) :: text:
+    set {_token} to 0
+    loop {_player}'s inventory:
+        if loop-slot's name is {globaltoken}'s name:
+            add loop-slot's item amount to {_token}
+            set loop-slot to air
+        else if loop-slot's name is {comptoken}'s name:
+            add loop-slot's item amount*64 to {_token}
+            set loop-slot to air
+    coins({_player}, {_token})
+    return "&aDeposited %addCommastoNumber({_token})% Tokens."
+
+function depositTokens(amount: integer, player: player) :: text:
+    set {_token} to 0
+    loop {_player}'s inventory:
+        if loop-slot's name is {globaltoken}'s name:
+            add loop-slot's item amount to {_token}
+    if {_token} is greater than or equal to {_amount}:
+        remove {_amount} of {globaltoken} from {_player}'s inventory
+        coins({_player}, {_amount})
+        return "&aDeposited %{_amount}% Tokens."
+    else:
+        remove {_token} of {globaltoken} from {_player}'s inventory
+        coins({_player}, {_token})
+        return "&aDeposited %addCommastoNumber({_token})% Tokens."
+
+function addCommastoNumber(n: integer) :: text:
+    set {_n} to "%{_n}%"
+    if {_n} contains "-":
+        set {_negative} to true
+        replace all "-" in {_n} with ""
+    set {_length} to length of {_n}
+    set {_loop} to floor({_length}/3)
+    remove 1 from {_loop} if mod({_length}, 3) is 0
+    set {_distance} to 0
+    set {_n::*} to {_n} split at ""
+    loop {_loop} times:
+        add 3 to {_distance}
+        set {_character} to {_n::%{_length}-{_distance}+1%}
+        set {_n::%{_length}-{_distance}+1%} to ",%{_character}%"
+    set {_return} to ""
+    loop {_n::*}:
+        set {_return} to "%{_return}%%loop-value%"
+    if {_negative} is true:
+        set {_return} to "-%{_return}%"
+    return {_return}
+
+command /bank [<text>] [<integer>]:
+    trigger:
+		send "&c&lThis feature is temporarily disabled"
+		stop
+        if arg 1 is set:
+            if arg 1 is "deposit":
+                if arg 2 < 0:
+                    send "&cYou cannot deposit %addCommastoNumber(arg 2)% tokens."
+                    stop
+                depositTokens(arg 2, player)
+                send "&aDeposited %addCommastoNumber(arg 2)% tokens."
+            else if arg 1 is "withdraw":
+                if arg 2 < 0:
+                    send "&cYou cannot deposit %addCommastoNumber(arg 2)% tokens."
+                    stop
+                withdrawTokens(arg 2, player)
+                send "&aWithdrew %addCommastoNumber(arg 2)% tokens."
+            stop
+        create a new gui with virtual chest inventory with 6 rows named "&6&lBank"
+        set {_token} to {globaltoken}
+        set {_comp} to {comptoken}
+        set {_coins} to addCommastoNumber(getcoins(player))
+        edit last gui:
+            format gui slot 0,1,2,3,5,6,7,8,9,17,18,26,27,35,36,44,45,46,47,48,49,50,51,52,53 with gray stained glass pane named " "
+            format gui slot 4 with sunflower named "&6&lBalance: %{_coins}% Tokens"
+            format gui slot 10 with 1 sunflower named "&6Deposit 1 Token" with lore "&7Balance: %{_coins}% Tokens":
+                depositTokens(1, player)
+                execute player command "/bank"
+            format gui slot 12 with 8 sunflower named "&6Deposit 8 Tokens" with lore "&7Balance: %{_coins}% Tokens":
+                depositTokens(8, player)
+                execute player command "/bank"
+            format gui slot 14 with 16 sunflower named "&6Deposit 16 Tokens" with lore "&7Balance: %{_coins}% Tokens":
+                depositTokens(16, player)
+                execute player command "/bank"
+            format gui slot 16 with 32 sunflower named "&6Deposit 32 Tokens" with lore "&7Balance: %{_coins}% Tokens":
+                depositTokens(32, player)
+                execute player command "/bank"
+            format gui slot 38 with sunflower named "&6Deposit All Tokens"  with lore "&7Balance: %{_coins}% Tokens":
+                depositAllTokens(player)
+                execute player command "/bank"
+            format gui slot 19 with 1 gold nugget named "&6Withdraw 1 Tokens"  with lore "&7Balance: %{_coins}% Tokens":
+                withdrawTokens(1, player)
+                execute player command "/bank"
+            format gui slot 21 with 8 gold nugget named "&6Withdraw 8 Tokens"  with lore "&7Balance: %{_coins}% Tokens":
+                withdrawTokens(8, player)
+                execute player command "/bank"
+            format gui slot 23 with 16 gold nugget named "&6Withdraw 16 Tokens"  with lore "&7Balance: %{_coins}% Tokens":
+                withdrawTokens(16, player)
+                execute player command "/bank"
+            format gui slot 25 with 32 gold nugget named "&6Withdraw 32 Tokens"  with lore "&7Balance: %{_coins}% Tokens":
+                withdrawTokens(32, player)
+                execute player command "/bank"
+            format gui slot 42 with gold nugget named "&6Withdraw All Tokens"  with lore "&7Balance: %{_coins}% Tokens":
+                withdrawTokens(999999, player)
+                execute player command "/bank"
+            format gui slot 28 with 1 gold blocks of mending 1 with all flags hidden named "&6Withdraw 1 Compressed Tokens" with lore "&7Balance: %{_coins}% Tokens":
+                withdrawTokens(1, player, true)
+                execute player command "/bank"
+            format gui slot 30 with 2 gold blocks of mending 1 with all flags hidden named "&6Withdraw 2 Compressed Tokens" with lore "&7Balance: %{_coins}% Tokens":
+                withdrawTokens(2, player, true)
+                execute player command "/bank"
+            format gui slot 32 with 4 gold blocks of mending 1 with all flags hidden named "&6Withdraw 4 Compressed Tokens" with lore "&7Balance: %{_coins}% Tokens":
+                withdrawTokens(4, player, true)
+                execute player command "/bank"
+            format gui slot 34 with 8 gold blocks of mending 1 with all flags hidden named "&6Withdraw 8 Compressed Tokens" with lore "&7Balance: %{_coins}% Tokens":
+                withdrawTokens(8, player, true)
+                execute player command "/bank"
+        open last gui to player
+
+on tab complete of "/bank":
+	set tab completions of position 1 to "deposit","withdraw"
+
+command /etokens <text> <offlineplayer> <integer>:
+	permission: op
+	usage: /etokens <add/remove/set> <player> <number>
+	trigger:
+		set {_p} to arg-2
+		set {_n} to arg-3
+		if arg-1 is "add":
+			set {_i} to getcoins({_p})
+			coins({_p},{_n})
+			set {_l} to getcoins({_p})
+			send "&aAdded %{_n}% tokens to %{_p}%'s balance! &7(Their balance was %{_i}% and is now %{_l}%)"
+		if arg-1 is "remove":
+			set {_i} to getcoins({_p})
+			coins({_p},0-{_n})
+			set {_l} to getcoins({_p})
+			send "&aRemoved %{_n}% tokens from %{_p}%'s balance! &7(Their balance was %{_i}% and is now %{_l}%)"
+		if arg-1 is "set":
+			set {_i} to getcoins({_p})
+			setcoins({_p},{_n})
+			set {_l} to getcoins({_p})
+			send "&aSet %{_p}%'s balance to %{_n}% tokens! &7(Their balance was %{_i}% and is now %{_l}%)"
+
+on tab complete of "/etokens":
+	set tab completions of position 1 to "add","set","remove"
+
+command /compress:
+	cooldown: 5 seconds
+	cooldown message: &cPlease wait %remaining time%!
+	trigger:
+		set {_n} to number of {globaltoken} in player's inventory
+		set {_n} to {_n} / 64
+		set {_n} to floor({_n})
+		remove ({_n} * 64) of {globaltoken} from player's inventory
+		give {_n} of {comptoken} to the player 
+		player.sendActionBar("&aCompressed %({_n} * 64)% tokens!")
+
+
+command /crystal:
+    permission: crystalgui.use
+    trigger:
+        create a gui with virtual chest inventory with 3 rows named "&5&lCrystals"
+        if {crystals::%player's uuid%} is not set:
+            set {crystals::%player's uuid%} to 0
+        set {_crystals} to addCommastoNumber({crystals::%player's uuid%})
+        edit last gui:
+            format gui slot 0,3,4,5,8,9,12,14,17,18,21,22,23,26 with gray stained glass pane named " "
+            format gui slot 1 with amethyst shard named "&5Deposit 1" with lore "&7Crystals: %{_crystals}%":
+                depositCrystals(1, player)
+                execute player command "/crystal"
+            format gui slot 10 with 2 amethyst shard named "&5Deposit 2" with lore "&7Crystals: %{_crystals}%":
+                depositCrystals(2, player)
+                execute player command "/crystal"
+            format gui slot 19 with 4 amethyst shard named "&5Deposit 4" with lore "&7Crystals: %{_crystals}%":
+                depositCrystals(4, player)
+                execute player command "/crystal"
+            format gui slot 2 with 8 amethyst shard named "&5Deposit 8" with lore "&7Crystals: %{_crystals}%":
+                depositCrystals(8, player)
+                execute player command "/crystal"
+            format gui slot 11 with 16 amethyst shard named "&5Deposit 16" with lore "&7Crystals: %{_crystals}%":
+                depositCrystals(17, player)
+                execute player command "/crystal"
+            format gui slot 20 with 32 amethyst shard named "&5Deposit 32" with lore "&7Crystals: %{_crystals}%":
+                depositCrystals(32, player)
+                execute player command "/crystal"
+            format gui slot 13 with amethyst cluster named "&5Crystals: %{_crystals}%" with lore "&5&l[CLICK] - Deposit All":
+                depositAllCrystals(player)
+                execute player command "/crystal"
+            format gui slot 6 with large amethyst bud named "&5Withdraw 1" with lore "&7Crystals: %{_crystals}%":
+                withdrawCrystals(1, player)
+                execute player command "/crystal"
+            format gui slot 15 with 2 large amethyst bud named "&5Withdraw 2" with lore "&7Crystals: %{_crystals}%":
+                withdrawCrystals(2, player)
+                execute player command "/crystal"
+            format gui slot 24 with 4 large amethyst bud named "&5Withdraw 4" with lore "&7Crystals: %{_crystals}%":
+                withdrawCrystals(4, player)
+                execute player command "/crystal"
+            format gui slot 7 with 8 large amethyst bud named "&5Withdraw 8" with lore "&7Crystals: %{_crystals}%":
+                withdrawCrystals(8, player)
+                execute player command "/crystal"
+            format gui slot 16 with 16 large amethyst bud named "&5Withdraw 16" with lore "&7Crystals: %{_crystals}%":
+                withdrawCrystals(16, player)
+                execute player command "/crystal"
+            format gui slot 25 with 32 large amethyst bud named "&5Withdraw 32" with lore "&7Crystals: %{_crystals}%":
+                withdrawCrystals(32, player)
+                execute player command "/crystal"
+        open last gui to player
+
+command /setcrystals [<player>] [<integer>]:
+    permission: op
+    trigger:
+        set {crystals::%arg 1's uuid%} to arg 2
+
+
+function withdrawCrystals(amount: integer, player: player) :: text:
+    if {crystals::%{_player}'s uuid%} is greater than or equal to {_amount}:
+        if {_player} can hold {_amount} of {crystal}:
+            remove {_amount} from {crystals::%{_player}'s uuid%}
+            give {_amount} of {crystal} to {_player}
+        else:
+            set {_potentialslot} to 0
+            set {_slots} to 36
+            loop {_player}'s inventory:
+                remove 1 from {_slots}
+                if loop-slot's name is {crystal}'s name:
+                    add 64-(loop-slot's item amount) to {_potentialslot}
+            add {_slots}*64 to {_potentialslot}
+            give {_potentialslot} of {crystal} to {_player}
+            remove {_potentialslot} from {crystals::%{_player}'s uuid%}  
+            return "&5Withdrew %addCommastoNumber({_potentialslot})% Crystals."
+    else:
+        withdrawCrystals({crystals::%{_player}'s uuid%}, {_player})
+        return "&5Withdrew %addCommastoNumber({crystals::%{_player}'s uuid%})% Crystals."
+
+function depositAllCrystals(player: player) :: text:
+    set {_token} to 0
+    loop {_player}'s inventory:
+        if loop-slot's name is {crystal}'s name:
+            add loop-slot's item amount to {_crystal}
+            set loop-slot to air
+    add {_crystal} to {crystals::%{_player}'s uuid%}
+    return "&5Deposited %addCommastoNumber({_crystal})% Crystals."
+
+function depositCrystals(amount: integer, player: player) :: text:
+    set {_token} to 0
+    loop {_player}'s inventory:
+        if loop-slot's name is {crystal}'s name:
+            add loop-slot's item amount to {_crystal}
+    if {_crystal} is greater than or equal to {_amount}:
+        remove {_amount} of {crystal} from {_player}'s inventory
+        add {_amount} to {crystals::%{_player}'s uuid%}
+        return "&5Deposited %{_amount}% Crystals."
+    else:
+        remove {_crystal} of {crystal} from {_player}'s inventory
+        add {_crystal} to {crystals::%{_player}'s uuid%}
+        return "&5Deposited %addCommastoNumber({_crystal})% Crystals."

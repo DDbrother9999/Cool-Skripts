@@ -1,0 +1,3 @@
+function debug(text: text):
+	loop all players where [input has permission "*"]:
+		send {_text} to loop-player

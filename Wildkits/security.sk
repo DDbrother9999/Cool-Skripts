@@ -1,0 +1,42 @@
+on load:
+	delete {opw::*}
+	add "Proyo9", "Decameter", "MindVoid", "Duurian", "DDbrother", "leonecali", "UnitAspect" and "CaliTheBear7" to {opw::*}
+	
+on join:
+	player has permission "op":
+		{opw::*} does not contain player's name:
+			kick player due to "&cIf you believe this is a mistake, contact Proyo9 or Decameter."
+			log "Unauthorized operator, %player%, has tried joining." to "security.log"
+
+on command "/op":
+	if executor is not console:
+		cancel event
+		log "Operator, %player%, has tried running /op." to "security.log"
+
+on break:
+	player has permission "op":
+		{opw::*} does not contain player's name:
+			cancel event
+			kick player due to "&cIf you believe this is a mistake, contact Proyo9 or Decameter."
+			log "Unauthorized operator, %player%, has tried breaking a block." to "security.log"
+
+on place:
+	player has permission "op":
+		{opw::*} does not contain player's name:
+			cancel event
+			kick player due to "&cIf you believe this is a mistake, contact Proyo9 or Decameter."
+			log "Unauthorized operator, %player%, has tried placing a block." to "security.log"
+
+on drop:
+	player has permission "op":
+		{opw::*} does not contain player's name:
+			cancel event
+			kick player due to "&cIf you believe this is a mistake, contact Proyo9 or Decameter."
+			log "Unauthorized operator, %player%, has tried dropping an item." to "security.log"
+
+on command:
+	player has permission "op":
+		{opw::*} does not contain player's name:
+			cancel event
+			kick player due to "&cIf you believe this is a mistake, contact Proyo9 or Decameter."
+			log "Unauthorized operator, %player%, has tried running a command." to "security.log"

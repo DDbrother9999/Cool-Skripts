@@ -1,0 +1,103 @@
+options:
+	isEnabled: true
+	pages: 9 # pages. Up to 9
+		
+	usePredeterminedRows: false  # Otherwise, uses the function to change the rows and command to.
+	rows: 3 # predetermined. 1 - 5
+		
+	permission: "enderchest.pvs"
+	canAccessAllPages: false # To allow access to a page while this is disabled, the permissions is enderchest.pvs.numberGoesHere
+		
+function ecgetEnabled() :: boolean:
+	return true if {@isEnabled} is true
+	return false
+		
+function ecgetPages() :: integer:
+	return {@pages}
+		
+function ecgetPermission() :: text:
+	return {@permission}
+		
+function ecaccessAllPages() :: boolean:
+	return {@canAccessAllPages}
+
+function ecgetRows(p: offline player) :: integer:
+	if {@usePredeterminedRows} is true:
+		return {@rows}
+	load yaml "plugins/Skript/yamlData/%{_p}'s uuid%/allPages.yml" as "loadedYaml"
+	return yaml value "data.totalRows" of "loadedYaml"
+		
+function ecreturnPages(p: offline player) :: integer:
+	if {@canAccessAllPages} is true:
+		return {@pages}
+	load yaml "plugins/Skript/yamlData/%{_p}'s uuid%/allPages.yml" as "loadedYaml"
+	return yaml value "data.totalPages" of "loadedYaml"	
+
+on load:
+	loop all players:
+		set {_player} to loop-player
+		close loop-player's inventory if name of loop-player's current inventory is "&fEnder Chest "
+		ecSaveAll({_player})
+		createEnderchestInventory({_player})
+
+command /giveenderchestrows <offlineplayer> <integer>:
+	permission: op
+	trigger:
+		execute console command "lp user %arg-1% permission set enderchest.rows.%arg-2%"
+		set {_p} to arg-1
+		{_p} is online
+		close {_p}'s inventory if name of {_p}'s current inventory is "&fEnder Chest "
+		wait 20 ticks
+		ecSaveAll({_p})
+		createEnderchestInventory({_p})
+		send "&a&lGave %{_p}% %arg-2% enderchest rows!"
+
+command /forceupdateenderchest <offlineplayer>:
+	permission: op
+	trigger:
+		set {_p} to arg-1
+		{_p} is online
+		close {_p}'s inventory if name of {_p}'s current inventory is "&fEnder Chest "
+		ecSaveAll({_p})		
+		createEnderchestInventory({_p})
+		send "&a&lForced-update %{_p}%'s enderchest!"
+
+on load:
+	set {ECPVExpander} to eye of ender of mending 1 named "&5&lEC Page Expander" with lore "&b+1 &fEnderchest Pages!","&7(Max of 9)","","&f&nRight Click to Use" with all flags hidden
+	set {ECRowsExpander} to prismarine crystals of mending 1 named "&5&lEC Row Expander" with lore "&b+1 &fEnderchest Rows!","&7(Max of 5)","","&f&nRight Click to Use" with all flags hidden
+
+command /giveecexpander <text>:
+	permission: op
+	trigger:
+		give {EC%arg-1%Expander} to player
+
+on tab complete of "/giveecexpander":
+	set tab completions for position 1 to "PV","Rows"
+
+on right click with prismarine crystals:
+	cancel event
+	player's tool is a prismarine crystal
+	set {_n} to ecgetRows(player)
+	if {_n} is 5:
+		send "&cYou can't upgrade your Enderchest Rows anymore!"
+	else:
+		add 1 to {_n}
+		ecChangeRows(player, {_n})
+		execute console command "forceupdateenderchest %player%"
+		send "&5You've upgraded the number of rows in your enderchest to %{_n}%"
+		remove 1 prismarine crystal from player's tool
+	wait 20 ticks
+
+on right click with eye of ender:
+	cancel event
+	player's tool is a eye of ender
+	set {_n} to ecreturnPages(player)
+	if {_n} is 9:
+		send "&cYou can't upgrade your Enderchest Rows anymore!"
+	else:
+		add 1 to {_n}
+		ecChangePages(player, {_n})
+		execute console command "forceupdateenderchest %player%"
+		send "&5You've upgraded the number of pages in your enderchest to %{_n}%"
+		remove 1 eye of ender from player's tool
+	wait 20 ticks

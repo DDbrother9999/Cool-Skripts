@@ -1,0 +1,74 @@
+on damage of a player:
+  attacker is a player
+
+  if attacker's gamemode is creative:
+    stop
+
+  {actplus.immune.%victim's uuid%} is not 1:
+    {actplus.time.%victim's uuid%} is not set:
+      send action bar "&cYou are now in &ccombat!" to victim
+    set {actplus.time.%victim's uuid%} to 12
+    set {actplus.combatant.%victim's uuid%} to "%attacker%"
+  {actplus.immune.%attacker's uuid%} is not 1:
+    {actplus.time.%attacker's uuid%} is not set:
+      send action bar "&cYou are now in combat!" to attacker
+    set {actplus.time.%attacker's uuid%} to 15
+    set {actplus.combatant.%attacker's uuid%} to "%victim%"
+every 1 second:
+  loop all players where [{actplus.time.%player input's uuid%} exists]:
+    {actplus.time.%loop-player's uuid%} is less than 0.1:
+      send action bar "&aYou are no longer in combat." to loop-player
+      delete {actplus.time.%loop-player's uuid%}
+      delete {actplus.combatant.%loop-player's uuid%}
+    {actplus.time.%loop-player's uuid%} is greater than 0:
+      loop-player is not sprinting:
+        send action bar "&cYou are in combat for %{actplus.time.%loop-player's uuid%}% &cseconds" to loop-player
+        subtract 1 from {actplus.time.%loop-player's uuid%}
+      loop-player is sprinting:
+        send action bar "&cCombat timer frozen while sprinting." to loop-player
+        
+on command:
+  {actplus.time.%player's uuid%} is set
+
+  if command is "sc" or "report" or "staffchat" or "tester" or "bid" or "viewah":
+    stop
+
+  if player does not have the permission "actplus.immune" or "staff.cmds":
+    send "&cYou can't execute commands in combat!" to player
+    cancel event
+    stop
+
+on region enter:
+  if "%event-region%" contains "spawn":
+    delete {actplus.time.%player's uuid%}
+    delete {actplus.combatant.%player's uuid%}
+
+on quit:
+  delete {actplus.combatant.%player's uuid%}
+  {actplus.time.%player's uuid%} exists:
+    delete {actplus.time.%player's uuid%}
+    remove all totems of undying from player's inventory
+    kill player
+    broadcast "&7[&c☠&7] &c%player%&7 logged out while in combat"
+on death of a player:
+  wait 1 tick
+  {actplus.time.%victim's uuid%} exists:
+    set {actplus.time.%victim's uuid%} to 0
+    
+command /actimmune:
+  permission: actplus.immune
+  permission message: &6&l» &4&lError: &cYou don't have permission
+  trigger:
+    {actplus.immune.%player's uuid%} exists:
+      delete {actplus.immune.%player's uuid%}
+      send "&cYou are no longer immune to combat tag." to player
+      stop
+    {actplus.immune.%player's uuid%} is not set:
+      set {actplus.immune.%player's uuid%} to 1
+      send "&aYou are now immune to combat tag." to player
+      delete {actplus.time.%player's uuid%}
+      delete {actplus.combatant.%player's uuid%}
+
+on stop:
+	loop all players:
+		delete {actplus.time.%loop-player's uuid%}

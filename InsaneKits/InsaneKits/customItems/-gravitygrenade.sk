@@ -1,0 +1,38 @@
+on load:
+	set {GravityGrenade} to conduit of sharpness 1 named "&x&5&4&6&9&6&3&lG&x&6&0&7&5&6&c&lr&x&6&b&8&0&7&4&la&x&7&7&8&c&7&d&lv&x&8&3&9&7&8&5&li&x&8&e&a&3&8&e&lt&x&9&a&a&e&9&7&ly &x&a&6&b&a&9&f&lG&x&b&2&c&5&a&8&lr&x&b&d&d&1&b&1&le&x&c&9&d&c&b&9&ln&x&d&5&e&8&c&2&la&x&e&0&f&3&c&a&ld&x&e&c&f&f&d&3&le" with lore "Spawns a gravity grenade that launches nearby enemies for 6 seconds."
+
+on right click:
+	name of player's tool is "&x&5&4&6&9&6&3&lG&x&6&0&7&5&6&c&lr&x&6&b&8&0&7&4&la&x&7&7&8&c&7&d&lv&x&8&3&9&7&8&5&li&x&8&e&a&3&8&e&lt&x&9&a&a&e&9&7&ly &x&a&6&b&a&9&f&lG&x&b&2&c&5&a&8&lr&x&b&d&d&1&b&1&le&x&c&9&d&c&b&9&ln&x&d&5&e&8&c&2&la&x&e&0&f&3&c&a&ld&x&e&c&f&f&d&3&le"
+	if metadata "GravityGrenade;cooldown" of player is greater than 0:
+		send "&c&lYou must wait &e&l%metadata "GravityGrenade;cooldown" of player% &c&lseconds before using this again!" to player
+		stop
+	set metadata "GravityGrenade;cooldown" of player to 20
+	set {_loc} to location of player
+	spawn armor stand at player
+	set {_fb} to last spawned entity
+	make {_fb} invisible
+	set helmet of {_fb} to player's tool
+	set item amount of player's tool to item amount of player's tool-1
+	push {_fb} in direction of player with speed 1
+	push {_fb} up with speed 0.25
+	wait 40 ticks
+	kill {_fb}
+	create fake explosion at {_fb}'s location
+	loop all players:
+		if loop-player is within 6 blocks of {_fb}:
+			apply levitation 2 to loop-player for 10 seconds
+
+on place of conduit:
+	cancel event
+
+every 1 seconds:
+	loop all players:
+		if metadata "GravityGrenade;cooldown" of loop-player is greater than 0:
+			set metadata "GravityGrenade;cooldown" of loop-player to metadata "GravityGrenade;cooldown" of loop-player - 1
+			if metadata "GravityGrenade;cooldown" of loop-player is 0:
+				send "&a&lYou can now use your gravity grenade again!" to loop-player
+
+command /givegravitygrenade:
+	permission: op
+	trigger:
+		give player 1 of {GravityGrenade}

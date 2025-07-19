@@ -1,0 +1,56 @@
+function formatTimespanStandard(time: timespan) :: string: #HH:MM:SS
+
+    set {_returnedTime} to ""
+
+    set {_hours} to hours of {_time}
+    remove "%{_hours}% hours" parsed as timespan from {_time}
+    set {_hours} to "%{_hours}%"
+    if length of {_hours} is 1:
+        set {_hours} to "0%{_hours}%"
+    set {_returnedTime} to "%{_returnedTime}%%{_hours}%:"
+
+    
+    set {_minutes} to minutes of {_time}
+    remove "%{_minutes}% minutes" parsed as timespan from {_time}
+    set {_minutes} to "%{_minutes}%"
+    if length of {_minutes} is 1:
+        set {_minutes} to "0%{_minutes}%"
+    set {_returnedTime} to "%{_returnedTime}%%{_minutes}%:"
+
+    set {_seconds} to seconds of {_time}
+    remove "%{_seconds}% seconds" parsed as timespan from {_time}
+    set {_seconds} to "%{_seconds}%"
+    if length of {_seconds} is 1:
+        set {_seconds} to "0%{_seconds}%"
+    set {_returnedTime} to "%{_returnedTime}%%{_seconds}%"
+    
+    return {_returnedTime}
+
+function formatTimespan(time: timespan) :: string: #xd xh xm xs
+    set {_returnedTime} to ""
+
+    set {_days} to getDays({_time})
+    if {_days} is greater than 0:
+        remove "%{_days}% days" parsed as timespan from {_time}
+        set {_returnedTime} to "%{_returnedTime}%%{_days}%d "
+
+    set {_hours} to hours of {_time}
+    if {_hours} is greater than 0:
+        remove "%{_hours}% hours" parsed as timespan from {_time}
+        set {_returnedTime} to "%{_returnedTime}%%{_hours}%h "
+
+    set {_minutes} to minutes of {_time}
+    if {_minutes} is greater than 0:
+        remove "%{_minutes}% minutes" parsed as timespan from {_time}
+        set {_returnedTime} to "%{_returnedTime}%%{_minutes}%m "
+
+    set {_seconds} to seconds of {_time}
+    if {_seconds} is greater than 0:
+        remove "%{_seconds}% seconds" parsed as timespan from {_time}
+        set {_returnedTime} to "%{_returnedTime}%%{_seconds}%s"
+
+    
+    return {_returnedTime}
+
+local function getDays(time: timespan) :: integer: #needed for default formattimespan
+    return floor(hours of {_time}/24)

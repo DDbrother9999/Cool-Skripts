@@ -1,0 +1,23 @@
+on right click on ender chest:
+    ecgetEnabled() is true
+    cancel event
+    play open animation on event-block
+    set metadata "ecBlock" of player to event-block
+    set metadata "justOpened" of player to true
+    
+on right click:
+    metadata "ecBlock" of player is set
+    if metadata "justOpened" of player is true:
+        clear metadata "justOpened" of player
+        stop
+    play close animation on metadata "ecBlock" of player
+    
+on inventory close:
+    metadata "ecBlock" of player is set
+    name of player's current inventory is "&fEnder Chest "
+    wait 1 tick
+    name of player's current inventory is not "&fEnder Chest "
+    if metadata "justOpened" of player is true:
+        clear metadata "justOpened" of player
+        stop
+    play close animation on metadata "ecBlock" of player

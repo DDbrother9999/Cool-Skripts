@@ -1,0 +1,9 @@
+on right click:
+    if player's tool is brown dye:
+        remove 1 of player's tool from player's inventory
+        loop blocks in radius 5 of player:
+            if loop-block is air:
+                lerp 1 of dust using dustOption(brown, 15) at loop-block ~ vector(0, 1, 0) with extra 0.5
+        loop players in radius 5 of player:
+            if loop-player is not player:
+                apply slowness 4 without particles to loop-player for 3 seconds

@@ -1,0 +1,72 @@
+on join:
+	ecgetEnabled() is true
+	ecChangeRows(player, 3)
+	ecChangePages(player, 1)
+	createEnderchestInventory(player)
+
+on right click on ender chest:
+	ecgetEnabled() is true
+	set metadata "echasOpened" of player to true
+	open metadata "ecPage%metadata "lastPageEC" of player ? 1%" of player to player
+		
+on inventory click:
+	event is not cancelled
+	ecgetEnabled() is true
+	event-inventory is player's current inventory
+	name of player's current inventory is "&fEnder Chest "
+	index of event-slot is between 0 and 8
+	cancel event 
+
+	event-slot is not pink stained glass pane or gray stained glass pane or red stained glass pane
+	if difference between metadata "ecDelay" of player and now is less than 0.2 seconds:
+		stop
+
+		
+	set metadata "ecDelay" of player to now
+	open metadata "ecPage%index of event-slot + 1%" of player to player
+	set metadata "lastPageEC" of player to index of event-slot + 1
+	play sound "block.ender_chest.open" with volume 0.4 and pitch 1.2 to player
+
+function createEnderchestInventory(p: player):
+	set {_loop} to 1
+	loop 9 times:
+		clear metadata "ecPage%{_loop}%" of {_p}
+		add 1 to {_loop}
+	set {_page} to 1
+	loop ecreturnPages({_p}) times:
+		set {_inventory} to ecgetBaseInventory({_page}, {_p})
+		set metadata "ecPage%{_page}%" of {_p} to {_inventory}
+
+		set {_itemIndex} to 0
+		loop ecgetRows({_p})*9 times:
+			set slot {_itemIndex}+9 of {_inventory} to ecgetItem({_p}, {_page}, {_itemIndex})
+			add 1 to {_itemIndex}
+		add 1 to {_page}
+
+function ecgetBaseInventory(currentPage: integer = 1, p: player) :: inventory:
+	set {_inventory} to virtual chest inventory with ecgetRows({_p})+1 rows named "&fEnder Chest "
+	#open {_inventory} to all players
+
+	set slot (integers between 0 and 8) of {_inventory} to gray stained glass pane named "&f"
+
+	set {_loop} to 0
+	loop ecreturnPages({_p}) times:
+		if {_loop}+1 is {_currentPage}:
+			set slot {_loop} of {_inventory} to pink stained glass pane named "&ePage %{_currentPage}%"
+		else:
+			if {_p} has permission "%ecgetPermission()%.%{_loop}+1%":
+				set slot {_loop} of {_inventory} to purple stained glass pane named "&aPage %{_loop}+1%"
+			else:
+				set slot {_loop} of {_inventory} to red stained glass pane named "&fPage %{_loop}+1%" with lore "&cNo access!"
+		add 1 to {_loop}
+
+
+	return {_inventory}
+
+function echasOpened(p: player) :: boolean:
+	if metadata "hasOpened" of {_p} is true:
+		clear metadata "hasOpened" of {_p}
+		return true
+	return false
+
+		

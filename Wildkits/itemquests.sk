@@ -1,0 +1,15 @@
+command /heavenlyshard:
+	trigger:
+		set metadata tag "hsquest" of player to chest inventory with 1 rows named "&d&lHeavenly Shard Quest"
+		set {_num} to 0
+		loop 9 times:
+			set slot {_num} of metadata tag "hsquest" of player to gray stained glass pane named " " with lore "&r&7These are subject to change."
+			add 1 to {_num}
+		set slot 1 of metadata tag "hsquest" of player to skeleton skull named "&cVictims" with lore "&r&fKill 5 different staff members.%nl%%nl%&aProgress: &e%size of {hsquest::%player's uuid%::victims::*}%/5"
+		set slot 4 of metadata tag "hsquest" of player to small amethyst bud named "&dShard Fragments" with lore "&r&fCollect 10 shard fragments.%nl%%nl%&aProgress: &e%{hsquest::%player's uuid%::frags}%/10%nl%%nl%&r&8Click to deposit fragments"
+		open (metadata tag "hsquest" of player) to player
+
+on inventory click:
+	if event-inventory = (metadata tag "hsquest" of player):
+		cancel event
+		#if index of event-slot is 0:

@@ -1,0 +1,204 @@
+on load:
+	set {parath::*} to "(" and ")"
+	loop {ActiveBoosters::*}:
+		set {_p} to ("%loop-value%" parsed as player)
+		set {_uuid} to uuid of {_p}
+		set bossbar visibility of {bar::%{_uuid}%} to false
+		remove {_p} from {bar::%{_uuid}%}
+		delete {booster::duration::%{_uuid}%}
+		delete {booster::%{_uuid}%}
+		delete {bar::%{_uuid}%}
+		remove "%loop-value%" from {ActiveBoosters::*}
+	clear {ActiveBoosters::*}
+	clear {booster::*}
+	clear {booster::duration::*}
+
+on right click:
+	if tag "booster" of nbt compound of player's off hand tool is set:
+		cancel event
+		send "&aPlease move this to your main hand to use."
+
+on right click:
+	tag "booster" of nbt compound of player's tool is set
+	cancel event
+	if {booster::duration::%player's uuid%} is not set:
+		set {_mult} to tag "boostAmount" of nbt compound of player's tool
+		set {_duration} to tag "boostMinutes" of nbt compound of player's tool
+		set item amount of player's tool to item amount of player's tool-1
+		giveBooster(player,{_mult},{_duration})
+		send "&aYou have successfully used a token booster %{_mult}%x, %formatTime({_duration})%" to player
+		stop
+	else:
+		send "&cYou already have a booster active!"
+
+on right click:
+	tag "boostGlobal" of nbt compound of player's tool is set
+	cancel event
+	if {globalbooster::duration} is not set:
+		set {_mult} to tag "boostAmount" of nbt compound of player's tool
+		set {_duration} to tag "boostMinutes" of nbt compound of player's tool
+		set item amount of player's tool to item amount of player's tool-1
+		giveGlobalBooster({_mult},{_duration})
+		send "&aYou have successfully used a global token booster %{_mult}%x, %formatTime({_duration})%" to player
+		stop
+	else:
+		send "&cThere is already a global booster active!"
+
+command /setbooster <text> <number> <number>:
+	permission: booster.set
+	trigger:
+		if arg-1 is "global":
+			giveGlobalBooster(arg-2,arg-3)
+			send "&aYou have successfully set a global booster %arg-2%x, %formatTime({arg-3})%" to player
+			stop
+		else if arg-1 is "player":
+			giveBooster(player,arg-2,arg-3)
+			send "&aYou have successfully set a player booster %arg-2%x, %formatTime({arg-3})%" to player
+			stop
+		else:
+			send "&cPlease specify either global or player."
+			stop
+
+on tab complete of "/setbooster":
+	set tab completions for position 1 to "global" and "player"
+	set tab completions for position 2 to 1 and 1.5 and 2 and 2.5 and 3
+	set tab completions for position 3 to 3 and 6 and 12 and 24
+
+command /givebooster <number> <number> [<offlineplayer>]:
+	permission: booster.give
+	trigger:
+		if arg-3 is set:
+			if arg-1 or arg-2 is less than or equal to 1:
+				send "&cno"
+				stop
+			if arg-1 or arg-2 is greater than 100000:
+				send "&cno"
+				stop
+			give formatBooster(arg-1,arg-2) to "%arg-3%" parsed as player
+			send "&aYou have successfully given %arg-3% a booster %arg-1%x, %formatTime({arg-2})%" to player
+			stop
+		if arg-1 or arg-2 is less than or equal to 1:
+			send "&cno"
+			stop
+		if arg-1 or arg-2 is greater than 100000:
+			send "&cno"
+			stop
+		give formatBooster(arg-1,arg-2) to player
+		
+on tab complete of "/givebooster" or "/giveglobalbooster":
+	set tab completions for position 1 to 1 and 1.5 and 2 and 2.5 and 3
+	set tab completions for position 2 to 3 and 6 and 12 and 24
+
+command /clearboosters <player>:
+	permission: op
+	trigger:
+		set {_p} to arg-1
+		set {_uuid} to the uuid of {_p}
+		delete {booster::duration::%{_uuid}%}
+		delete {booster::%{_uuid}%}
+		delete {bar::%{_uuid}%}
+
+every second:
+	loop {ActiveBoosters::*}:
+		stop if ("%loop-value%" parsed as player) is offline
+		set {_p} to ("%loop-value%" parsed as player)
+		set {_uuid} to uuid of {_p}
+		set {_n} to {booster::duration::%{_uuid}%}/{booster::segment::%{_uuid}%}
+		set {_n} to {_n}*10
+		if {booster::duration::%{_uuid}%} is less than or equal to 0:
+			send "&c&lYour booster has expired!" to {_p}
+			set bossbar visibility of {bar::%{_uuid}%} to false
+			remove {_p} from {bar::%{_uuid}%}
+			delete {booster::duration::%{_uuid}%}
+			delete {booster::%{_uuid}%}
+			delete {bar::%{_uuid}%}
+			remove "%loop-value%" from {ActiveBoosters::*}
+			stop
+		add {_p} to {bar::%{_p}'s uuid%}
+		subtract 1 from {booster::duration::%{_uuid}%}
+		set bossbar progress of {bar::%{_uuid}%} to {_n}
+		set bossbar title of {bar::%{_uuid}%} to "&c&lBOOSTER &e%{booster::%{_uuid}%}%x &7%{parath::1}%%formatTime({booster::duration::%{_uuid}%})%&7%{parath::2}%"
+
+every second:
+	{globalbooster::duration} is set
+	set {_n} to {globalbooster::duration}/{globalbooster::segment}
+	set {_n} to {_n}*10
+	if {globalbooster::duration} is less than or equal to 0:
+		broadcast "&c&lThe Global Booster has expired!"
+		set bossbar visibility of {globalbooster::bar} to false
+		delete {globalbooster::duration}
+		delete {globalbooster::barsegment}
+		delete {globalbooster::bar}
+		stop
+	subtract 1 from {globalbooster::duration}
+	set bossbar progress of {globalbooster::bar} to {_n}
+	set bossbar title of {globalbooster::bar} to "&c&lSERVER BOOSTER &e%{globalbooster}%x &7%{parath::1}%%formatTime({globalbooster::duration})%&7%{parath::2}%"
+	set bossbar visibility of {globalbooster::bar} to true
+	loop all players:
+		add "%loop-value%" parsed as player to {globalbooster::bar}
+
+function giveBooster(player: player, mult: number, duration: number):
+	#debug("%{_player}% %{_mult}% %{_duration}%")
+	add "%{_player}%" to {ActiveBoosters::*}
+	set {bar::%{_player}'s uuid%} to boss bar named "%{_player}%bar" with title "&c&lBOOSTER &e%{booster::%{_uuid}%}%x &7%{parath::1}%%formatTime({booster::duration::%{_uuid}%})%&7%{parath::2}%" with color blue with progress 100
+	add {_player} to {bar::%{_player}'s uuid%}
+	set bossbar visibility of {bar::%{_player}'s uuid%} to true
+	set bar style of {bar::%{_player}'s uuid%} to segmented 10
+	
+	set {booster::%{_player}'s uuid%} to "%{_mult}%" parsed as number
+	set {booster::duration::%{_player}'s uuid%} to "%{_duration}%" parsed as number
+	set {booster::segment::%{_player}'s uuid%} to {booster::duration::%{_player}'s uuid%}/10
+
+function giveGlobalBooster(mult: number, duration: number):
+	set {globalbooster::bar} to boss bar named "globalbar" with title "&c&lSERVER BOOSTER &e%{globalbooster}%x &7%{parath::1}%%formatTime({globalbooster::duration})%&7%{parath::2}%" with color blue with progress 100
+	set bossbar visibility of {globalbooster::bar} to true
+	set bar style of {globalbooster::bar} to segmented 10
+	set {globalbooster} to "%{_mult}%" parsed as number
+	set {globalbooster::duration} to "%{_duration}%" parsed as number
+	set {globalbooster::segment} to {globalbooster::duration}/10
+
+function formatBooster(mult: number, duration: number) :: item:
+	set {_item} to 1 nether star of mending with all flags hidden
+	set tag "booster" of nbt compound of {_item} to true
+	set tag "boostAmount" of nbt compound of {_item} to {_mult}
+	set tag "boostMinutes" of nbt compound of {_item} to {_duration}
+	set name of {_item} to "&d%{_mult}%x Booster"
+	set line 1 of lore of {_item} to "&7| &fMultiplier: &e%{_mult}%x"
+	set line 2 of lore of {_item} to "&7| &fDuration: &e%formatTime({_duration})%"
+	return {_item}
+
+function formatTime(s: number) :: text:
+	set {_r} to "%{_s}% Seconds" parsed as timespan
+	set {_r} to formatTimespan({_r})
+	return "&r&a%{_r}%"
+
+#on join:
+#	remove player from {ActiveBoosters::*}
+#	set bossbar visibility of {bar::%player's uuid%} to false
+#	remove player from {bar::%player's uuid%}
+#	delete {booster::duration::%player's uuid%}
+#	delete {booster::%player's uuid%}
+#	delete {bar::%player's uuid%}
+
+function formatGlobalBooster(mult: number, duration: number) :: item:
+	set {_item} to 1 nether star of mending with all flags hidden
+	set tag "booster" of nbt compound of {_item} to true
+	set tag "boostAmount" of nbt compound of {_item} to {_mult}
+	set tag "boostMinutes" of nbt compound of {_item} to {_duration}
+	set tag "boostGlobal" of nbt compound of {_item} to true
+	set name of {_item} to "&d%{_mult}%x Global Booster"
+	set line 1 of lore of {_item} to "&7| &fMultiplier: &e%{_mult}%x"
+	set line 2 of lore of {_item} to "&7| &fDuration: &e%formatTime({_duration})%"
+	set line 3 of lore of {_item} to "&7| &eGlobal Booster"
+	return {_item}
+
+command /giveglobalbooster <number> <number>:
+	permission: booster.give
+	trigger:
+		if arg-1 or arg-2 is less than or equal to 1:
+			send "&cno"
+			stop
+		if arg-1 or arg-2 is greater than 100000:
+			send "&cno"
+			stop
+		give formatGlobalBooster(arg-1,arg-2) to player

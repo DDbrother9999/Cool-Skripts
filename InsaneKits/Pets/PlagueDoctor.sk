@@ -1,0 +1,40 @@
+function PlagueDoctorPet(p: text):
+	# Summons a hoard of zombies that attack players and have a 10% chance of giving poison to victim
+	set {_p} to {_p} parsed as player
+	stop if checkPetCD({_p}'s tool, {_p}) is false
+	set {_level} to int tag "Pet;level" of nbt compound of {_p}'s tool
+	set {_maxZombies} to {_level}
+	set {_currentZombies} to metadata "Pet%int tag "Pet;id" of nbt compound of {_p}'s tool%;spawned" of {_p} ? 0
+	set {Pets::PlagueDoctor::%{_p}'s uuid%::lastUsed} to unix timestamp of now
+	set {_chance} to 10
+	loop {_maxZombies} - {_currentZombies} times:
+		spawnZombie({_p}, {_chance}, ({_p}'s tool))
+
+function spawnZombie(p: player, chance: number, t: item):
+	set metadata "Pet%int tag "Pet;id" of nbt compound of {_p}'s tool%;spawned" of {_p} to metadata "Pet%int tag "Pet;id" of nbt compound of {_p}'s tool%;spawned" of {_p} + 1
+	summon zombie at {_p}'s location
+	set {_l} to last spawned entity
+	set display name of {_l} to "&b&l%{_p}%'s Hoard Zombie"
+	set metadata "PlagueDoctor;Owner" of {_l} to {_p}
+	set metadata "PlagueDoctor;Chance" of {_l} to {_chance}
+	wait 4 minutes
+	set metadata "Pet%int tag "Pet;id" of nbt compound of {_t}%;spawned" of {_p} to metadata "Pet%int tag "Pet;id" of nbt compound of {_t}%;spawned" of {_p} - 1
+	kill {_l}
+
+on target:
+	event-entity is zombie
+	target's name is metadata "PlagueDoctor;Owner" of event-entity
+	cancel event
+
+on damage:
+	attacker is a zombie
+	if attacker's name is metadata "PlagueDoctor;Owner" of victim:
+		cancel event
+		stop
+	chance of (metadata "PlagueDoctor;Chance" of attacker)%:
+		set victim's health to victim's health - 1
+		set victim's saturation to victim's saturation - 1
+		apply poison 2 without particles to victim for 5 seconds
+
+on death of zombie:
+	clear drops

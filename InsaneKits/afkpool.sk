@@ -1,0 +1,50 @@
+on region enter:
+    if "%region%" contains "afkzone1":
+        send action bar "&a&LAFK &8» &fYou are now AFK!" to player
+        send "&A&LAFK &8» &fYou are now AFK! Please make sure your inventory has enough space for keys!" to player
+        set metadata tag "afk" of player to 1
+        set {afk} to 1
+        add the name of the player to {afkPlayers::*}
+
+on region exit:
+    if "%region%" contains "afkzone1":
+        send action bar "&a&LAFK &8» &cYou are no longer AFK!" to player
+        set metadata tag "afk" of player to 0
+        set {afk} to 0
+        remove the name of the player from {afkPlayers::*}
+        
+every 1 second:
+    loop {afkPlayers::*}:
+        set {_p} to loop-value parsed as player
+        set metadata tag "afk" of {_p} to (metadata tag "afk" of {_p} + 1)
+        set {afk} to metadata tag "afk" of {_p}
+        progresstitle({afk}, {_p})
+        if metadata tag "afk" of {_p} is greater than or equal to 1800:
+            rewardAFK({_p})
+
+
+function rewardAFK(p: player):
+    send "&cYou will recieve a reward!" to {_p}
+    send action bar "&a&LAFK &0» You have been rewarded for being AFK!" to {_p}
+    execute console command "/etokens add %{_p}% 30"
+    set metadata tag "afk" of {_p} to 1
+    chance of 100%:
+        execute console command "crate key give %{_p}% afk 1"
+    chance of 10%:
+        execute console command "crate key give %{_p}% rareafk 1"
+
+function progresstitle(afk: integer, p: player) :: string:
+    set {percent} to round ((metadata tag "afk" of {_p}) / 1800 * 100)
+    set {_progress} to "&a"
+    loop 10 times:
+        if {_afk}/180 is between loop-number - 1 and loop-number:
+            set {_progress} to "%{_progress}%&7"
+        set {_progress} to "%{_progress}%|"
+    send title "&7[%{_progress}%&7]" with subtitle "&c%{percent}%%%" to {_p} for 1 second with fadein 0 seconds and fade out 1 second
+    return {_progress}
+    
+on skript stop:
+	delete {afkPlayers::*}
+	delete {progresstitle::*}
+    
+# Made by SackboyLBP3/Please DM if there are any issues

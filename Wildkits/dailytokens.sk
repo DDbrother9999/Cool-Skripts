@@ -1,0 +1,12 @@
+command /daily:
+    cooldown: 24 hours
+    cooldown message: &cPlease wait %remaining time% to use this!
+    trigger:
+        add 20 to {eTokens::%player's uuid%}
+        execute console command "excellentcrates key give %player% daily_key 1"
+        if player has permission "group.bronze":
+            execute console command "excellentcrates key give %player% daily_bronze 1"
+        send "&aYou claimed &b20&a eTokens!"
+        play sound "block.note_block.pling" at volume 1 at pitch 2 to player
+        broadcast "&6%player% &7just got their daily reward! &e(/daily)"
+	

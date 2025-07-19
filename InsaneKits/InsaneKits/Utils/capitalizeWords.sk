@@ -1,0 +1,19 @@
+function capitalizeFirst(text: texts) :: texts:
+
+  loop {_text::*}:
+    set {_first-char} to first character of loop-value
+    set {_remaining} to last (length of loop-value - 1) characters of loop-value
+
+    set {_output::%loop-index%} to "%{_first-char} in upper case%%{_remaining}%"
+
+  return {_output::*}
+
+# An extra just in-case you need it. # TheProB: can't you just use a 'case' ?
+function capitalizeSentence(text: text, delimiter: text = " ") :: texts:
+
+  loop {_text::*}:
+
+    set {_words::*} to split loop-value by {_delimiter}
+    set {_output::%loop-index%} to join capitalizeFirst({_words::*}) by {_delimiter}
+
+  return {_output::*}

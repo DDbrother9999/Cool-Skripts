@@ -1,0 +1,146 @@
+function loadSupplyDrops():
+# PRE-DEFINED CRATES
+	# BRONZE CRATE
+	remove "bronze" from {lootbox::tables::*}
+	add "bronze" to {lootbox::tables::*}
+	delete {lootbox::totalweight::bronze}
+	clear {lootbox::table::bronze::*}
+	addItemToTable("bronze", {globaltoken}, 40, 5, 10)
+	addItemToTable("bronze", {comptoken}, 1)
+	set {_sharpness} to 1 enchanted book of sharpness 4
+	addItemToTable("bronze", {_sharpness}, 5)
+	set {_protection} to 1 enchanted book of protection 3
+	addItemToTable("bronze", {_protection}, 5)
+	set {_efficiency} to 1 enchanted book of efficiency 4
+	addItemToTable("bronze", {_efficiency}, 5)
+	set {_fireaspect} to 1 enchanted book of fire aspect 2
+	addItemToTable("bronze", {_fireaspect}, 4)
+	set {_knockback} to 1 enchanted book of knockback 1
+	addItemToTable("bronze", {_knockback}, 5)
+	set {_looting} to 1 enchanted book of looting 2
+	addItemToTable("bronze", {_looting}, 5)
+
+	set {_sword} to 1 netherite sword of knockback 1 and looting 2 and sharpness 3 and sweeping edge 2 and unbreaking 2 named "&x&c&d&7&f&3&2B&x&c&5&8&4&4&0r&x&b&e&8&a&4&eo&x&b&6&8&f&5&bn&x&a&e&9&4&6&9z&x&a&7&9&a&7&7e &x&9&f&9&f&8&5S&x&9&7&a&4&9&3w&x&8&f&a&9&a&0o&x&8&8&a&f&a&er&x&8&0&b&4&b&cd"
+	addItemToTable("bronze", {_sword}, 3)
+	set {_pickaxe} to 1 netherite pickaxe of efficiency 4 and fortune 2 and unbreaking 2 named "&x&c&d&7&f&3&2B&x&c&7&8&3&3&er&x&c&0&8&8&4&9o&x&b&a&8&c&5&5n&x&b&3&9&1&6&0z&x&a&d&9&5&6&ce &x&a&7&9&a&7&7P&x&a&0&9&e&8&3i&x&9&a&a&2&8&ec&x&9&3&a&7&9&ak&x&8&d&a&b&a&5a&x&8&6&b&0&b&1x&x&8&0&b&4&b&ce"
+	addItemToTable("bronze", {_pickaxe}, 3)
+	set {_axe} to 1 netherite axe of efficiency 4 and fortune 2 and unbreaking 2 and sharpness 3 named "&x&c&d&7&f&3&2B&x&c&3&8&6&4&3r&x&b&a&8&c&5&5o&x&b&0&9&3&6&6n&x&a&7&9&a&7&7z&x&9&d&a&0&8&8e &x&9&3&a&7&9&aA&x&8&a&a&d&a&bx&x&8&0&b&4&b&ce"
+	addItemToTable("bronze", {_axe}, 3)
+	set {_helmet} to 1 netherite helmet of protection 3 and respiration 2 and thorns 2 and unbreaking 2 named "&x&c&d&7&f&3&2B&x&c&6&8&4&3&fr&x&b&f&8&9&4&bo&x&b&8&8&d&5&8n&x&b&1&9&2&6&4z&x&a&a&9&7&7&1e &x&a&3&9&c&7&dH&x&9&c&a&1&8&ae&x&9&5&a&6&9&6l&x&8&e&a&a&a&3m&x&8&7&a&f&a&fe&x&8&0&b&4&b&ct"
+	addItemToTable("bronze", {_helmet}, 3)
+	set {_chestplate} to 1 netherite chestplate of protection 3 and thorns 2 and unbreaking 2 named "&x&c&d&7&f&3&2B&x&c&8&8&3&3&br&x&c&3&8&6&4&4o&x&b&e&8&a&4&en&x&b&8&8&d&5&7z&x&b&3&9&1&6&0e &x&a&e&9&4&6&9C&x&a&9&9&8&7&2h&x&a&4&9&b&7&ce&x&9&f&9&f&8&5s&x&9&a&a&2&8&et&x&9&5&a&6&9&7p&x&8&f&a&9&a&0l&x&8&a&a&d&a&aa&x&8&5&b&0&b&3t&x&8&0&b&4&b&ce"
+	addItemToTable("bronze", {_chestplate}, 3)
+	set {_leggings} to 1 netherite leggings of protection 3 and thorns 2 and unbreaking 2 named "&x&c&d&7&f&3&2B&x&c&7&8&3&3&dr&x&c&1&8&7&4&7o&x&b&b&8&b&5&2n&x&b&5&8&f&5&cz&x&a&f&9&3&6&7e &x&a&9&9&7&7&2L&x&a&4&9&c&7&ce&x&9&e&a&0&8&7g&x&9&8&a&4&9&2g&x&9&2&a&8&9&ci&x&8&c&a&c&a&7n&x&8&6&b&0&b&1g&x&8&0&b&4&b&cs"
+	addItemToTable("bronze", {_leggings}, 3)
+	set {_boots} to 1 netherite boots of protection 3 and thorns 2 and unbreaking 2 named "&x&c&d&7&f&3&2B&x&c&5&8&4&4&0r&x&b&e&8&a&4&eo&x&b&6&8&f&5&bn&x&a&e&9&4&6&9z&x&a&7&9&a&7&7e &x&9&f&9&f&8&5B&x&9&7&a&4&9&3o&x&8&f&a&9&a&0o&x&8&8&a&f&a&et&x&8&0&b&4&b&cs"
+	addItemToTable("bronze", {_boots}, 3)
+	addItemToTable("bronze", respawn anchor, 20, 1, 8)
+	addItemToTable("bronze", glowstone, 23, 1, 16)
+	addItemToTable("bronze", obsidian, 20, 1, 20)
+	addItemToTable("bronze", end crystal, 10, 1, 10)
+	set {supplydropbroadcast::bronze} to "&x&9&d&6&1&2&6[&x&c&d&7&f&3&2&lSUPPLY DROP&x&9&d&6&1&2&6] &x&c&d&7&f&3&2A &x&c&d&7&f&3&2B&x&c&5&8&4&4&0r&x&b&e&8&a&4&eo&x&b&6&8&f&5&bn&x&a&e&9&4&6&9z&x&a&7&9&a&7&7e &x&9&f&9&f&8&5C&x&9&7&a&4&9&3r&x&8&f&a&9&a&0a&x&8&8&a&f&a&et&x&8&0&b&4&b&ce &x&c&d&7&f&3&2has dropped!"
+	set {lootbox::bronze::chance} to 0.40 # 40%
+	# SILVER
+	remove "silver" from {lootbox::tables::*}
+	add "silver" to {lootbox::tables::*}
+	delete {lootbox::totalweight::silver}
+	clear {lootbox::table::silver::*}
+	addItemToTable("silver", {globaltoken}, 35, 10, 24)
+	addItemToTable("silver", {comptoken}, 3)
+	set {_sharpness} to 1 enchanted book of sharpness 5
+	addItemToTable("silver", {_sharpness}, 3)
+	set {_protection} to 1 enchanted book of protection 3
+	addItemToTable("silver", {_protection}, 7)
+	set {_efficiency} to 1 enchanted book of efficiency 4
+	addItemToTable("silver", {_efficiency}, 7)
+	set {_fireaspect} to 1 enchanted book of fire aspect 2
+	addItemToTable("silver", {_fireaspect}, 4)
+	set {_knockback} to 1 enchanted book of knockback 1
+	addItemToTable("silver", {_knockback}, 4)
+	set {_looting} to 1 enchanted book of looting 3
+	addItemToTable("silver", {_looting}, 7)
+	set {_sword} to 1 netherite sword of knockback 2 and looting 2 and mending 1 and sharpness 4 and sweeping edge 2 and unbreaking 3 named "&x&c&0&c&0&c&0S&x&b&a&b&f&c&0i&x&b&3&b&e&b&fl&x&a&d&b&c&b&fv&x&a&6&b&b&b&ee&x&a&0&b&a&b&er &x&9&a&b&9&b&eS&x&9&3&b&8&b&dw&x&8&d&b&6&b&do&x&8&6&b&5&b&cr&x&8&0&b&4&b&cd"
+	addItemToTable("silver", {_sword}, 3)
+	set {_pickaxe} to 1 netherite pickaxe of efficiency 4 and fortune 2 and mending 1 and unbreaking 3 named "&x&c&0&c&0&c&0S&x&b&b&b&f&c&0i&x&b&5&b&e&b&fl&x&b&0&b&d&b&fv&x&a&b&b&c&b&fe&x&a&5&b&b&b&er &x&a&0&b&a&b&eP&x&9&b&b&9&b&ei&x&9&5&b&8&b&dc&x&9&0&b&7&b&dk&x&8&b&b&6&b&da&x&8&5&b&5&b&cx&x&8&0&b&4&b&ce"
+	addItemToTable("silver", {_pickaxe}, 3)
+	set {_axe} to 1 netherite axe of efficiency 4 and fortune 2 and mending 1 and unbreaking 3 and sharpness 4 named "&x&c&0&c&0&c&0S&x&b&8&b&f&c&0i&x&b&0&b&d&b&fl&x&a&8&b&c&b&fv&x&a&0&b&a&b&ee&x&9&8&b&9&b&er &x&9&0&b&7&b&dA&x&8&8&b&6&b&dx&x&8&0&b&4&b&ce"
+	addItemToTable("silver", {_axe}, 4)
+	set {_helmet} to 1 netherite helmet of mending 1 and protection 3 and respiration 2 and thorns 2 and unbreaking 3 named "&x&c&0&c&0&c&0S&x&b&a&b&f&c&0i&x&b&4&b&e&b&fl&x&a&f&b&d&b&fv&x&a&9&b&c&b&fe&x&a&3&b&b&b&er &x&9&d&b&9&b&eH&x&9&7&b&8&b&de&x&9&1&b&7&b&dl&x&8&c&b&6&b&dm&x&8&6&b&5&b&ce&x&8&0&b&4&b&ct"
+	addItemToTable("silver", {_helmet}, 4)
+	set {_chestplate} to 1 netherite chestplate of mending 1 and protection 3 and thorns 2 and unbreaking 3 named "&x&c&0&c&0&c&0S&x&b&b&b&f&c&0i&x&b&7&b&e&b&fl&x&b&2&b&d&b&fv&x&a&e&b&d&b&fe&x&a&9&b&c&b&fr &x&a&5&b&b&b&eC&x&a&0&b&a&b&eh&x&9&b&b&9&b&ee&x&9&7&b&8&b&ds&x&9&2&b&7&b&dp&x&8&e&b&7&b&dl&x&8&9&b&6&b&da&x&8&5&b&5&b&ct&x&8&0&b&4&b&ce"
+	addItemToTable("silver", {_chestplate}, 4)
+	set {_leggings} to 1 netherite leggings of mending 1 and protection 3 and thorns 2 and unbreaking 3 named "&x&c&0&c&0&c&0S&x&b&b&b&f&c&0i&x&b&6&b&e&b&fl&x&b&1&b&d&b&fv&x&a&c&b&c&b&fe&x&a&7&b&b&b&er &x&a&2&b&a&b&eL&x&9&e&b&a&b&ee&x&9&9&b&9&b&eg&x&9&4&b&8&b&dg&x&8&f&b&7&b&di&x&8&a&b&6&b&dn&x&8&5&b&5&b&cg&x&8&0&b&4&b&cs"
+	addItemToTable("silver", {_leggings}, 4)
+	set {_boots} to 1 netherite boots of mending 1 and protection 3 and thorns 2 and unbreaking 3 named "&x&c&0&c&0&c&0S&x&b&a&b&f&c&0i&x&b&3&b&e&b&fl&x&a&d&b&c&b&fv&x&a&6&b&b&b&ee&x&a&0&b&a&b&er &x&9&a&b&9&b&eB&x&9&3&b&8&b&do&x&8&d&b&6&b&do&x&8&6&b&5&b&ct&x&8&0&b&4&b&cs"
+	addItemToTable("silver", {_boots}, 4)
+	addItemToTable("silver", respawn anchor, 10, 6, 24)
+	addItemToTable("silver", glowstone, 15, 7, 32)
+	addItemToTable("silver", obsidian, 15, 7, 32)
+	addItemToTable("silver", end crystal, 10, 5, 16)
+	set {supplydropbroadcast::silver} to "&x&9&8&9&8&9&8[&x&c&0&c&0&c&0&lSUPPLY DROP&x&9&8&9&8&9&8] &x&c&0&c&0&c&0A &x&c&0&c&0&c&0S&x&b&a&b&f&c&0i&x&b&3&b&e&b&fl&x&a&d&b&c&b&fv&x&a&6&b&b&b&ee&x&a&0&b&a&b&er &x&9&a&b&9&b&eC&x&9&3&b&8&b&dr&x&8&d&b&6&b&da&x&8&6&b&5&b&ct&x&8&0&b&4&b&ce&x&c&0&c&0&c&0 has dropped!"
+	set {lootbox::silver::chance} to 0.50 # 50%
+	# GOLD
+	remove "gold" from {lootbox::tables::*}
+	add "gold" to {lootbox::tables::*}
+	delete {lootbox::totalweight::gold}
+	clear {lootbox::table::gold::*}
+	addItemToTable("gold", {globaltoken}, 40, 20, 40)
+	addItemToTable("gold", {comptoken}, 7, 1, 3)
+	set {_sharpness} to 1 enchanted book of sharpness 5
+	addItemToTable("gold", {_sharpness}, 4)
+	set {_protection} to 1 enchanted book of protection 4
+	addItemToTable("gold", {_protection}, 3)
+	set {_efficiency} to 1 enchanted book of efficiency 5
+	addItemToTable("gold", {_efficiency}, 3)
+	set {_fireaspect} to 1 enchanted book of fire aspect 2
+	addItemToTable("gold", {_fireaspect}, 3)
+	set {_sword} to 1 netherite sword of knockback 1 and looting 2 and mending 1 and sharpness 5 and sweeping edge 2 and unbreaking 3 named "&x&f&f&d&7&0&0G&x&e&f&d&3&1&8o&x&d&f&c&e&2&fl&x&c&f&c&a&4&7d &x&c&0&c&6&5&eS&x&b&0&c&1&7&6w&x&a&0&b&d&8&do&x&9&0&b&8&a&5r&x&8&0&b&4&b&cd"
+	addItemToTable("gold", {_sword}, 6)
+	set {_pickaxe} to 1 netherite pickaxe of efficiency 5 and fortune 3 and mending 1 and unbreaking 3 named "&x&f&f&d&7&0&0G&x&f&2&d&4&1&3o&x&e&6&d&0&2&6l&x&d&9&c&d&3&8d &x&c&c&c&9&4&bP&x&c&0&c&6&5&ei&x&b&3&c&2&7&1c&x&a&6&b&f&8&4k&x&9&9&b&b&9&6a&x&8&d&b&8&a&9x&x&8&0&b&4&b&ce"
+	addItemToTable("gold", {_pickaxe}, 6)
+	set {_axe} to 1 netherite axe of efficiency 5 and fortune 3 and mending 1 and unbreaking 3 and fire aspect 1 and sharpness 5 named "&x&f&f&d&7&0&0G&x&e&a&d&1&1&fo&x&d&5&c&b&3&fl&x&c&0&c&6&5&ed &x&a&a&c&0&7&dA&x&9&5&b&a&9&dx&x&8&0&b&4&b&ce"
+	addItemToTable("gold", {_axe}, 7)
+	set {_helmet} to 1 netherite helmet of mending 1 and protection 4 and respiration 3 and unbreaking 3 named "&x&f&f&d&7&0&0G&x&f&1&d&3&1&5o&x&e&3&c&f&2&al&x&d&5&c&b&3&fd &x&c&7&c&7&5&4H&x&b&8&c&4&6&8e&x&a&a&c&0&7&dl&x&9&c&b&c&9&2m&x&8&e&b&8&a&7e&x&8&0&b&4&b&ct"
+	addItemToTable("gold", {_helmet}, 7)
+	set {_chestplate} to 1 netherite chestplate of mending 1 and protection 4 and unbreaking 3 named "&x&f&f&d&7&0&0G&x&f&5&d&4&0&eo&x&e&b&d&2&1&dl&x&e&2&c&f&2&bd &x&d&8&c&c&3&aC&x&c&e&c&a&4&8h&x&c&4&c&7&5&7e&x&b&b&c&4&6&5s&x&b&1&c&1&7&4t&x&a&7&b&f&8&2p&x&9&d&b&c&9&1l&x&9&4&b&9&9&fa&x&8&a&b&7&a&et&x&8&0&b&4&b&ce"
+	addItemToTable("gold", {_chestplate}, 7)
+	set {_leggings} to 1 netherite leggings of mending 1 and blast protection 4 and unbreaking 3 named "&x&f&f&d&7&0&0G&x&f&3&d&4&1&1o&x&e&8&d&1&2&2l&x&d&c&c&d&3&3d &x&d&1&c&a&4&4L&x&c&5&c&7&5&5e&x&b&a&c&4&6&7g&x&a&e&c&1&7&8g&x&a&3&b&e&8&9i&x&9&7&b&a&9&an&x&8&c&b&7&a&bg&x&8&0&b&4&b&cs"
+	addItemToTable("gold", {_leggings}, 7)
+	set {_boots} to 1 netherite boots of mending 1 and protection 4 and unbreaking 3 named "&x&f&f&d&7&0&0G&x&e&f&d&3&1&8o&x&d&f&c&e&2&fl&x&c&f&c&a&4&7d &x&c&0&c&6&5&eB&x&b&0&c&1&7&6o&x&a&0&b&d&8&do&x&9&0&b&8&a&5t&x&8&0&b&4&b&cs"
+	addItemToTable("gold", {_boots}, 7)
+	addItemToTable("gold", respawn anchor, 20, 10, 32)
+	addItemToTable("gold", glowstone, 25, 12, 40)
+	addItemToTable("gold", obsidian, 25, 7, 35)
+	addItemToTable("gold", end crystal, 20, 5, 20)
+	set {supplydropbroadcast::gold} to "&x&c&b&a&b&0&0[&x&f&f&d&7&0&0&lSUPPLY DROP&x&c&b&a&b&0&0] &x&f&f&d&7&0&0A &x&f&f&d&7&0&0G&x&e&f&d&3&1&8o&x&d&f&c&e&2&fl&x&c&f&c&a&4&7d &x&c&0&c&6&5&eC&x&b&0&c&1&7&6r&x&a&0&b&d&8&da&x&9&0&b&8&a&5t&x&8&0&b&4&b&ce&x&f&f&d&7&0&0 has dropped!"
+	set {lootbox::gold::chance} to 0.60 # 60%
+	# PLATINUM
+	remove "platinum" from {lootbox::tables::*}
+	add "platinum" to {lootbox::tables::*}
+	delete {lootbox::totalweight::platinum}
+	clear {lootbox::table::platinum::*}
+	addItemToTable("platinum", {globaltoken}, 15, 32, 64)
+	addItemToTable("platinum", {comptoken}, 15, 1, 3)
+	set {_sword} to 1 netherite sword of knockback 1 and looting 3 and mending 1 and sharpness 5 and sweeping edge 3 and unbreaking 3 named "&x&e&5&e&4&e&2P&x&d&d&e&0&d&fl&x&d&4&d&c&d&ca&x&c&c&d&8&d&9t&x&c&3&d&4&d&5i&x&b&b&d&0&d&2n&x&b&3&c&c&c&fu&x&a&a&c&8&c&cm &x&a&2&c&4&c&9S&x&9&9&c&0&c&6w&x&9&1&b&c&c&2o&x&8&8&b&8&b&fr&x&8&0&b&4&b&cd"
+	addItemToTable("platinum", {_sword}, 11)
+	set {_pickaxe} to 1 netherite pickaxe of efficiency 6 and fortune 4 and mending 1 and unbreaking 3 named "&x&e&5&e&4&e&2P&x&d&e&e&1&d&fl&x&d&7&d&d&d&da&x&c&f&d&a&d&at&x&c&8&d&6&d&7i&x&c&1&d&3&d&4n&x&b&a&c&f&d&2u&x&b&3&c&c&c&fm &x&a&b&c&9&c&cP&x&a&4&c&5&c&ai&x&9&d&c&2&c&7c&x&9&6&b&e&c&4k&x&8&e&b&b&c&1a&x&8&7&b&7&b&fx&x&8&0&b&4&b&ce"
+	addItemToTable("platinum", {_pickaxe}, 11)
+	set {_axe} to 1 netherite axe of efficiency 6 and fortune 3 and mending 1 and unbreaking 3 and fire aspect 2 and sharpness 5 named "&x&e&5&e&4&e&2P&x&d&b&d&f&d&el&x&d&1&d&a&d&aa&x&c&7&d&6&d&7t&x&b&d&d&1&d&3i&x&b&3&c&c&c&fn&x&a&8&c&7&c&bu&x&9&e&c&2&c&7m &x&9&4&b&e&c&4A&x&8&a&b&9&c&0x&x&8&0&b&4&b&ce"
+	addItemToTable("platinum", {_axe}, 11)
+	set {_helmet} to 1 netherite helmet of mending 1 and protection 4 and respiration 3 and unbreaking 3 named "&x&e&5&e&4&e&2P&x&d&d&e&0&d&fl&x&d&5&d&d&d&ca&x&c&e&d&9&d&9t&x&c&6&d&5&d&6i&x&b&e&d&2&d&3n&x&b&6&c&e&d&0u&x&a&f&c&a&c&em &x&a&7&c&6&c&bH&x&9&f&c&3&c&8e&x&9&7&b&f&c&5l&x&9&0&b&b&c&2m&x&8&8&b&8&b&fe&x&8&0&b&4&b&ct"
+	addItemToTable("platinum", {_helmet}, 13)
+	set {_chestplate} to 1 netherite chestplate of mending 1 and protection 4 and unbreaking 3 named "&x&e&5&e&4&e&2P&x&d&f&e&1&e&0l&x&d&9&d&e&d&ea&x&d&3&d&c&d&bt&x&c&d&d&9&d&9i&x&c&7&d&6&d&7n&x&c&1&d&3&d&5u&x&b&b&d&0&d&2m &x&b&5&c&d&d&0C&x&b&0&c&b&c&eh&x&a&a&c&8&c&ce&x&a&4&c&5&c&9s&x&9&e&c&2&c&7t&x&9&8&b&f&c&5p&x&9&2&b&c&c&3l&x&8&c&b&a&c&0a&x&8&6&b&7&b&et&x&8&0&b&4&b&ce"
+	addItemToTable("platinum", {_chestplate}, 13)
+	set {_leggings} to 1 netherite leggings of mending 1 and protection 4 and blast protection 4 and unbreaking 3 named "&x&e&5&e&4&e&2P&x&d&e&e&1&d&fl&x&d&8&d&e&d&da&x&d&1&d&a&d&at&x&c&a&d&7&d&8i&x&c&3&d&4&d&5n&x&b&d&d&1&d&3u&x&b&6&c&e&d&0m &x&a&f&c&a&c&eL&x&a&8&c&7&c&be&x&a&2&c&4&c&9g&x&9&b&c&1&c&6g&x&9&4&b&e&c&4i&x&8&d&b&a&c&1n&x&8&7&b&7&b&fg&x&8&0&b&4&b&cs"
+	addItemToTable("platinum", {_leggings}, 15)
+	set {_boots} to 1 netherite boots of mending 1 and protection 4 and unbreaking 3 named "&x&e&5&e&4&e&2P&x&d&d&e&0&d&fl&x&d&4&d&c&d&ca&x&c&c&d&8&d&9t&x&c&3&d&4&d&5i&x&b&b&d&0&d&2n&x&b&3&c&c&c&fu&x&a&a&c&8&c&cm &x&a&2&c&4&c&9B&x&9&9&c&0&c&6o&x&9&1&b&c&c&2o&x&8&8&b&8&b&ft&x&8&0&b&4&b&cs"
+	addItemToTable("platinum", {_boots}, 13)
+	set {_key} to tripwire hook named "&b&lKey All Key"
+	set tag "PublicBukkitValues;excellentcrates:crate_key.id" of nbt compound of {_key} to "keyall"
+	addItemToTable("platinum", {_key}, 5)
+	addItemToTable("platinum", respawn anchor, 20, 6, 64)
+	addItemToTable("platinum", glowstone, 25, 7, 64)
+	addItemToTable("platinum", obsidian, 25, 7, 64)
+	addItemToTable("platinum", end crystal, 20, 5, 64)
+	set {supplydropbroadcast::platinum} to "&x&8&0&b&4&b&c[&x&e&5&e&4&e&2&lSUPPLY DROP&x&8&0&b&4&b&c] &x&e&5&e&4&e&2A &x&e&5&e&4&e&2P&x&d&d&e&0&d&fl&x&d&4&d&c&d&ca&x&c&c&d&8&d&9t&x&c&3&d&4&d&5i&x&b&b&d&0&d&2n&x&b&3&c&c&c&fu&x&a&a&c&8&c&cm &x&a&2&c&4&c&9C&x&9&9&c&0&c&6r&x&9&1&b&c&c&2a&x&8&8&b&8&b&ft&x&8&0&b&4&b&ce&x&e&5&e&4&e&2 has dropped!"
+	set {lootbox::platinum::chance} to 0.70 # 75%

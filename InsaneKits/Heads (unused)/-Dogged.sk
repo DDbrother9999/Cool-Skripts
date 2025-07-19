@@ -1,0 +1,18 @@
+on sneak toggle:
+	player is not sneaking
+	string tag "GameValues;head" of nbt compound of player's helmet is "Dogged"
+	if {-dogged::%player's uuid%} is not set:
+		set {_1} to true
+	else:
+		if difference between now and {-dogged::%player's uuid%} is greater than 10 seconds:
+			set {_1} to true
+		else:
+			play sound "entity.villager.no" to player
+			send "&cEffect on Cooldown!"
+	if {_1} is true:
+		set player's helmet to updateHead(player's helmet)
+		set {_v} to vector between player's location and location of targeted player
+		push player {_v} with speed 4
+		set {-dogged::%player's uuid%} to now
+		send "&aUsed your Dogged Head Special Effect!"
+		play sound "entity.enderman.teleport" to player

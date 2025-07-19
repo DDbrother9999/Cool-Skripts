@@ -1,0 +1,2 @@
+on break of ore:
+	addprogressquest(player,"Daily","Miner I")

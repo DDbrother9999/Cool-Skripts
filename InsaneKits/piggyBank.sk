@@ -1,0 +1,175 @@
+import:
+    org.bukkit.event.player.PlayerAttemptPickupItemEvent as pickupAttempt
+    org.bukkit.Material as material
+
+on load:
+    set {piggybank::max::1} to 10
+    set {piggybank::max::cost::1} to 25
+    set {piggybank::max::2} to 50
+    set {piggybank::max::cost::2} to 100
+    set {piggybank::max::3} to 100
+    set {piggybank::max::cost::3} to 250
+    set {piggybank::max::4} to 250
+    set {piggybank::max::cost::4} to 500
+    set {piggybank::max::5} to 500
+    set {piggybank::maxstorage} to 5
+    set {piggybank::death::1} to 100
+    set {piggybank::death::cost::1} to 250
+    set {piggybank::death::2} to 75
+    set {piggybank::death::cost::2} to 1000
+    set {piggybank::death::3} to 50
+    set {piggybank::maxdeath} to 3
+    set {piggybankItemTag} to "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvZDc3Y2JkMjVlZGY0MzNlODYwNDZmZWU2NzFkZDk1MWViODRiNTE0ZDllYWQ5NDI5MDkyZTk3NDljZGE4MzZhOSJ9fX0="
+    
+    set {PiggyBankItem} to skull of "Decameter" parsed as offline player
+    set {_nbt::*} to compound list tag "SkullOwner;Properties;textures" of nbt compound of {PiggyBankItem}
+    set tag "Value" of {_nbt::1} to {piggybankItemTag}
+    set compound list tag "SkullOwner;Properties;textures" of nbt compound of {PiggyBankItem} to {_nbt::*}
+
+
+command /setpiggybankitem:
+    permission: op
+    trigger:
+        set {PiggyBankItem} to player's tool
+
+command /piggybank:
+    trigger:
+        if player is in combat:
+            send "&cYou can't do this while combat tagged."
+            stop
+        if player does not have permission "piggybank.use":
+            set {_name} to string tag "Pet;name" of nbt compound of player's tool
+            if {_name} is not "Pig":
+                send "&cYou don't have permission for this! Talk the pig in spawn or buy bronze rank to use this."
+                stop
+        set {_maxvalue} to {piggybank::%player's uuid%::max} ? 1
+        set {_max} to {piggybank::max::%{_maxvalue}%}
+        set {_nextmax} to {piggybank::max::%{_maxvalue}+1%}
+        set {_nextmaxcost} to {piggybank::max::cost::%{_maxvalue}%}
+        set {_deathvalue} to {piggybank::%player's uuid%::death} ? 1
+        set {_death} to {piggybank::death::%{_deathvalue}%}
+        set {_nextdeath} to {piggybank::death::%{_deathvalue}+1%}
+        set {_nextdeathcost} to {piggybank::death::cost::%{_deathvalue}%}
+        set {_depositStatus} to {piggybank::%player's uuid%::toggledeposit} ? true
+        set {_gui} to chest inventory with 3 rows named "&d&lPiggy Bank"
+        set slots (integers between 0 and 27) of {_gui} to gray stained glass pane
+        set slot 11 of {_gui} to sunflower named "&e&lMax Storage %roman numeral of {_maxvalue}%" with lore "&eIncrease the maximum storage of","&eyour piggy bank!","","&fCurrent: &a%{_max}% tokens","&fNext Upgrade: &a%{_nextmax}% tokens","&fCost: &e%{_nextmaxcost}% tokens","","&f&nLeft Click to Upgrade!"
+
+        set slot 13 of {_gui} to {PiggyBankItem} named "&e&lPiggy Bank" with lore "&6Store tokens automatically when in the arena,","&6redeem them when in a safe-zone!","","&fBalance: &e%{piggybank::%player's uuid%::bal} ? 0% tokens","&fMax: &a%{_max}% tokens","&fDeath Reduction: &c%{_death}%%% loss","","&f&nLeft Click to Redeem!"
+
+        set slot 15 of {_gui} to wither skeleton skull named "&c&lDeath Reduction %roman numeral of {_deathvalue}%" with lore "&4When you die with tokens in your piggy bank,","&4a percentage will be reducted!","","&fCurrent: &c%{_death}%%% loss","&fNext Upgrade: &c%{_nextdeath}%%% loss","&fCost: &e%{piggybank::death::cost::%{piggybank::%player's uuid%::death} ? 1%}% tokens","","&f&nLeft Click to Upgrade!"
+
+        if {_depositStatus} is true:
+            set slot 22 of {_gui} to dispenser named "&a&lAutomatic Deposit" with lore "&aAutomatically deposit your piggy bank when entering spawn","","&a&lENABLED","","&f&nLeft Click to Toggle"
+        else if {_depositStatus} is false:
+            set slot 22 of {_gui} to dispenser named "&c&lAutomatic Deposit" with lore "&cAutomatically deposit your piggy bank when entering spawn","","&c&lDISABLED","","&f&nLeft Click to Toggle"
+
+        if {_maxvalue} is greater than or equal to 5:
+            set slot 11 of {_gui} to sunflower named "&e&lMax Storage" with lore "&eIncrease the maximum storage of","&eyour piggy bank!","","&fCurrent: &a%{_max}% tokens","","&2&lFULLY UPGRADED"
+        if {_deathvalue} is greater than or equal to 3:
+            set slot 15 of {_gui} to wither skeleton skull named "&c&lDeath Reduction" with lore "&4When you die with tokens in your piggy bank,","&4a percentage will be reducted!","","&fCurrent: &c%{_death}%%% loss","","&2&lFULLY UPGRADED"
+        open {_gui} to player
+
+on pickupAttempt:
+    set {_item} to Event.getItem()
+    set {_itemStack} to {_item}.getItemStack()
+    set {_player} to Event.getPlayer()
+    {piggybank::%{_player}'s uuid%::toggledeposit} ? false is true
+    "%{_itemStack}.getType()%" is "SUNFLOWER"
+    set {_amount} to {_itemStack}.getAmount()
+    set {_max} to {piggybank::max::%{piggybank::%{_player}'s uuid%::max}%} ? 10
+    set {_bal} to {piggybank::%{_player}'s uuid%::bal} ? 0
+
+    # debug("Bal %{_bal}% : Max %{_max}% : Amount %{_amount}%")
+
+    if {_bal} is greater than or equal to {_max}:
+        # debug("Bal >= max")
+        stop
+        
+    cancel event
+    
+    set {_remaining} to {_max}-{_bal}
+    #broadcast "Remaining %{_remaining}%"
+
+    if {_amount}+{_bal} > {_max}:
+        #broadcast "Inst1 : %{_remaining}%"
+        #send "true"
+        {_itemStack}.setAmount({_amount} - {_remaining})
+        add {_remaining} to {piggybank::%{_player}'s uuid%::bal}
+    else:
+        #broadcast "Inst2 : %{_amount}%"
+        {_item}.remove()
+        add {_amount} to {piggybank::%{_player}'s uuid%::bal}
+
+command /resetpiggybank:
+    permission: op
+    trigger:
+        send "&c&lReset all PiggyBanks &7(Needs a skript reload to function correctly after a reset!)"
+        delete {piggybank::*}
+        send "&c&lReloading Skript"
+        execute console command "sk reload piggyBank.sk"
+
+local function depositCoins(p: player):
+    set {_val} to {piggybank::%{_p}'s uuid%::bal}
+    {_val} is greater than 0
+    add {_val} to {_p}'s balance
+    set {piggybank::%{_p}'s uuid%::bal} to 0
+    send action bar "&aThe coins from your piggy bank have been deposited! (/piggybank)" to {_p}
+
+local function removeCoins(p: player, int: integer):
+    setCoins({_p}, getCoins({_p})-{_int})
+
+local function getCoins(p: player) :: integer:
+    return {piggybank::%{_p}'s uuid%::bal}
+
+local function setCoins(p: player, int: integer):
+    set {piggybank::%{_p}'s uuid%::bal} to {_int}
+
+on death:
+    set {_death} to {piggybank::death::%{piggybank::%victim's uuid%::death}%} ? 100
+    removeCoins(victim, round(getCoins(victim)*({_death}/100)))
+    depositCoins(victim)
+
+on inventory click:
+    name of player's current inventory is "&d&lPiggy Bank"
+    if player is in combat: #starlight ur skript sucks
+        cancel event
+        close player's inventory
+        stop
+    if event-slot is 11:
+        set {_max} to {piggybank::%player's uuid%::max} ? 1
+        {piggybank::maxstorage} is greater than or equal to {_max} + 1
+        if player's balance is greater than or equal to {piggybank::max::cost::%{_max}%}:
+            remove {piggybank::max::cost::%{_max}%} from player's balance
+            set {piggybank::%player's uuid%::max} to {_max} + 1 
+            play sound "block.note_block.pling" with volume 1 and pitch 2 to player
+            send action bar "&aUpgraded!" to player
+        else:
+            play sound "block.note_block.bass" with volume 1 and pitch 0.8 to player
+            send action bar "&cYou do not have enough coins in your bank to purchase this!" to player
+    if event-slot is 13:
+        depositCoins(player)
+        play sound "entity.experience_orb.pickup" with volume 1 and pitch 2 to player if getCoins(player) is greater than 0
+    if event-slot is 15:
+        set {_death} to {piggybank::%player's uuid%::death} ? 1
+        {piggybank::maxdeath} is greater than or equal to {_death} + 1
+        if player's balance is greater than or equal to {piggybank::death::cost::%{_death}%}:
+            remove {piggybank::death::cost::%{_death}%} from player's balance
+            set {piggybank::%player's uuid%::death} to {_death} + 1 
+            play sound "block.note_block.pling" with volume 1 and pitch 2 to player
+            send action bar "&aUpgraded!" to player
+        else:
+            play sound "block.note_block.bass" with volume 1 and pitch 0.8 to player
+            send action bar "&cYou do not have enough coins in your bank to purchase this!" to player
+    if event-slot is 22:
+        "%event-clicktype%" contains "left"
+        set {_current} to {piggybank::%player's uuid%::toggledeposit} ? true
+        set {_current} to not {_current}
+        set {piggybank::%player's uuid%::toggledeposit} to {_current}
+        play sound "block.dispenser.fail" with volume 1 and pitch 2 to player
+    execute player command "piggybank"
+
+on region enter:
+    "%event-region%" is "spawn in world world"
+    {piggybank::%player's uuid%::toggledeposit} ? true is true
+    depositCoins(player)

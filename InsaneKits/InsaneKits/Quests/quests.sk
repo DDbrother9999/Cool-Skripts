@@ -1,0 +1,109 @@
+command /resetdailyquests:
+	permission: op
+	trigger:
+		resetQuests("Daily",5)
+
+command /resetweeklyquests:
+	permission: op
+	trigger:
+		resetQuests("Weekly",9)
+
+command /resetmonthlyquests:
+	permission: op
+	trigger:
+		resetQuests("Monthly",5)
+		
+command /quests:
+	trigger:
+		set {_gui} to chest inventory with 3 rows named "&9Quests"
+		set slot (integers between 0 and 27) of {_gui} to gray stained glass pane named ""
+		set slot 11 of {_gui} to green concrete named "&aDaily Quests"
+		set slot 13 of {_gui} to yellow concrete named "&eWeekly Quests"
+		set slot 15 of {_gui} to red concrete named "&cMonthly Quests"
+		open {_gui} to player
+
+on inventory click:
+	if name of event-inventory is "&9Quests":
+		cancel event
+		event-slot is not gray stained glass pane
+		if event-slot is 11:
+			execute player command "dailyquests"
+		if event-slot is 13:
+			execute player command "weeklyquests"
+		if event-slot is 15:
+			execute player command "monthlyquests"
+
+on inventory click:
+	if name of event-inventory contains "Quests":
+		cancel event
+		event-slot is not gray stained glass pane
+		event-slot is 4
+		event-item is arrow named "&cReturn"
+		execute player command "quests"
+
+command /dailyquests:
+	trigger:
+		set {_p} to player
+		set {_gui} to chest inventory with 3 rows named "&aDaily Quests"
+		set slot (integers between 0 and 27) of {_gui} to gray stained glass pane named ""
+		set slot 4 of {_gui} to arrow named "&cReturn"
+		set {_i} to 10
+		loop {ActiveDailyQuests::*}:
+			continue if {_i} is 18
+			set slot {_i} of {_gui} to formatquestitem({_p},"Daily","%loop-value%")
+			set {_i} to {_i} + 2
+		if player has permission "quests.extradaily":
+			set slot 22 of {_gui} to formatquestitem(player,"Daily","%{ActiveDailyQuests::5}%")
+		else:
+			set slot 22 of {_gui} to red concrete of mending 1 named "&4&lLOCKED" with lore "&eBuy a rank at &b/buy &eto unlock!" with all flags hidden
+		open {_gui} to player
+
+command /weeklyquests:
+	trigger:
+		set {_p} to player
+		set {_gui} to chest inventory with 3 rows named "&eWeekly Quests"
+		set slot (integers between 0 and 27) of {_gui} to gray stained glass pane named ""
+		set slot 4 of {_gui} to arrow named "&cReturn"
+		set {_i} to 10
+		loop {ActiveWeeklyQuests::*}:
+			continue if {_i} is 17
+			set slot {_i} of {_gui} to formatquestitem({_p},"Weekly","%loop-value%")
+			set {_i} to {_i} + 1
+		if player has permission "quests.extraweekly":
+			set slot 21 of {_gui} to formatquestitem(player,"Weekly","%{ActiveWeeklyQuests::8}%")
+			set slot 23 of {_gui} to formatquestitem(player,"Weekly","%{ActiveWeeklyQuests::9}%")
+		else:
+			set slot 21 of {_gui} to red concrete of mending 1 named "&4&lLOCKED" with lore "&eBuy a rank at &b/buy &eto unlock!" with all flags hidden
+			set slot 23 of {_gui} to red concrete of mending 1 named "&4&lLOCKED" with lore "&eBuy a rank at &b/buy &eto unlock!" with all flags hidden
+		open {_gui} to player
+
+command /monthlyquests:
+	trigger:
+		set {_p} to player
+		set {_gui} to chest inventory with 3 rows named "&cMonthly Quests"
+		set slot (integers between 0 and 27) of {_gui} to gray stained glass pane named ""
+		set slot 4 of {_gui} to arrow named "&cReturn"
+		set {_i} to 10
+		loop {ActiveMonthlyQuests::*}:
+			continue if {_i} is 18
+			set slot {_i} of {_gui} to formatquestitem({_p},"Monthly","%loop-value%")
+			set {_i} to {_i} + 2
+		set slot 22 of {_gui} to formatquestitem(player,"Monthly","%{ActiveMonthlyQuests::5}%")
+		open {_gui} to player
+
+command /completequests <player> <text>:
+	permission: op
+	trigger:
+		loop {ActiveDailyQuests::*}:
+			if loop-value is arg-2:
+				set {_type} to "Daily"
+		loop {ActiveWeeklyQuests::*}:
+			if loop-value is arg-2:
+				set {_type} to "Weekly"
+		loop {ActiveMonthlyQuests::*}:
+			if loop-value is arg-2:
+				set {_type} to "Montly"
+		completequest(arg-1,{_type},arg-2)
+
+on tab complete of "/completequests":
+	set tab completions of position 2 to {ActiveDailyQuests::*} and {ActiveWeeklyQuests::*} and {ActiveMonthlyQuests::*}

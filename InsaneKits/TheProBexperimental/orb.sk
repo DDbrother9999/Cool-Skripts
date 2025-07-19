@@ -1,0 +1,102 @@
+on right click with white dye:
+	player is in region "boxs3"
+	if difference between metadata "snowglobecooldown" of player and now is less than 60 seconds:
+		player's gamemode is survival
+		send action bar "&9Please wait before using this item again!" to player
+		stop
+	set metadata "snowglobecooldown" of player to now
+	if "%nbt compound of player's tool%" contains "snowglobe":
+		remove 1 of player's tool from player's tool
+		set {_true} to true
+	else if "%nbt compound of player's off hand tool%" contains "snowglobe":
+		set {_true} to true
+		remove 1 of player's off hand tool from player's off hand tool
+	if {_true} is true:
+		set {_x} to floor(player's x coordinate)
+		set {_y} to floor(player's y coordinate)
+		set {_z} to floor(player's z coordinate)
+		set {_loc} to location({_x}, {_y}, {_z}, world "world")
+		loop blocks in radius 5 of {_loc}:
+			loop-block is in region "boxs3"
+			if distance between {_loc} and loop-block is greater than or equal to 4:
+				add loop-block to {_dropblock::*} if loop-block's y coordinate is greater than {_loc}'s y coordinate+2
+				add 1 to {_amountofdropblock}
+				set {_originalblock::%loop-block%} to loop-block's type
+				set {_originalblock::%loop-block%} to air if "%loop-block's type%" contains "snow" or "glass"
+				set loop-block to light blue stained glass if "%loop-block's type%" does not contain "glass" or "snow"
+				add loop-block to {_blocks::*}
+			else if loop-block's y coordinate is less than {_loc}'s y coordinate:
+				set {_originalblock::%loop-block%} to loop-block's type
+				set {_originalblock::%loop-block%} to air if "%loop-block's type%" contains "snow" or "glass"
+				set loop-block to snow block
+				set {specialblock::%loop-block%} to "no drops"
+				add loop-block to {_blocks::*}
+			else:
+				set {_originalblock::%loop-block%} to loop-block's type
+				set {_originalblock::%loop-block%} to air if "%loop-block's type%" contains "snow" or "glass"
+				add loop-block to {_blocks::*}
+				set loop-block to air
+				set {specialblock::%loop-block%} to "no drops"
+		teleport player to location({_x}, {_y}+6, {_z})
+		loop 600 times:
+			wait 1 tick
+			add 1 to {_ticks}
+			loop 16 times:
+				set {_randint} to random integer between 1 and {_amountofdropblock}
+				{_dropblock::%{_randint}%} is not air
+				set {_randomx} to random number between -0.2 and 0.2
+				set {_randomy} to random number between -0.2 and 0.2
+				set {_randomz} to random number between -0.2 and 0.2
+				set {_loc2} to block below {_dropblock::%{_randint}%} if block below {_dropblock::%{_randint}%} is air
+				if {_loc2} is not set:
+					set {_loc2} to block 2 blocks below {_dropblock::%{_randint}%} if block 2 blocks below {_dropblock::%{_randint}%} is air 
+				set {_loc2} to location({_loc2}'s x coordinate+{_randomx}, {_loc2}'s y coordinate, {_loc2}'s z coordinate+{_randomz}, world "world")
+				spawn 1 snowball at {_loc2}
+				delete {_loc2}
+				set metadata "specialsnowball" of last spawned snowball to true
+			stop loop if {_ticks} is greater than or equal to 400
+		loop {_blocks::*}:
+			set loop-value to {_originalblock::%loop-value%}
+			delete {specialblock::%loop-value%}
+
+on break:
+	if {specialblock::%event-block%} is "no drops":
+		cancel drops
+
+on damage:
+	damage cause is projectile
+	metadata "specialsnowball" of projectile is true
+	set victim's health to victim's health - 0.25
+	damage victim by 0.05
+
+on shoot:
+	projectile is snowball
+	while projectile is alive:
+		wait 5 ticks
+	set {_block} to block at projectile
+	if block at {_block} is snow block:
+		set {_block} to block above {_block}
+	if block below {_block} is snow:
+		set {_block} to block below {_block}
+	if block below {_block} is air:
+		stop
+	loop 10 times:
+		set {_block} to block above {_block} if {_block} is powder snow
+	if {_block} is air:
+		set {specialblock::%block at {_block}%} to "no drops"
+		set block at {_block} to snow
+	if {_block} is snow:
+		set {_layers} to block data tag "layers" of block at {_block}
+		add 2 to {_layers}
+		set block data tag "layers" of block at {_block} to {_layers}
+		if {_layers}+2 is greater than or equal to 8:
+			set block at {_block} to powder snow
+
+on break:
+	player's gamemode is survival
+	set event-block to white stained glass if event-block is light blue stained glass
+	set event-block to air if event-block is white stained glass
+
+
+every 2 hours:
+	clear {specialblock::*}

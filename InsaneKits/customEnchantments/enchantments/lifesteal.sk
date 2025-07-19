@@ -1,0 +1,9 @@
+on damage:
+    hasCEnchant(attacker's tool, "lifesteal") is true
+    set {_damage} to damage
+    set {_level} to getCEnchantLevel(attacker's tool, "lifesteal")
+   
+    set {_healthRecieved} to {_damage}*(10%*{_level})
+
+    heal attacker by {_healthRecieved}
+

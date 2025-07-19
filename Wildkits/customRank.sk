@@ -1,0 +1,326 @@
+import:
+    net.leonemc.core.util.bukkit.CC
+    com.koletar.jj.mineresetlite.MineResetLite
+    org.bukkit.Bukkit
+
+on join:
+	{crank::%player's uuid%} is set:
+		set {custom.%{crank::%player's uuid%}%::%player's uuid%} to player
+
+command /createrank <text> <text>:
+	permission: crm.create
+	usage: /createrank <name> <prefix>
+	trigger:
+		stop if arg-1 is "none"
+		send "&cThis rank already exists" if {customrank::%arg-1%} is set
+		stop if {customrank::%arg-1%} is set
+		set {customrank::%arg-1%} to arg-2
+		set {customranklist::%arg-1%} to arg-1
+		send "Created custom rank - Preview: %colored arg-2% %player%"
+
+command /setrank <offlineplayer> <text>:
+	permission: crm.set
+	usage: /setrank <player> <rank> | /setrank <player> none
+	trigger:
+		if arg-2 is "none":
+			execute console command "lp user %arg-1% meta removeprefix 5 server=wildkits"
+			execute console command "lp user %arg-1% meta removeprefix 5 server=hub"
+			set {_old} to {crank::%arg-1's uuid%}
+			execute console command "lp user %arg-1% parent remove custom server=wildkits"
+			execute console command "lp user %arg-1% parent remove custom server=hub"
+			execute console command "lp user %arg-1% permission unset %{_old}%.rank server=wildkits"
+			execute console command "lp user %arg-1% permission unset %{_old}%.rank server=hub"
+			delete {crank::%arg-1's uuid%}
+			delete {custom.%{_old}%::%arg-1's uuid%}
+			send "&cRemoved"
+			stop
+		set {_old} to {crank::%arg-1's uuid%}
+		execute console command "lp user %arg-1% permission unset %{_old}%.rank server=wildkits"
+		execute console command "lp user %arg-1% permission unset %{_old}%.rank server=hub"
+		delete {custom.%{_old}%::%arg-1's uuid%}
+		delete {crank::%arg-1's uuid%}
+		giveRank(arg-1, arg-2)
+		send "&aDone"
+
+command /deleterank <text>:
+	permission: crm.delete
+	usage: /deleterank <rank>
+	trigger:
+		if {customrank::%arg-1%} is set:
+			delete {customrank::%arg-1%}
+			delete {customranklist::%arg-1%}
+			delete {crank.%arg-1%::*}
+			loop {custom.%arg-1%::*}:
+				set {_p} to "%loop-value%" parsed as an offlineplayer
+				execute console command "lp user %{_p}% parent remove custom server=wildkits"
+				execute console command "lp user %{_p}% meta removeprefix 5 server=wildkits"
+				execute console command "lp user %{_p}% permission unset %arg-1%.rank server=wildkits"
+
+				execute console command "lp user %{_p}% parent remove custom server=hub"
+				execute console command "lp user %{_p}% meta removeprefix 5 server=hub"
+				execute console command "lp user %{_p}% permission unset %arg-1%.rank server=hub"
+				delete {crank::%uuid of {_p}%}
+			delete {custom.%arg-1%::*}
+
+command /customlock [<text>]:
+	permission: crm.lock
+	trigger:
+		if arg-1 is set:
+			if {customrank::%arg-1%} is set:
+				if {customsetting.%arg-1%::locked} is true:
+					set {customsetting.%arg-1%::locked} to false
+					send "&eEvent Unlocked &e%arg-1%"
+				else if {customsetting.%arg-1%::locked} is false:
+					delete {customsetting.%arg-1%::locked}
+					send "&aUnlocked &e%arg-1%"
+				else:
+					set {customsetting.%arg-1%::locked} to true
+					send "&cLocked &e%arg-1%"
+
+command /crprefix [<text>] [<text>]:
+	permission: crm.prefix
+	trigger:
+		set {customrank::%arg-1%} to arg-2
+		loop {custom.%arg-1%::*}:
+			execute console command "lp user %loop-value% meta removeprefix 5 server=wildkits"
+			execute console command "lp user %loop-value% meta setprefix 5 ""&r%{customrank::%arg-1%}% "" server=wildkits"
+
+			execute console command "lp user %loop-value% meta removeprefix 5 server=hub"
+			execute console command "lp user %loop-value% meta setprefix 5 ""&r%{customrank::%arg-1%}% "" server=hub"
+
+command /craddchangecredit <offlineplayer>:
+	permission: op
+	trigger:
+		add 1 to {crchange::%arg-1's uuid%}
+		send "&aDone! &e%{crchange::%arg-1's uuid%}%"
+
+command /crremovechangecredit <offlineplayer>:
+	permission: op
+	trigger:
+		remove 1 from {crchange::%arg-1's uuid%}
+		send "&aDone! &e%{crchange::%arg-1's uuid%}%"
+
+command /customrank [<text>] [<text>] [<text>]:
+	aliases: /crank, /cr
+	trigger:
+		if arg-1, arg-2, and arg-3 is not set:
+			send "&6&m===================="
+			send "&e&lCustom Rank"
+			send ""
+			send "&a/customrank &elist &7- Get a list of custom ranks"
+			send ""
+			send "&a/customrank &einfo &7(&rrank/player&7) &aRankName&e/&aPlayerName &7- Get info about a rank or player"
+			if {crank::%player's uuid%} is set:
+				send "" 
+				send "&d/customrank &eswitch &r[rank] &7- Switch your custom rank (1 Day Cooldown)"
+#				send "" 
+#				send "&d/customrank &econvert &7- Convert your custom rank into an item (For Trading)"
+#				send "" 
+#				send "&d/customrank &eredeem &7- Redeem a voucher"
+			send "&6&m===================="
+		else if arg-1 is "list":
+			set {_list} to ""
+			loop {customranklist::*}:
+				if {customsetting.%loop-value%::locked} is true:
+					set {_comma} to "&7," if length of {_list} is not 0
+					set {_comma} to "" if length of {_list} is 0
+					set {_list} to "%{_list}%%{_comma}% &c%loop-value% &b&k|&r&b%size of {custom.%loop-value%::*}%&b&k|&r"
+				else if {customsetting.%loop-value%::locked} is false:
+					set {_comma} to "&7," if length of {_list} is not 0
+					set {_comma} to "" if length of {_list} is 0
+					set {_list} to "%{_list}%%{_comma}% &e%loop-value% &b&k|&r&b%size of {custom.%loop-value%::*}%&b&k|&r"
+				else:
+					set {_comma} to "&7," if length of {_list} is not 0
+					set {_comma} to "" if length of {_list} is 0
+					set {_tier} to "&7"
+					set {_tier} to "&e" if size of {custom.%loop-value%::*} is greater than or equal to 3
+					set {_tier} to "&6" if size of {custom.%loop-value%::*} is greater than or equal to 5
+					set {_tier} to "&c" if size of {custom.%loop-value%::*} is greater than or equal to 10
+					set {_list} to "%{_list}%%{_comma}% &a%loop-value% %{_tier}%(%size of {custom.%loop-value%::*}%)%{_tier}%"
+			send "&6&m===================="
+			send "&eCustom Ranks&7: &r(&aOpen&7, &cLocked&7, &eOpen Event&7)%nl%%{_list}%"
+			send "&6&m===================="
+		else if arg-1 is "info":
+			if arg-2 is "player":
+				set {_plr} to arg-3 parsed as an offlineplayer
+				if {crank::%uuid of {_plr}%} is not set:
+					send "&cThis player does not have a custom rank."
+					stop
+				send "&6&m===================="
+				send "&e%{_plr}% &ais a part of %CC.translate({customrank::%{crank::%uuid of {_plr}%}%})% &r&7(&r%{crank::%uuid of {_plr}%} in uppercase%&7)"
+				send "&6&m===================="
+			else if arg-2 is "rank":
+				if {customrank::%arg-3%} is not set:
+					send "&cThis rank does not exist."
+					stop
+				set {_list} to ""
+				loop {custom.%arg-3%::*}:
+					set {_comma} to "&7," if length of {_list} is not 0
+					set {_comma} to "" if length of {_list} is 0
+					set {_list} to "%{_list}%%{_comma}% &r%loop-value%"
+				set {_open} to "&aOpen"
+				set {_open} to "&cLocked" if {customsetting.%arg-3%::locked} is true
+				set {_open} to "&eOpen Event" if {customsetting.%arg-3%::locked} is false
+				set {_tier} to "&71"
+				set {_tier} to "&e2" if size of {custom.%arg-3%::*} is greater than or equal to 3
+				set {_tier} to "&63" if size of {custom.%arg-3%::*} is greater than or equal to 5
+				set {_tier} to "&c4" if size of {custom.%arg-3%::*} is greater than or equal to 10
+				set {_tier} to "&b&k|&r&b5&b&k|&r" if {customsetting.%arg-3%::locked} is true or false
+				send "&6&m===================="
+				send "%CC.translate({customrank::%arg-3%})% &7(%{_open}%&7)"
+				send "&eTier: %{_tier}%"
+				send "&eMembers&7(%size of {custom.%arg-3%::*}%)&e:&r%{_list}%"
+				if {customsetting.%arg-3%::locked} is true:
+					send "&cThis group may be locked because&7:%nl%&e- &cRank owner requested it%nl%&e- &cIt is a special/event rank"
+				else if {customsetting.%arg-3%::locked} is false:
+					send "&eThis is an event/holiday rank, it is only available during certain holidays."
+				send "&6&m===================="
+		else if arg-1 is "switch":
+			if {crchange::%player's uuid%} is greater than or equal to 1:
+				stop if arg-2 is not set
+				stop if {crank::%player's uuid%} is not set
+				if {customrank::%arg-2%} is not set:
+					send "&cThis rank does not exist. If you would like to create it, please open a ticket on Discord."
+					stop
+				if {customsetting.%arg-2%::locked} is true:
+					send "&cThis rank is locked."
+					stop
+				if {customsetting.%{crank::%player's uuid%}%::locked} is true:
+					send formatted "&cWARNING! You are currently in a locked rank! If you switch ranks you will not be able to return to the one you have. <cmd:/crchangeconfirm %arg-2% crcckey1>&eConfirm Switch<reset>"
+					stop
+				if {crankchangecooldown::%player's uuid%} is set:
+					if difference between {crankchangecooldown::%player's uuid%} and now is greater than or equal to 1 day:
+						set {crankchangecooldown::%player's uuid%} to now
+						execute console command "setrank %player% %arg-2%"
+						send "&aYour rank has been changed!"
+						remove 1 from {crchange::%player's uuid%}
+					else:
+						send "&cYou can only switch ranks once per day."
+				else:
+					set {crankchangecooldown::%player's uuid%} to now
+					execute console command "setrank %player% %arg-2%"
+					send "&aYour rank has been changed!"
+					remove 1 from {crchange::%player's uuid%}
+			else:
+				send "&cYou do not have a change credit, you can buy one at &eshop.leonemc.net&c."
+		else if arg-1 is "convert":
+			if player doesn't have enough space for 1 of bedrock:
+				send "&cYou do not have space in your inventory"
+			else:
+				if {crank::%player's uuid%} is set:
+					give player glowing paper named "&6&lCustom Rank Voucher" with lore "&r&fRank: &e%{crank::%uuid of player%} in uppercase%"
+					execute console command "setrank %player% none"
+					execute console command "lp user %player% parent add custom server=wildkits"
+					execute console command "lp user %player% parent add custom server=hub"
+				else:
+					send "&cYou do not have a custom rank."
+		else if arg-1 is "redeem":
+			# Optimize by creating a function later - too lazy rn
+			if {redeemcd::%player's uuid%} is not set:
+				if player has permission "custom.use":
+					if name of player's tool is "&6&lCustom Rank Voucher":
+						set {_redeemed} to uncolored line 1 of lore of player's tool
+						replace all "Rank: " with "" in {_redeemed}
+						if {customrank::%{_redeemed}%} is set:
+							remove paper named "&r&6&lCustom Rank Voucher" from player's inventory
+							send "&aYou have redeemed: &e%{_redeemed}%"
+							if {crank::%player's uuid%} is set:
+								execute player command "customrank convert"
+								send "&eYour old rank has been turned into a voucher"
+							execute console command "setrank %player% %{_redeemed}%"
+							set {redeemcd::%player's uuid%} to now
+						else:
+							send "&cThis rank does not exist, please make a ticket on Discord."
+			else if difference between {redeemcd::%player's uuid%} and now is greater than or equal to 1 day:
+				if player has permission "custom.use":
+					if name of player's tool is "&6&lCustom Rank Voucher":
+						set {_redeemed} to uncolored line 1 of lore of player's tool
+						replace all "Rank: " with "" in {_redeemed}
+						if {customrank::%{_redeemed}%} is set:
+							remove paper named "&r&6&lCustom Rank Voucher" from player's inventory
+							send "&aYou have redeemed: &e%{_redeemed}%"
+							if {crank::%player's uuid%} is set:
+								execute player command "customrank convert"
+								send "&eYour old rank has been turned into a voucher"
+							execute console command "setrank %player% %{_redeemed}%"
+							set {redeemcd::%player's uuid%} to now
+						else:
+							send "&cThis rank does not exist, please make a ticket on Discord."
+			else:
+				send "&cYou can only redeem ranks once per day."
+
+command /crchangeconfirm [<text>] [<text>]:
+	trigger:
+		stop if arg-2 is not "crcckey1"
+		if {crchange::%player's uuid%} is greater than or equal to 1:
+			stop if {crank::%player's uuid%} is not set
+			set {crankchangecooldown::%player's uuid%} to now
+			execute console command "setrank %player% %arg-1%"
+			send "&aYour rank has been changed!"
+			remove 1 from {crchange::%player's uuid%}
+
+command /resetcooldown <offlineplayer>:
+	permission: op
+	trigger:
+		delete {crankchangecooldown::%arg-1's uuid%}
+		delete {redeemcd::%arg-1's uuid%}
+		send "&aReset"
+
+command /lazymine <text> <integer>:
+	permission: crm.lazymine
+	usage: /lazymine <name> <resetDelay>
+	trigger:
+		execute player command "mine erase %arg-1%mine"
+		wait 1 tick
+
+		execute player command "cm create %arg-1%mine"
+		wait 1 ticks
+		execute player command "cm set %arg-1%mine diamond_ore 50%%"
+		wait 1 ticks
+		execute player command "cm set %arg-1%mine emerald_ore 50%%"
+		wait 1 ticks
+		set {_time} to arg-2 * 60
+		execute player command "cm setdelay %arg-1%mine %{_time}%"
+		wait 1 ticks
+		execute player command "cm reset %arg-1%mine"
+		wait 1 ticks
+		execute player command "rg delete %arg-1%mine"
+		wait 1 ticks
+		execute player command "rg create %arg-1%mine"
+		wait 1 ticks
+		execute player command "rg setpriority %arg-1%mine 10"
+		wait 1 ticks
+		execute player command "rg flag %arg-1%mine block-break allow"
+
+function giveRank(p: offlineplayer, rank: text):
+	set {custom.%{_rank}%::%{_p}'s uuid%} to {_p}
+	execute console command "lp user %{_p}% parent add custom server=wildkits"
+	execute console command "lp user %{_p}% meta setprefix 5 ""&r%{customrank::%{_rank}%}% "" server=wildkits"
+	execute console command "lp user %{_p}% permission set %{_rank}%.rank true server=wildkits"
+
+	execute console command "lp user %{_p}% parent add custom server=hub"
+	execute console command "lp user %{_p}% meta setprefix 5 ""&r%{customrank::%{_rank}%}% "" server=hub"
+	execute console command "lp user %{_p}% permission set %{_rank}%.rank true server=hub"
+	set {crank::%uuid of {_p}%} to {_rank}
+
+on tab complete of "/customrank" and "/cr" and "/crank":
+	if {crank::%player's uuid%} is set:
+		add "switch" to {_tabs::*}
+		add "convert" to {_tabs::*}
+		add "redeem" to {_tabs::*}
+	add "list" and "info" to {_tabs::*}
+	set tab completions for position 1 to {_tabs::*}
+	if tab arg-1 is "info":
+		set tab completions for position 2 to "player" and "rank"
+	else if tab arg-1 is "switch":
+		loop {customranklist::*}:
+			add loop-value to {_tabs2::*}
+			set tab completions for position 2 to {_tabs2::*}
+	if tab arg-2 is "player":
+		loop all players:
+			add loop-player to {_tabs2::*}
+			set tab completions for position 3 to {_tabs2::*}
+	else if tab arg-2 is "rank":
+		loop {customranklist::*}:
+			add loop-value to {_tabs2::*}
+			set tab completions for position 3 to {_tabs2::*}

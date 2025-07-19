@@ -1,0 +1,135 @@
+options:
+	prefix: &6&lTumadre &8»
+	cap: 10
+
+on load:
+	set {refreshtp} to true
+
+on join:
+	{refreshtp} is true
+	clear {refreshtp}
+	set {_ptp} to player's location
+	teleport player to {holopos::eTokens}
+	execute player command "/bypasssetholoposeTokens"
+	teleport player to {holopos::kills}
+	execute player command "/bypasssetholoposkills"
+	teleport player to {holopos::level}
+	execute player command "/bypasssetholoposlevel"
+	execute player command "/bypassrefreshleaderboards"
+	teleport player to {_ptp}
+	send "&aRefreshed leaderboards as op."
+
+every 1 minute:
+	execute console command "/refreshleaderboards"
+
+on command "/bypasssetholoposeTokens":
+	cancel event
+	delete hologram {holo.eTokens}
+	create a new hologram with line "&cLeaderboard for eTokens. /refreshleaderboards" and store in {holo.eTokens}
+	set {holopos::eTokens} to location of player
+	send "&aSuccesfully set the hologram for level to &e%{holopos::eTokens}%&a!"
+
+on command "/bypasssetholoposkills":
+	cancel event
+	delete hologram {holo.kills}
+	create a new hologram with line "&cLeaderboard for Kills. /refreshleaderboards" and store in {holo.kills}
+	set {holopos::kills} to location of player
+	send "&aSuccesfully set the hologram for kills to &e%{holopos::kills}%&a!"
+
+on command "/bypasssetholoposlevel":
+	cancel event
+	delete hologram {holo.level}
+	create a new hologram with line "&cLeaderboard for Levels. /refreshleaderboards" and store in {holo.level}
+	set {holopos::level} to location of player
+	send "&aSuccesfully set the hologram for kills to &e%{holopos::level}%&a!"
+
+command /setholopos <text>:
+	permission: incred.lb.setpos
+	permission message: &cYou have no permission to execute this command!
+	trigger:
+		if arg-1 is "eTokens":
+			execute player command "/bypasssetholoposeTokens"
+		else if arg-1 is "kills":
+			execute player command "/bypasssetholoposkills"
+		else if arg-1 is "level":
+			execute player command "/bypasssetholoposlevel"
+		else:
+			send "&cUsage: /setholopos <eTokens/kills/level>"
+	
+on command "/bypassrefreshleaderboards":
+	cancel event
+	# eTokens
+	set {_list::*} to sort((indices of {eTokens::*}), {eTokens::*})
+	set {_pos} to 1
+	delete all lines of hologram {holo.eTokens}
+	append line "&7&l[ &e&lTop eTokens &7&l]" to hologram {holo.eTokens}
+	loop {_list::*}:
+		set {_player} to ("%loop-value%" parsed as offline player)
+		{_player} is set
+		set {_uuid} to ({_player} parsed as offline player)'s uuid
+		append line "&6##%{_pos}% &7- &7%{_player}% &7- &e%regex({eTokens::%loop-value%})%" to hologram {holo.eTokens}
+		add 1 to {_pos}
+		if {_pos} > {@cap}:
+			exit loop
+	# kills
+	set {_list::*} to sort((indices of {kills::*}), {kills::*})
+	set {_pos} to 1
+	delete all lines of hologram {holo.kills}
+	append line "&7&l[ &e&lTop Kills &7&l]" to hologram {holo.kills}
+	loop {_list::*}:
+		set {_player} to ("%loop-value%" parsed as offline player)
+		{_player} is set
+		set {_uuid} to ({_player} parsed as offline player)'s uuid
+		append line "&6##%{_pos}% &7- &7%{_player}% &7- &e%regex({kills::%loop-value%})%" to hologram {holo.kills}
+		add 1 to {_pos}
+		if {_pos} > {@cap}:
+			exit loop
+	# level
+	set {_list::*} to sort((indices of {level::*}), {level::*})
+	set {_pos} to 1
+	delete all lines of hologram {holo.level}
+	append line "&7&l[ &e&lTop level &7&l]" to hologram {holo.level}
+	loop {_list::*}:
+		set {_player} to ("%loop-value%" parsed as offline player)
+		{_player} is set
+		set {_uuid} to ({_player} parsed as offline player)'s uuid
+		append line "&6##%{_pos}% &7- &7%{_player}% &7- &e%regex({level::%loop-value%})%" to hologram {holo.level}
+		add 1 to {_pos}
+		if {_pos} > {@cap}:
+			exit loop
+	send "&aSuccesfully refreshed all leaderboards!"
+
+command /refreshleaderboards:
+	permission: incred.lb.refresh
+	permission message: &cYou have no permission to execute this command!
+	trigger:
+		execute player command "/bypassrefreshleaderboards"
+
+function sendError(p: player, m: text):
+	send "&c&lError: &c%{_m}%" to {_p}
+
+function regex(n: object) :: text:
+	if "%{_n}%" contains ".":
+		set {_s::*} to split "%{_n}%" at "."
+		set {_n} to "%a({_s::1})%.%last 2 characters of {_s::2}%"
+		return "%{_n}%"
+	else:
+		set {_n} to a("%{_n}%")
+		return "%{_n} ? 0%"
+
+function a(b: text) :: text:
+	if length of {_b} > 3:
+		return "%a(first length of {_b} - 3 characters of {_b})%,%last 3 characters of {_b}%"
+	return {_b}
+
+function sort(indices: strings, values: numbers, descending: boolean = true) :: strings:
+	loop {_indices::*}:
+		add 1 to {_f}
+		set {_sort::%{_values::%loop-index%}%.%{_f}%} to loop-value
+	return (reversed {_sort::*}) if {_descending} is true, else {_sort::*}
+
+command /setvar <text> <offlineplayer> <number>:
+	permission: set.var
+	trigger:
+		set {%arg-1%::%arg-2's uuid%} to arg-3
+

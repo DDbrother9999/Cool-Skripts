@@ -1,0 +1,501 @@
+# PRE-DEFINED CRATES
+on load:
+	loadSupplyDrops()
+
+# END OF PRE-DEFINED CRATES
+
+#delete {lootbox::totalweight::%{_table}%}
+#clear {lootbox::table::%{_table}%::*}
+function spawnSupplyDrop(type: text, loc: location = location(0, -100, 0, world "world")):
+	if {_loc} is location at 0, -100, 0 in world "world":
+		set {_x} to random integer between -73 and 76
+		set {_y} to random integer between 111 and 130
+		set {_z} to random integer between -118 and 31
+		set {_loc} to location({_x}, {_y}, {_z}, world "world")
+	spawn falling barrel at {_loc} with nbt nbt compound from "{Time:-214151}"
+	set {_barrel} to last spawned falling barrel
+	spawn slime at {_loc} with nbt nbt compound from "{Size:1,Silent:1,NoAI:1,NoGravity:1,Invulnerable:1b,Persistence:1}"
+	set {_slime} to last spawned slime
+	particleSlime()
+	# debug("Slime spawned")
+	spawn pig at {_loc} with nbt nbt compound from "{Size:1,Silent:1,Invulnerable:1b,Persistence:1}"
+	set {_pig} to last spawned pig
+	set metadata "supply" of {_pig} to true
+	set metadata "supply" of {_barrel} to true
+	if {supplycratenumber} is not set:
+		set {supplycratenumber} to 0
+	add 1 to {supplycratenumber}
+	set {_number} to {supplycratenumber}
+	broadcast {supplydropbroadcast::%{_type}%}
+	
+	set metadata "gui" of {_slime} to "supplycrate::%{_number}%"
+	set metadata "time" of {_slime} to now
+	createSupplyCrateGui("supplycrate::%{_number}%", {_type})
+	apply invisibility of tier 1 without particles to {_pig} for 5 years
+	apply slow falling of tier 2 without particles to {_pig} for 5 years
+	apply invisibility of tier 1 without particles to {_slime} for 5 years
+	apply glowing of tier 1 without particles to {_slime} for 5 years
+	make {_barrel} ride {_pig}
+	set {_loc} to {_pig}'s location
+	wait 1 second
+	while {_loc} is not {_loc2}:
+		if {_slime} is not alive:
+			spawn slime at {_loc} with nbt nbt compound from "{Size:1,Silent:1,NoAI:1,NoGravity:1,Invulnerable:1b,Persistence:1}"
+			# debug("Slime spawned")
+			particleSlime()
+			set {_slime} to last spawned slime
+			set metadata "gui" of {_slime} to "supplycrate::%{_number}%"
+			apply invisibility of tier 1 without particles to {_slime} for 5 years
+			apply glowing of tier 1 without particles to {_slime} for 5 years
+		set {_loc2} to {_pig}'s location
+		wait 2 tick
+		teleport {_slime} to {_barrel}'s location
+		set {_loc} to {_pig}'s location
+	kill {_pig}
+	wait 2 ticks
+	kill all dropped items
+	if block at {_barrel} is air:
+		set block at {_barrel} to barrel
+		set {_loc} to block at {_barrel}
+		set {_true} to true
+	else:
+		loop blocks in radius 1 of {_barrel}:
+			if loop-block is air:
+				set block at loop-block to barrel
+				set {_loc} to loop-block
+				set {_true} to true
+				stop loop
+	if {_true} is not set:
+		kill {_barrel}
+		secureKill({_slime})
+	kill {_barrel}
+	set {supplydrop::%block at {_loc}%} to true
+	wait 1 tick
+	if {_slime} is not alive:
+		spawn slime at {_loc} with nbt nbt compound from "{Size:1,Silent:1,NoAI:1,NoGravity:1,Invulnerable:1b,Persistence:1}"
+		# debug("Slime spawned")
+		set {_slime} to last spawned slime
+		particleSlime()
+		set metadata "gui" of {_slime} to "supplycrate::%{_number}%"
+		apply invisibility of tier 1 without particles to {_slime} for 5 years
+		apply glowing of tier 1 without particles to {_slime} for 5 years
+	teleport {_slime} to middle of location of {_loc}
+	if {_slime} is alive:
+		# debug("Cube is alive")
+	wait 3 minutes
+	kill {_barrel}
+	set block at {_loc} to air
+	secureKill({_slime})
+	delete {supplydrop::%block at {_loc}%}
+
+function particleSlime():
+	# broadcast "function called"
+	set {_slime} to last spawned slime
+	while {_slime} is alive:
+		make 3 of flash at {_slime}'s location
+		make 1 of sonic boom at {_slime}'s location
+		wait 5 ticks
+
+every 20 seconds:
+	loop all slimes:
+		difference between now and metadata "time" of loop-entity is greater than 3 minutes
+		secureKill(loop-entity)
+		set block at loop-entity to air
+		delete {supplydrop::%block at loop-entity%}
+
+every 10 minutes:
+	loop 3 times:
+		execute console command "/spawnsupplydrop"
+		wait 5 seconds
+
+
+function secureKill(entity: entity):
+	teleport {_entity} to location at 0, -600, 0 in world "world"
+	kill {_entity}
+
+on right click on barrel:
+	{supplydrop::%event-block%} is set
+	cancel event
+
+on damage of slime:
+	damage cause is entity explosion
+	cancel event
+
+on break of barrel:
+	{supplydrop::%event-block%} is set
+	cancel event
+
+on right click on respawn anchor:
+	loop blocks in radius 10 of event-block:
+		loop-block is barrel
+		cancel event
+		wait 5 tick
+		set loop-block to barrel
+
+on pickup:
+	event-item is barrel
+	cancel event
+
+on explode:
+	loop exploded blocks:
+		loop-block is barrel
+		cancel event
+
+on right click on slime:
+	# debug("Right clicked")
+	metadata "gui" of event-entity is set
+	#debug("gui meta set")
+	set {_gui} to metadata "gui" of event-entity
+	open gui with id "%{_gui}%" to player
+
+command /spawnSupplyDrop [<text>] [<text>]:
+	permission: supplydrop.spawn
+	aliases: /summonsupplydrop
+	trigger:
+		if arg 1 is not set:
+			set {_random} to random integer between 1 and 100
+			if {_random} is between 1 and 49:
+				spawnSupplyDrop("bronze")
+			else if {_random} is between 50 and 79:
+				spawnSupplyDrop("silver")
+			else if {_random} is between 80 and 94:
+				spawnSupplyDrop("gold")
+			else if {_random} is between 95 and 100:
+				spawnSupplyDrop("platinum")
+			stop
+		if arg 2 is not set:
+			spawnSupplyDrop(arg 1)
+		else:
+			spawnSupplyDrop(arg 1, player's location)
+		# debug("Supply drop spawned")
+
+command /startsupplydroprush:
+	permission: supplydrop.rushtoggle
+	trigger:
+		if {sdrush} is true:
+			execute console command "/addtosupplydroprush"
+			send "&aCommand has been turned into /addtosupplydroprush."
+			stop
+		set {sdrush} to true
+		broadcast "&8[&7&lSUPPLY DROP&8]&7 A supply drop rush has been started!"
+		set {totaldrops} to 0
+		set {startsdrush} to now
+		set {sdrushtotal} to 10
+		while {sdrush} is true:
+			execute console command "/spawnsupplydrop"
+			add 1 to {totaldrops}
+			if {totaldrops} is greater than or equal to {sdrushtotal}:
+				wait 3 seconds
+				broadcast "&8[&7&lSUPPLY DROP&8]&7 The supply drop rush is over!"
+				delete {sdrush}
+				delete {totaldrops}
+				delete {startsdrush}
+				set {sdrushottal} to 10
+			wait 30 seconds
+
+command /supplydroprush:
+	trigger:
+		if {sdrush} is true:
+			send "&8[&7&lSUPPLY DROP&8]&7 %{sdrushtotal}-{totaldrops}% crates remaining."
+		else:
+			send "&8[&7&lSUPPLY DROP&8]&7 There is not currently a supply drop rush."
+
+command /addtosupplydroprush:
+	permission: supplydrop.rush
+	trigger:
+		add 10 to {sdrushtotal}
+		broadcast "Added 10 to SD Rush Total"
+		broadcast "&8[&7&lSUPPLY DROP&8]&7 The supply drop rush will now go on for 5 more minutes!"
+
+command /endsupplydroprush:
+	permission: supplydrop.endsupplydroprush
+	trigger:
+		broadcast "&8[&7&lSUPPLY DROP&8]&7 The supply drop rush has been forcefully ended!"
+		delete {sdrush}	
+
+on skript load:
+	set {sdrushtotal} to 10
+	delete {sdrush}
+
+on tab complete of "/spawnSupplyDrop":
+	set tab completions for position 2 to "atMe"
+	set tab completions for position 1 to {lootbox::tables::*}
+
+on death of slime:
+	cancel drops
+
+function createSupplyCrateGui(name: text, table: text):
+	#if {supplycratenumber} is not set:
+	#	set {supplycratenumber} to 0
+	#add 1 to {supplycratenumber}
+	create gui with id "%{_name}%" with virtual chest inventory with 3 rows named "Supply Drop" and stealable items
+	wait 1 tick
+	edit gui with id {_name}:
+		set {_loop} to 0
+		loop 27 times:
+			wait 1 tick
+			add 1 to {_loop}
+			chance of {lootbox::%{_table}%::chance}:
+				set {_l} to random integer between 1 and {lootbox::totalweight::%{_table}%}
+				loop {lootbox::table::%{_table}%::*}:
+					set {_item} to loop-value-2
+					if {_l} is between {lootbox::%{_table}%itemweight1::%{_item}%} and {lootbox::%{_table}%itemweight2::%{_item}%}:
+						if {lootbox::%{_table}%itemrandom1::%{_item}%} is set:
+							set {_random} to random integer between {lootbox::%{_table}%itemrandom1::%{_item}%} and {lootbox::%{_table}%itemrandom2::%{_item}%}
+							set {_nbt} to full nbt compound of {_item}
+							set tag "Count" of {_nbt} to {_random}
+							set {_item} to item from nbt {_nbt}
+						format gui slot {_loop} with {_item}
+
+
+# LOOT BOX
+
+function loadItemsFromTableGUI(table: text, p: player, r: integer) :: text:
+	open virtual chest inventory with {_r} rows to {_p}
+	clear {_p}'s current inventory
+	set {_loop} to 0
+	set {_size} to slots of {_p}'s current inventory
+	loop {_size} times:
+	
+		# The chance determines the amount of items in the chest
+		chance of {lootbox::%{_table}%::chance}:
+		
+			set {_l} to random integer between 1 and {lootbox::totalweight::%{_table}%}
+			loop {lootbox::table::%{_table}%::*}:
+				set {_item} to loop-value-2
+				if {_l} is between {lootbox::%{_table}%itemweight1::%{_item}%} and {lootbox::%{_table}%itemweight2::%{_item}%}:
+					if {lootbox::%{_table}%itemrandom1::%{_item}%} is set:
+						set {_random} to random integer between {lootbox::%{_table}%itemrandom1::%{_item}%} and {lootbox::%{_table}%itemrandom2::%{_item}%}
+						set {_nbt} to full nbt compound of {_item}
+						set tag "Count" of {_nbt} to {_random}
+						set {_item} to item from nbt {_nbt}
+					set slot {_loop} of {_p}'s current inventory to {_item}
+				
+		add 1 to {_loop}
+		
+		
+function removeItemFromTable(table: text, p: player):
+	create a gui with virtual chest inventory with 6 rows named "&c%{_table}% - Removing"
+	edit last gui:
+		set {_loop} to 0
+		loop {lootbox::table::%{_table}%::*}:
+			set {_item} to loop-value
+			set {_item2} to {_item}
+			add "%{lootbox::%{_table}%itemweight2::%{_item}%}-{lootbox::%{_table}%itemweight1::%{_item}%}% / %{lootbox::totalweight::%{_table}%}% Weight" to lore of {_item2}
+			format gui slot {_loop} with {_item2}:
+				remove {lootbox::%{_table}%itemweight2::%{_item}%}-{lootbox::%{_table}%itemweight1::%{_item}%} from {lootbox::totalweight::%{_table}%}
+				delete {lootbox::%{_table}%itemweight1::%{_item}%}
+				delete {lootbox::%{_table}%itemweight2::%{_item}%}
+				remove {_item} from {lootbox::table::%{_table}%::*}
+				give {_item} to {_p}
+				send "&aSuccessfully removed!"
+				removeItemFromTable({_table}, {_p})
+			add 1 to {_loop}
+	open last gui to {_p}
+    
+function openSupplyDropGUI(p: player):
+	create a gui with virtual chest inventory with 3 rows named "&7Supply Drops"
+	edit last gui:
+		loop 27 times:
+			format gui slot loop-value -1 with purple glass pane named " ":
+				cancel event
+		format gui slot 4 with oak wood floor sign named "&7&lBuy from /gemshop!":
+			cancel event
+			make player execute command "/gemshop"
+		format gui slot 11 with copper block named "&6&lBronze Supply Drop":
+			cancel event
+			if {supplydropcredits::%{_p}%'s uuid::bronze} is greater than 0:
+				openConfirmSpawnGUI({_p}, "bronze")
+			else:
+				send "&cYou do not have any credits for that supply drop!."
+				close {_p}'s inventory
+		format gui slot 12 with iron block named "&f&lSilver Supply Drop":
+			cancel event
+			if {supplydropcredits::%{_p}%'s uuid::silver} is greater than 0:
+				openConfirmSpawnGUI({_p}, "silver")
+			else:
+				send "&cYou do not have any credits for that supply drop!."
+				close {_p}'s inventory
+		format gui slot 14 with gold block named "&e&lGold Supply Drop":
+			cancel event
+			if {supplydropcredits::%{_p}%'s uuid::gold} is greater than 0:
+				openConfirmSpawnGUI({_p}, "gold")
+			else:
+				send "&cYou do not have any credits for that supply drop!."
+				close {_p}'s inventory
+		format gui slot 15 with diamond block named "&b&lPlatinum Supply Drop":
+			cancel event
+			if {supplydropcredits::%{_p}%'s uuid::platinum} is greater than 0:
+				openConfirmSpawnGUI({_p}, "platinum")
+			else:
+				send "&cYou do not have any credits for that supply drop!."
+				close {_p}'s inventory
+		if {supplydropcredits::%{_p}%'s uuid::bronze} is greater than 0:
+			format gui slot 20 with green stained glass pane named "&7Bronze Supply Drop Credits: %{supplydropcredits::%{_p}%'s uuid::bronze}%":
+				cancel event
+		else:
+			format gui slot 20 with red stained glass pane named "&7Bronze Supply Drop Credits: 0":
+				cancel event
+		if {supplydropcredits::%{_p}%'s uuid::silver} is greater than 0:
+			format gui slot 21 with green stained glass pane named "&7Silver Supply Drop Credits: %{supplydropcredits::%{_p}%'s uuid::silver}%":
+				cancel event
+		else:
+			format gui slot 21 with red stained glass pane named "&7Silver Supply Drop Credits: 0":
+				cancel event
+		if {supplydropcredits::%{_p}%'s uuid::gold} is greater than 0:
+			format gui slot 23 with green stained glass pane named "&7Gold Supply Drop Credits: %{supplydropcredits::%{_p}%'s uuid::gold}%":
+				cancel event
+		else:
+			format gui slot 23 with red stained glass pane named "&7Gold Supply Drop Credits: 0":
+				cancel event
+		if {supplydropcredits::%{_p}%'s uuid::platinum} is greater than 0:
+			format gui slot 24 with green stained glass pane named "&7Platinum Supply Drop Credits: %{supplydropcredits::%{_p}%'s uuid::platinum}%":
+				cancel event
+		else:
+			format gui slot 24 with red stained glass pane named "&7Platinum Supply Drop Credits: 0":
+				cancel event
+		format gui slot 26 with barrier named "&c&lClose":
+			cancel event
+			close {_p}'s inventory
+			
+	open last gui to {_p}
+
+function openConfirmSpawnGUI(p: player, table: text):
+	create a gui with virtual chest inventory with 3 rows named "&7Confirm Spawn"
+	edit last gui:
+		format gui slot 11 with copper block named "&6&lSpawn Supply Drop":
+			cancel event
+			make {_p} execute command "/supplydrop spawn %{_table}%"
+			close {_p}'s inventory
+		format gui slot 15 with redstone block named "&c&lCancel":
+			cancel event
+			openSupplyDropGUI({_p})
+	open last gui to {_p}
+
+command /removeitemfromtable <text>:
+	permission: chesttable
+	usage: /removeitemfromtable <table>
+	trigger:
+		removeItemFromTable(arg 1, player)
+		
+function addItemToTable(table: text, item: item, weight: integer, random1: integer = -100, random2: integer = -100):
+	if {lootbox::tables::*} does not contain {_table}:
+		add {_table} to {lootbox::tables::*}
+		set {lootbox::totalweight::%{_table}%} to 0
+	if {_random1} is not -100:
+		set {lootbox::%{_table}%itemrandom1::%{_item}%} to {_random1}
+		set {lootbox::%{_table}%itemrandom2::%{_item}%} to {_random2}
+	add {_item} to {lootbox::table::%{_table}%::*}
+	add {_weight} to {lootbox::totalweight::%{_table}%}
+	set {lootbox::%{_table}%itemweight1::%{_item}%} to {lootbox::totalweight::%{_table}%}-({_weight})
+	set {lootbox::%{_table}%itemweight2::%{_item}%} to {lootbox::totalweight::%{_table}%}
+
+command /setlootboxchance <text> <number>:
+	permission: chesttable
+	usage: /setlootboxchance <table> <chance>
+	trigger:
+		set {_chance} to arg 2/100
+		if arg 2 is greater than 100:
+			send "&cPlease make it less than 100."
+		else if arg 2 is less than 0.1:
+			send "&cPlease make it greater than 0.1"
+		else:
+			set {lootbox::%arg 1%::chance} to {_chance}
+			send "&aSet loot chance of table ""%arg 1%"" to %arg 2%%%"
+			
+command /additemtotable <text> <integer> [<integer>] [<integer>]:
+	permission: chesttable
+	usage: /additemtotable <table> <weight> [<amount (to) amount>] of item
+	trigger:
+		send action bar "&6Added item &c""%player's tool%""&6 to table &c""%arg 1%""&6 with weight &c%arg 2%." to player
+		if arg 3 is set:
+			addItemToTable(arg 1, player's tool, arg 2, arg 3, arg 4)
+			stop
+		addItemToTable(arg 1, player's tool, arg 2)
+
+command /setsupplydropbroadcast <text> <text>:
+	permission: chesttable
+	usage: /setsupplydropbroadcast <table> <message>
+	trigger:
+		set {supplydropbroadcast::%arg 1%} to colored arg 2
+		send "&fSet to -- &r%{supplydropbroadcast::%arg 1%}%"
+
+command /opentabletoplayer <text> <player> <integer>:
+	permission: chesttable
+	usage: /opentabletoplayer <table> <player> <rows>
+	trigger:
+		loadItemsFromTableGUI(arg 1, player, arg 3)
+		
+command /opentabletoallplayers <text> <integer>:
+	permission: op
+	usage: /opentabletoplayer <table> <rows>
+	trigger:
+		loop all players:
+			loadItemsFromTableGUI(arg 1, player, arg 2)	
+		
+on tab complete of "givechesttable" or "additemtotable" or "setlootboxchance" or "removeitemfromtable" or "regeneratechesttable" or "opentabletoplayer":
+	set tab completions for position 1 to {lootbox::tables::*}
+
+command /supplydrop [<text>] [<text>] [<offlineplayer>] [<number>]:
+	usage: /supplydrop <action> [<table>]
+	trigger:
+		if arg-1 is not set:
+			openSupplyDropGUI(player)
+		else:
+			if arg-1 is "spawn":
+				if arg-2 is not set:
+					send "&cPlease specify a table."
+					stop
+				else:
+					if {supplydropcredits::%player%'s uuid::%arg 2%} is not set:
+						send "&cYou do not have any credits for table that supply drop!."
+						stop
+					if {supplydropcredits::%player%'s uuid::%arg 2%} is less than 1:
+						send "&cYou do not have any credits for that supply drop!."
+						stop
+					remove 1 from {supplydropcredits::%player%'s uuid::%arg 2%}
+					# debug("Removed 1 credit")
+					spawnSupplyDrop(arg-2)
+					loop 3 times:
+						launch ball large coloured red and white fading to light green and black at player's location with duration 2
+						wait 20 ticks
+			else if arg-1 is "givecredit":
+				player is op
+				if arg-2 is not set:
+					send "&cPlease specify a table."
+					stop
+				else:
+					if arg-3 is not set:
+						send "&cPlease specify a player."
+						stop
+					if arg-4 is not set:
+						set {supplydropcredits::%arg-3%'s uuid::%arg-2%} to 1
+						send "&aGave 1 credit to %arg 3% for table %arg 2%."
+					else:
+						set {supplydropcredits::%arg-3%'s uuid::%arg 2%} to arg-4
+						send "&aGave %arg 4% credits to %arg 3% for table %arg 2%."
+
+on tab complete of "supplydrop":
+	if player is op:
+		set tab completions for position 1 to "spawn" and "givecredit"
+	else:
+		set tab completions for position 1 to "spawn"
+	set tab completions for position 2 to {lootbox::tables::*}
+
+
+command /givesupplydropcredit <offlineplayer> <text> [<number>]:
+	permission: op
+	usage: /givesupplydropcredit <player> <table> [<amount>]
+	trigger:
+		if {lootbox::tables::*} does not contain arg-2:
+			send "&cThat table does not exist."
+			stop
+		if arg 3 is not set:
+			set {supplydropcredits::%arg 1%'s uuid'::%arg 2%} to 1
+			send "&aGave 1 credit to %arg 1% for table %arg 2%."
+		else:
+			set {supplydropcredits::%arg 1%'s uuid::%arg 2%} to arg 3
+			send "&aGave %arg 3% credits to %arg 1% for table %arg 2%."
+
+on tab complete of "givesupplydropcredit":
+	set tab completions for position 2 to {lootbox::tables::*}

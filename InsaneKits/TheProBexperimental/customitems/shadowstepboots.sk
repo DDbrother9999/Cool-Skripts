@@ -1,0 +1,56 @@
+options:
+    cooldown: "3.5 seconds" parsed as timespan
+    distance: 10 #blocks
+ 
+on join:
+    set metadata "shadowstep" of player to now
+
+on load:
+    set {shadowstepboots} to unbreakable leather boots of mending 1 named "&8&lShadowstep Boots" with lore "&7Teleports the player forwards when they crouch.%nl%&8Woah, they're gone." with all flags hidden
+    set tag "shadowstep" of nbt compound of {shadowstepboots} to true
+    set tag "customitem" of nbt compound of {shadowstepboots} to true
+    dye {shadowstepboots} black
+
+on sneak toggle:
+    player is sneaking
+    tag "shadowstep" of nbt compound of player's boots is set
+    if difference between now and metadata "shadowstep" of player is not greater than {@cooldown}:
+        set {_difference} to difference between now and metadata "shadowstep" of player
+        set {_metadata} to metadata "shadowstep" of player
+        set {_timespan} to {@cooldown}
+        send action bar "&c%difference between {_timespan} and {_difference}%" to player
+        play sound "block.glass.break" with volume 1 and pitch 0.2 to player
+        stop
+    make 10 of dragon breath at player's chest with offset vector(0.2, 0.5, 0.2) with extra 0.01
+    set metadata "shadowstep" of player to now
+    set {_loop} to 0
+    set {_pitch} to player's pitch
+    set {_yaw} to player's yaw
+    set {_playerloc} to player's location
+    set pitch of {_playerloc} to 0
+    set yaw of {_playerloc} to {_yaw}
+    loop {@distance}*5 times:
+        teleport player to {_playerloc}
+        if block {_loop} blocks in front of player is not air:
+            set {_block} to block {_loop}-1 blocks in front of player's eyes
+            set {_location} to location({_block}'s x coordinate, player's y coordinate, {_block}'s z coordinate)
+            set {_location}'s pitch to {_pitch}
+            set {_location}'s yaw to {_yaw}
+            if distance between {_location} and player's location is greater than 1.5:
+                teleport player to {_playerloc}
+            make 10 of dragon breath at player's chest with offset vector(0.2, 0.5, 0.2) with extra 0.01
+            play sound "entity.enderman.teleport" with volume 1 and pitch 1.5 to player
+            stop
+        add 0.5 to {_loop}
+    set {_block} to block {@distance} blocks in front of player's eyes
+    set {_location} to location({_block}'s x coordinate, player's y coordinate, {_block}'s z coordinate)
+    set pitch of {_location} to {_pitch}
+    set yaw of {_location} to {_yaw}
+    teleport player to {_location}
+    make 10 of dragon breath at player's chest with offset vector(0.2, 0.5, 0.2) with extra 0.01
+    play sound "entity.enderman.teleport" with volume 1 and pitch 1.5 to player
+
+command /giveshadowstep:
+    permission: customitem.give 
+    trigger:
+        give {shadowstepboots} to player

@@ -1,0 +1,397 @@
+on damage of a player:
+	attacker is a player
+	set {-damagedWithin10s.%victim%} to player
+	set {-damagedWithin10s2.%victim%} to now
+
+every 5 seconds:
+	loop all players where [{-damagedWithin10s2.%input%} is set]:
+		if difference between {-damagedWithin10s2.%loop-player%} and now is greater than 10 seconds:
+			delete {-damagedWithin10s2.%loop-player%}
+			delete {-damagedWithin10s.%loop-player%}
+
+on death of player:
+	set death message to ""
+	stop if metadata "Killedbydisc" of victim is set
+	if attacker is not a player:
+		if "%attacker%" is "ender crystal":
+			set {_attacker} to getTag(attacker) ? victim
+			set {_km} to grabKillMessageA({_attacker}, 1)
+		
+			replace all "%%victim%%" in {_km} with victim's name
+			replace all "%%player%%" in {_km} with victim's name
+			replace all "%%attacker%%" in {_km} with {_attacker}'s name
+			send {_km} to all players
+			stop
+		else if "%attacker%" is "tnt":
+			set {_attacker} to getTag(attacker) ? victim
+			set {_km} to grabKillMessageA({_attacker}, 2)
+		
+			replace all "%%victim%%" in {_km} with victim's name
+			replace all "%%player%%" in {_km} with victim's name
+			replace all "%%attacker%%" in {_km} with {_attacker}'s name
+			send {_km} to all players
+			stop
+		else if attacker is set:
+			set {_attacker} to attacker ? victim
+		
+			set {_km} to grabKillMessageA(victim, 7)
+		
+			replace all "%%victim%%" in {_km} with victim's name
+			replace all "%%player%%" in {_km} with victim's name
+			replace all "%%attacker%%" in {_km} with "a %{_attacker}'s type%"
+			send {_km} to all players
+			stop
+	if damage cause is lava:
+		set {_attacker} to {-damagedWithin10s.%victim%} ? victim
+		set {_km} to grabKillMessageA({_attacker}, 4)
+		
+		replace all "%%victim%%" in {_km} with victim's name
+		replace all "%%player%%" in {_km} with victim's name
+		replace all "%%attacker%%" in {_km} with {_attacker}'s name
+		send {_km} to all players
+		stop
+	if "%damage cause%" is "burning" or "fire":
+		set {_attacker} to {-damagedWithin10s.%victim%} ? victim
+		set {_km} to grabKillMessageA({_attacker}, 5)
+
+		replace all "%%victim%%" in {_km} with victim's name
+		replace all "%%player%%" in {_km} with victim's name
+		replace all "%%attacker%%" in {_km} with {_attacker}'s name
+		send {_km} to all players
+		stop
+	if attacker is a player:
+		if projectile is not set:
+			set {_attacker} to attacker ? victim
+			set {_km} to grabKillMessageA({_attacker}, 6)
+		
+			replace all "%%victim%%" in {_km} with victim's name
+			replace all "%%player%%" in {_km} with victim's name
+			replace all "%%attacker%%" in {_km} with {_attacker}'s name
+			send {_km} to all players
+			stop
+		if projectile is set:
+			set {_attacker} to attacker ? victim
+			set {_km} to grabKillMessageA({_attacker}, 8)
+		
+			replace all "%%victim%%" in {_km} with victim's name
+			replace all "%%player%%" in {_km} with victim's name
+			replace all "%%attacker%%" in {_km} with {_attacker}'s name
+			send {_km} to all players
+			stop
+	if projectile is set:
+		if tag "Potion" of nbt compound of projectile is set:
+			set {_attacker} to {-damagedWithin10s.%victim%} ? victim
+			set {_km} to grabKillMessageA({_attacker}, 11)
+			replace all "%%victim%%" in {_km} with victim's name
+			replace all "%%player%%" in {_km} with victim's name
+			replace all "%%attacker%%" in {_km} with {_attacker}'s name
+			send {_km} to all players
+			stop
+		else:
+			set {_attacker} to attacker ? victim
+			set {_km} to grabKillMessageA({_attacker}, 8)
+			replace all "%%victim%%" in {_km} with victim's name
+			replace all "%%player%%" in {_km} with victim's name
+			replace all "%%attacker%%" in {_km} with {_attacker}'s name
+			send {_km} to all players
+			stop
+	if damage cause is freeze: 
+		set {_attacker} to {-damagedWithin10s.%victim%} ? victim
+		set {_km} to grabKillMessageA({_attacker}, 9)
+		replace all "%%victim%%" in {_km} with victim's name
+		replace all "%%player%%" in {_km} with victim's name
+		replace all "%%attacker%%" in {_km} with {_attacker}'s name
+		send {_km} to all players
+		stop
+	if damage cause is drown or drowning:
+		set {_attacker} to {-damagedWithin10s.%victim%} ? victim
+		set {_km} to grabKillMessageA({_attacker}, 10)
+		replace all "%%victim%%" in {_km} with victim's name
+		replace all "%%player%%" in {_km} with victim's name
+		replace all "%%attacker%%" in {_km} with {_attacker}'s name
+		send {_km} to all players
+		stop
+	if damage cause is potion:
+		set {_attacker} to {-damagedWithin10s.%victim%} ? victim
+		set {_km} to grabKillMessageA({_attacker}, 9)
+		replace all "%%victim%%" in {_km} with victim's name
+		replace all "%%player%%" in {_km} with victim's name
+		replace all "%%attacker%%" in {_km} with {_attacker}'s name
+		send {_km} to all players
+		stop
+	set {_attacker} to {-damagedWithin10s.%victim%} ? victim
+	set {_km} to grabKillMessageA({_attacker}, 13)
+	replace all "%%victim%%" in {_km} with victim's name
+	replace all "%%player%%" in {_km} with victim's name
+	replace all "%%attacker%%" in {_km} with {_attacker}'s name
+	send {_km} to all players
+	stop
+		
+function getKillMessageFromID(id: integer) :: objects:
+	if {_id} is 1:
+		return 1 of end crystal and "&fEnd Crystal"
+	else if {_id} is 2:
+		return 1 of tnt and "&fTNT"
+	else if {_id} is 3:
+		return 1 of music disc cat and "&fDisc"
+	else if {_id} is 4:
+		return 1 of lava bucket and "&fLava"
+	else if {_id} is 5:
+		return (1 of flint and steel) and "&fFire"
+	else if {_id} is 6:
+		return 1 of iron sword and "&fDeath by Player"
+	else if {_id} is 7:
+		return 1 of creeper spawn egg and "&fDeath by Entity"
+	else if {_id} is 8:
+		return 1 of arrow and "&fProjectile Death"
+	else if {_id} is 9:
+		return 1 of powder snow bucket and "&fFreezing"
+	else if {_id} is 10:
+		return 1 of water bucket and "&fDrowning"
+	else if {_id} is 11:
+		return 1 of tipped arrow and "&fTipped Arrow Death"
+	else if {_id} is 12:
+		return 1 of water bottle and "&fPotion Death"
+	else if {_id} is 13:
+		return 1 of black stained glass and "&fGeneric Death"
+
+local function openKMGui(p: player):
+	create a new gui with virtual chest inventory with 5 rows named "&cKill Messages"
+	edit last gui:
+		format gui slot (integers between 0 and 8) with lime stained glass pane named " "
+		format gui slot 4 with redstone block named "&cKill Messages"
+		format gui slot 6 with anvil of mending 1 named "&aView Equipped" with lore "&8L-CLICK to view equipped." with all flags hidden:
+			openKMEquipped(player)
+		format gui slot (integers between 36 and 44) with lime stained glass pane named " "
+		format gui slot 37 with yellow stained glass pane named "&ePrevious Page"
+		format gui slot 43 with yellow stained glass pane named "&eNext Page"
+		set {_loopSlot} to 9
+		loop {categories::*}:
+			set {_loop} to {_loopSlot}-8
+			set {_kmGUI} to loop-value
+			
+			if {KMpacksOwned::%{_p}'s uuid%::*} does not contain {_kmGUI}:
+				format gui slot {_loopSlot} with {categories::%loop-value%::icon} with lore "&cYou do not own this pack.":
+					openKMPack({_p}, {_kmGUI})
+			else:
+				format gui slot {_loopSlot} with {categories::%loop-value%::icon} with lore "%{categories::%loop-value%::icon}'s lore%%nl%&aShift Left click to equip entire pack.":
+					if "%click type%" is "left mouse button with shift":
+						set {_loop} to 1
+						loop 13 times:
+							set {_true} to true if {categories::%{_kmGUI}%::killmessages::%{_loop}%::alwaysShown} is false
+							set {_true} to true if {categories::%{_kmGUI}%::killmessages::%{_loop}%::alwaysShown} is not set
+							if {_true} is true:
+								add 1 to {_loop}
+								continue
+							setKillMessage(player, {_kmGUI}, {_loop})
+							add 1 to {_loop}
+						send "&aEquipped!"
+					else:
+						openKMPack({_p}, {_kmGUI})
+			add 1 to {_loopSlot}
+	open last gui to {_p}
+
+local function openKMPack(p: player, kmPack: text):
+	create a new gui with virtual chest inventory with 4 rows named "&fViewing..."
+	edit last gui: 
+		format gui slot (integers between 0 and 8) with lime stained glass pane named " "
+		format gui slot (integers between 27 and 35) with lime stained glass pane named " "
+		format gui slot 4 with {categories::%{_kmPack}%::icon}
+		format gui slot 2 with red stained glass pane named "&cGo Back":
+			openKMGui({_p})
+		set {_killMessages::*} to {categories::%{_kmPack}%::killmessages::*}
+		set {_loop} to 1
+		set {_loopSlot} to 9
+		loop 13 times:
+			if {categories::%{_kmPack}%::killmessages::%{_loop}%::alwaysShown} is false:
+				add 1 to {_loop}
+				continue
+			else if isValidKM("%{categories::%{_kmPack}%::killmessages::%{_loop}%}%") is false:
+				add 1 to {_loop}
+				continue
+			set {_objects::*} to getKillMessageFromID({_loop})
+			if {KMpacksOwned::%{_p}'s uuid%::%{_kmPack}%%{_loop}%} is true: 
+				if {killMessage::%{_p}'s uuid%::%{_loop}%} is {_kmPack}:
+					enchant {_objects::1} with mending 1
+					format gui slot {_loopSlot} with {_objects::1} named {_objects::2} with lore "%{categories::%{_kmPack}%::killmessages::%{_loop}%}%%nl%&a✓ Owned" with all flags hidden:
+						setKillMessage(player, "Default", {_loop})
+						if {_kmPack} is not "Default":
+							send "&cUnequipped!"
+						else:
+							send "&cCannot unequip!"
+						openKMPack(player, {_kmPack})
+				else:
+					format gui slot {_loopSlot} with {_objects::1} named {_objects::2} with lore "%{categories::%{_kmPack}%::killmessages::%{_loop}%}%%nl%&a✓ Owned" with all flags hidden:
+						if isValidKM("%{categories::%{_kmPack}%::killmessages::%{_loop}%}%"):
+							setKillMessage(player, {_kmPack}, {_loop})
+							send "&aEquipped!"
+							openKMPack(player, {_kmPack})
+						else:
+							send "&cThis kill message is not set up."
+							openKMPack(player, {_kmPack})
+			else:
+				format gui slot {_loopSlot} with {_objects::1} named {_objects::2} with lore "%{categories::%{_kmPack}%::killmessages::%{_loop}%}%%nl%&c✖ Not Owned":
+					send "&cYou do not own this kill message." to player
+
+			add 1 to {_loop}
+			add 1 to {_loopSlot}
+				
+	open last gui to {_p}
+
+local function openKMEquipped(p: player):
+	create a new gui with virtual chest inventory with 4 rows named "&fViewing equipped..."
+	edit last gui: 
+		format gui slot (integers between 0 and 8) with lime stained glass pane named " "
+		format gui slot (integers between 27 and 35) with lime stained glass pane named " "
+		format gui slot 4 with red stained glass pane named "&cGo Back":
+			openKMGui({_p})
+		set {_killMessages::*} to {categories::%{_kmPack}%::killmessages::*}
+		set {_loop} to 1
+		set {_loopSlot} to 9
+		loop 13 times:
+			set {_kmPack} to {killMessage::%{_p}'s uuid%::%{_loop}%}
+
+			set {_objects::*} to getKillMessageFromID({_loop})
+			if {KMpacksOwned::%{_p}'s uuid%::%{_kmPack}%%{_loop}%} is true: 
+				format gui slot {_loopSlot} with {_objects::1} named {_objects::2} with lore "%{categories::%{_kmPack}%::killmessages::%{_loop}%}%%nl%&a✓ Equipped":
+					setKillMessage(player, "Default", {_loop})
+					if {_kmPack} is not "Default":
+						send "&cUnequipped."
+					else:
+						send "&cCannot unequip!"
+					openKMEquipped(player)
+
+
+			add 1 to {_loop}
+			add 1 to {_loopSlot}
+				
+	open last gui to {_p}
+
+local function setKillMessage(p: player, kmPack: text, index: integer):
+	if isValidKM({categories::%{_kmPack}%::killmessages::%{_index}%}):
+		set {killMessage::%{_p}'s uuid%::%{_index}%} to {_kmPack}
+
+function grabKillMessageA(player: player, index: integer) :: text:
+	set {_kmPack} to {killMessage::%{_player}'s uuid%::%{_index}%}
+	set {_killMessage} to {categories::%{_kmPack}%::killmessages::%{_index}%}
+	return {_killMessage}
+
+local function giveWholeKMPack(p: player, kmPack: text):
+	add {_kmPack} to {KMpacksOwned::%{_p}'s uuid%::*} if {KMpacksOwned::%{_p}'s uuid%::*} does not contain {_kmPack}
+
+	set {_loop} to 1
+	loop 13 times:
+		set {KMpacksOwned::%{_p}'s uuid%::%{_kmPack}%%{_loop}%} to true
+		add 1 to {_loop}
+
+local function giveKMPackKillType(p: player, kmPack: text, index: integer):
+	unlockKMPack({_p}, {_kmPack})
+	set {KMpacksOwned::%{_p}'s uuid%::%{_kmPack}%%{_index}%} to true
+
+local function unlockKMPack(p: player, kmPack: text):
+	{KMpacksOwned::%{_p}'s uuid%::*} does not contain {_kmPack}
+	add {_kmPack} to {KMpacksOwned::%{_p}'s uuid%::*}
+		
+local function clearKMPacks(p: player):
+	loop {KMpacksOwned::%{_p}'s uuid%::*}:
+
+		set {_loop} to 1
+		loop 13 times:
+			delete {KMpacksOwned::%{_p}'s uuid%::%loop-value-1%%{_loop}%}
+			add 1 to {_loop}
+		remove loop-value from {KMpacksOwned::%{_p}'s uuid%::*}
+	giveWholeKMPack({_p}, "Default")
+	firstJoinKMPack({_p})
+
+command /killmessages:
+	aliases: /km, /kmgui, /killmessagesgui
+	trigger:
+		openKMGui(player)
+
+command /givewholekmpack <text> [<player>]:
+	permission: op
+	trigger:
+		set {_player} to arg 2 if arg 2 is set
+		set {_player} to player if arg 2 is not set
+		giveWholeKMPack({_player}, arg 1)
+
+command /givekmpack <text> [<player>]:
+	permission: op
+	trigger:
+		set {_player} to arg 2 if arg 2 is set
+		set {_player} to player if arg 2 is not set
+		unlockKMPack({_player}, arg 1)
+
+command /givekmpackkilltype <text> <integer> [<player>]:
+	permission: op
+	trigger:
+		set {_player} to arg 3 if arg 3 is set
+		set {_player} to player if arg 3 is not set
+		giveKMPackKillType({_player}, arg 1, arg 2)
+
+command /resetkillmessages <player>:
+	permission: op
+	trigger:
+		clearKMPacks(arg 1)
+
+on tab complete of "givewholekmpack" and "givekmpack" and "givekmpackkilltype" and "givewholekmpackitem":
+	set tab completions for position 1 to {categories::*}
+
+on tab complete of "givekmpackkilltype" and "givewholekmpackitemkilltype":
+	set tab completions for position 2 to (integers between 1 and 13)
+
+on join:
+	giveWholeKMPack(player, "Default")
+	firstJoinKMPack(player)
+
+local function firstJoinKMPack(p: player):
+	{killMessage::%{_p}'s uuid%::1} is not set
+	set {_loop} to 1
+	loop 13 times:
+		setKillMessage({_p}, "Default", {_loop})
+		add 1 to {_loop}
+		
+local function isValidKM(km: text) :: boolean:
+	if "%{_km}%" is "<none>":
+		return false
+	else if "%{_km}%" is "Not Set":
+		return false
+	else:
+		return true
+		
+command /givewholekmpackitem <text>:
+	permission: op
+	trigger:
+		set {_item} to stick named "&cChange my name!" with lore "&8Change my lore!%nl%&8This item will give: %arg 1% bundle. (btw change this lol)"
+		set int tag "killmessages;givesPack" of nbt compound of {_item} to 1
+		set string tag "killmessages;givesPackWhat" of nbt compound of {_item} to arg 1
+		give {_item} to player
+		send "&cGiven."
+		
+command /givekmpackitemkilltype <text> <integer>:
+	permission: op
+	trigger:
+		set {_item} to stick named "&cChange my name!" with lore "&8Change my lore!%nl%&8This item will give: %arg 1% bundle, %arg 2% kill type (btw change this lol)"
+		set int tag "killmessages;givesPack" of nbt compound of {_item} to 2
+		set string tag "killmessages;givesPackWhat" of nbt compound of {_item} to arg 1
+		set int tag "killmessages;givesPackKillType" of nbt compound of {_item} to arg 2
+		give {_item} to player
+		send "&cGiven."
+
+on right click:
+	int tag "killmessages;givesPack" of nbt compound of player's tool is set
+	set {_givesWhat} to int tag "killmessages;givesPack" of nbt compound of player's tool
+	if {_givesWhat} is 1:
+		set {_pack} to string tag "killmessages;givesPackWhat" of nbt compound of player's tool
+		remove 1 of player's tool from player's tool
+		giveWholeKMPack(player, {_pack})
+		send "&aGiven you the &b%{_pack}% &apack."
+
+	else if {_givesWhat} is 2:
+		set {_pack} to string tag "killmessages;givesPackWhat" of nbt compound of player's tool
+		set {_killType} to int tag "killmessages;givesPackKillType" of nbt compound of player's tool
+		remove 1 of player's tool from player's tool
+		giveKMPackKillType(player, {_pack}, {_killType})
+		set {_objects::*} to getKillMessageFromID({_killType})
+		set {_name} to {_objects::2}
+		send "&aGiven you the &b%{_name}% &akilltype from the &b%{_pack}% &apack."

@@ -1,0 +1,176 @@
+options:
+	Prefix: &6&lBOUNTY
+	BountyJoinList: false 
+	TopBountyListAmount: 10 
+	BountyForKillingPlayer: 150 
+	# How many bounties it takes a player to collect before they get an extra reward, think kill streaks but for bounties!
+	Bounty.Killstreak1: 1
+	Bounty.Killstreak2: 2
+	Bounty.Killstreak3: 3
+	# Execute command down here... examples: 
+	# make player execute command "/feed"
+	# or if you want to give an item to a player:
+	# run player command "/give %attacker% diamondsword 1" as op 
+	# run player command "/eco give %attacker% 250" as op
+	# run player command "/kit Starter" as op 
+	# A better way to give a player money:
+	# add 500 to the attacker's account
+	Bounty.Killstreak1.Reward: add 1 to {eTokens::%player's uuid%}
+	Bounty.Killstreak2.Reward: add 2 to {eTokens::%player's uuid%}
+	Bounty.Killstreak3.Reward: add 3 to {eTokens::%player's uuid%}
+#---------------- Do Not Touch Anything Below This Line Unless You have sufficient knowledge of skript ---------------------
+
+
+
+command /setbounty <player> <integer>:
+	trigger:
+		if arg 1 is not player:
+			if arg 2 is less than or equal to {eTokens::%player's uuid%}:
+				if arg 2 is not less than 50:
+					if {bounty::%arg 1%} is not set:
+						set {bounty::%arg 1%} to arg 2
+						set {bounty::%arg 1%::player} to player
+						remove arg 2 from {eTokens::%player's uuid%}
+						broadcast "{@Prefix} &b%player% &7has set a bounty of &b%arg 2% eTokens &7on %arg-1%!"
+					else:
+						add arg 2 to {bounty::%arg 1%}
+						remove arg 2 from {eTokens::%player's uuid%}
+						broadcast "{@Prefix} &b%player% &7has added a bounty of &b%arg-2% eTokens &7on &6%arg-1%, &7increasing &6%arg-1%'s bounty to &3%{bounty::%arg 1%}% eTokens"
+				else:
+					send "{@Prefix} &7Sorry, bounty can not be less than &b50 eTokens!"
+			else:
+				send "{@Prefix} &7You may only add a bounty equal to or less than your current balance!"
+		else:
+			send "{@Prefix} &7You may not place a bounty on yourself!"
+
+on death of player:
+	metadata "inDuel" of victim is not set
+	metadata "inDuel" of attacker is not set
+	attacker is a player
+	if {bounty::%victim%} is set:
+		set {bounty.killstreak::%victim%} to 0
+		add {bounty::%victim%} to {eTokens::%attacker's uuid%}
+		add 1 to {bounty.killstreak::%attacker%}
+		broadcast "{@Prefix} &3%attacker% &7just claimed &3%victim%'s bounty of &6%{bounty::%victim%}% eTokens"
+		if {bounty::%victim%::player} is online:
+			send "{@Prefix} &3%victim% &7was killed by &3%attacker%" to {bounty::%victim%::player}
+		else:
+			set {bountymessage::%{bounty::%victim%::player}%} to "{@Prefix}&3%victim% &7was killed by &3%attacker%"
+		delete {bounty::%victim%} and {bounty::%victim%::*}
+	else if attacker is victim:	
+		stop
+
+command /bounty <text>:
+	trigger:
+		if arg 1 is "help" or "command" or "commands":
+			send "&0=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-="
+			send "                 &3Bounty Help List"
+			send "&0=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-="
+			send " "
+			send "  &b/bounty help: &7List Bounty commands"
+			send "  &3/bountylist: &7List all online players with a bounty"
+			send "  &b/listbounty all: &7List all players with a bounty"
+			send "  &3/setbounty: &7Set a bounty on player"
+			send "  &b/bounty: &7Show players bounty "
+			send "  &3/topbounties: &7List top &c{@TopBountyListAmount}&7 bounties"
+		else if arg 1 is set:
+			send "{@Prefix} &bCurrent bounty for &3%arg 1% &bis &a$%{bounty::%arg 1%}%"
+       
+		else:
+			send "{@Prefix} &bYour bounty is &a$%{bounty::%arg 1%}%"
+
+command /adminbounty:
+	aliases: /adminbounty, /abounty, /bountyadmin, /bountya
+	trigger:
+		if player has permission "bounty.help.staff":
+			send "&0=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-="
+			send "                                      &3Bounty Help List"
+			send "&0=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-="
+			send " "
+			send "  &b/bounty help&c&l|&bcommand(s)      &7List Bounty commands"
+			send "  &3/bountylist&c&l|&3listbounty      &7List all online players with a bounty"
+			send "  &b/bountylist&c&l|&blistbounty all      &7List all players with a bounty"
+			send "  &3/setbounty        &7Set a bounty on player"
+			send "  &b/bounty       &7Show players bounty "
+			send "  &3/topbounty&c&l|&3topbounties      &7List top &c{@TopBountyListAmount}&7 bounties"
+			send " "
+			send "&0=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-="
+			send "                                      &4Admin Bounty Help List"
+			send "&0=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-="
+			send " "
+			send "  &c/adminbounty &chelp      &7List player and admin help list/commands "
+			send "  &4/clearbounty       &7Clear a player's bounty"
+			send "  &c/togglebounty      &7Toggles bounty list showing when player joins server"
+
+
+command /bountylist:
+	aliases: /listbounty, /bountylist, /listbounties
+	cooldown: 1 minute
+	cooldown message: &cPlease wait %remaining time% to use this!
+	trigger:
+		set {_var} to true
+		if {_var} is true:
+			set {_number} to 0
+			loop all players:
+				{bounty::%loop-player%} is more than 0:
+					set {_bounty::%loop-player%} to {bounty::%loop-player%}
+					add 1 to {_number}
+			if {_number} is 0:
+				send "{@Prefix} &7Their are no players currently online with a bounty!"
+			else:
+				loop {_bounty::*}:
+					if {_low.to.high.list::%loop-value%} is not set:
+						set {_low.to.high.list::%loop-value%} to loop-index
+					else:
+						set {_n} to 0
+						loop 1500 times:
+							set {_n} to {_n}+1
+							{_low.to.high.list::%loop-value-1%.%{_n}%} is not set
+							set {_low.to.high.list::%loop-value-1%.%{_n}%} to loop-index
+							stop loop
+				wait 1 tick
+				set {_n} to size of {_low.to.high.list::*}
+				loop {_low.to.high.list::*}:
+					set {_high.to.low.list::%{_n}%} to loop-value
+					set {_n} to {_n}-1
+				wait 1 tick
+				message "&0&l&m------------&r  &c&l&nOnline Bounties&r  &0&l&m------------"
+				loop {_high.to.low.list::*}:
+					add 1 to {_result}
+					send "&b%loop-index%&7: &3%loop-value% &a&n$%{_bounty::%loop-value%}%"
+					if {_result} is size of {_bounty::*}:
+						stop
+    
+command /clearbounty <offlineplayer>:
+	permission: bounty.staff.clear
+	trigger:
+		set {bounty::%arg 1%} to 0
+		send "you cleared %arg-1%'s bounty'"
+		
+		
+command /topbounty:
+	aliases: /topbounty, /bountytop, /topbounties
+	trigger:
+		loop {bounty::*}:
+			if {_low.to.high.list::%loop-value%} is not set:
+				set {_low.to.high.list::%loop-value%} to loop-index
+			else:
+				set {_n} to 0
+				loop 1500 times:
+					set {_n} to {_n}+1
+					{_low.to.high.list::%loop-value-1%.%{_n}%} is not set
+					set {_low.to.high.list::%loop-value-1%.%{_n}%} to loop-index
+					stop loop
+		wait 1 tick
+		set {_n} to size of {_low.to.high.list::*}
+		loop {_low.to.high.list::*}:
+			set {_high.to.low.list::%{_n}%} to loop-value
+			set {_n} to {_n}-1
+		wait 1 tick
+		message "&0&l&m------------&r  &c&l&nTop {@TopBountyListAmount} Bounties&r  &0&l&m------------"
+		loop {_high.to.low.list::*}:
+			add 1 to {_result}
+			send "&b%loop-index%&7: &3%loop-value% &a&n$%{bounty::%loop-value%}%"
+			if {_result} is {@TopBountyListAmount}:
+				stop 
+

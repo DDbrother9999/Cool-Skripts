@@ -1,0 +1,3 @@
+on place of a sign:
+  if "%region at event-block%" contains "shulker1" or "shulker2" or "shulker3" or "shulkerarea":
+    cancel event

@@ -1,0 +1,4 @@
+on join:
+  if player is in the region "shulkerarea" or "shulker1" or "shulker2" or "shulker3":
+    teleport player to {spawn} 
+

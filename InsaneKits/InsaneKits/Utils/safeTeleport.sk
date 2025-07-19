@@ -1,0 +1,5 @@
+function safeTeleport(p: player, loc: location):
+	if the region at {_p} does not contain "boxs4":
+		teleport {_p} to {_loc}
+	else:
+		send "&cYou must be in a safezone to teleport!" to {_p}

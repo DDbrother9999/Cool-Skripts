@@ -1,0 +1,22 @@
+command /lock [<text>]:
+	trigger:
+		if arg-1 is "all":
+			set {_i} to 0
+			set {_current} to metadata "Lock;0" ? false of player
+			loop 9 times:
+				set metadata "Lock;%{_i}%" of player to !{_current}
+				add 1 to {_i}
+			send "&cLocked all of your slots! &7(/lock all to unlock!)" if metadata "Lock;0" of player is true
+			send "&aUnlocked all of your slots!" if metadata "Lock;0" of player is false 
+			stop
+		set metadata "Lock;%index of current hotbar slot of player%" of player to !(metadata "Lock;%index of current hotbar slot of player%" of player ? false)
+		send "&cLocked Slot %index of current hotbar slot of player% &7(Use /lock to unlock! | /lock all)" if metadata "Lock;%index of current hotbar slot of player%" of player is true
+		send "&aUnlocked Slot %index of current hotbar slot of player% &7(Use /lock all)" if metadata "Lock;%index of current hotbar slot of player%" of player is false 
+
+on drop:
+	metadata "Lock;%index of current hotbar slot of player%" of player is true
+	cancel event
+	send "&cSlot %index of current hotbar slot of player% is locked! &7(Use /lock to unlock | /lock all)"
+
+on tab complete of "/lock":
+	set tab completions for position 1 to "all"

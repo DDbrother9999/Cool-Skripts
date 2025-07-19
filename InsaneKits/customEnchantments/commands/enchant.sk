@@ -1,0 +1,29 @@
+command /cenchant <text> <integer>:
+    permission: cenchant.use
+    trigger:
+        set int tag "customEnchants;%arg 1%" of nbt compound of player's tool to arg 2
+
+command /cenchdesc [<text>]:
+    trigger:
+        if arg 1 is "beheader":
+            send "&cBeheader%nl%&9Axe Enchantment%nl%&8Has a chance of dropping the victim's head, which you can consume. Chance of dropping increases per level. Caps at level 5."
+        else if arg 1 is "frostbite":
+            send "&9Frostbite%nl%&9Weapon Enchantment%nl%&8Does damage to the victim every so often after hitting them. Damage increases per level. Caps at level 3."
+        else if arg 1 is "molten":
+            send "&6Molten%nl%&9Weapon Enchantment%nl%&8Doubles fire damage while also setting the victim on fire for three seconds. Caps at level 1."
+        else if arg 1 is "glide":
+            send "&bGlide%nl%&9Boots Enchantment%nl%&8Gives you slowfalling while wearing. Crouch to fall faster."
+        else if arg 1 is "ender shift":
+            send "&5Ender Shift%nl%&9Boots Enchantment%nl%&8Crouch to teleport 3 blocks in your direction. Beware though, it needs to charge. Caps at level 1."
+        else if arg 1 is "lifesteal":
+            send "&cLifesteal%nl%&9Weapon Enchantment%nl%&8Gives you the damage you deal as health. Caps at level 3."
+        else if arg 1 is "soul stealer":
+            send "&7Soul Stealer%nl%&9Weapon Enchantment%nl%&8It's simple. The higher your killstreak, the more damage you deal. Caps at level 1. Damage caps at 2.5x."
+        else if arg 1 is "teleportation blocker":
+            send "&5Anti-Teleport%nl%&9Bow Enchantment%nl%&8Shoot someone, they have a chance of not being able to use ender pearls. Caps at level 3."
+
+on tab complete of "/cenchant":
+    set tab completions for position 1 to "beheader" and "frostbite" and "molten" and "glide" and "ender shift" and "lifesteal" and "soul stealer" and "anti-teleport"
+ 
+on tab complete of "/cenchdesc":
+    set tab completions for position 1 to "beheader" and "frostbite" and "molten" and "glide" and "ender shift" and "lifesteal" and "soul stealer" and "anti-teleport"

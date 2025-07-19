@@ -1,0 +1,4 @@
+on place of TNT:
+    cancel the event
+    remove 1 TNT from player's inventory
+    spawn 1 primed TNT at event-location

@@ -1,0 +1,250 @@
+on load:
+    set {swords::*} to "iron sword" and "diamond sword" and "netherite sword"
+    set {swordenchants::*} to "sharpness 1" and "sharpness 2"
+    set {axes::*} to "iron axe" and "diamond axe" and "netherite axe"
+    set {axeenchants::*} to "sharpness 1" and "sharpness 2"
+    set {pickaxes::*} to "iron pickaxe" and "diamond pickaxe"
+    set {pickaxeenchants::*} to "efficiency 1" and "efficiency 2" 
+    set {bows::*} to "bow" and "crossbow"
+    set {normalbowenchant::*} to "power 1" and "power 2"
+    set {crossbowenchant::*} to "piercing 1" and "piercing 2" and "quick charge 1" and "quick charge 2"
+    set {foods::*} to "bread" and "golden carrot" and "cooked beef"
+    set {foodamount} to 16
+    set {blocks::*} to "cobblestone" and "oak planks"
+    set {blockamount} to 64
+    set {slot6} to lava bucket
+    set {slot7} to water bucket
+    set {_jukebox} to jukebox named "/c/lExploding Jukebox" with lore "&8oh no it explodes"
+    enchant {_jukebox} with mending 0
+   # set tag "iexplode" of nbt compound of {_jukebox} to true
+    #clear {slot8::*}
+    #add {_jukebox} to {slot8::*}
+    loop 10 times:
+        add tnt named "/c/lTNT" to {slot8::*}
+        add cobweb to {slot8::*}
+    set {slot8amount::*} to 4 and 6 and 8 and 16 
+    #set {slot8nbt::*} to "iexplode"
+    #set {slot8enchants::*} to "mending 0"
+    set {slot9} to arrow
+    set {slot9amount} to 64
+    set {helmet::*} to "iron helmet" and "diamond helmet" and "netherite helmet"
+    set {helmetenchants::*} to "protection 1" and "protection 2"
+    set {chestplate::*} to "iron chestplate" and "diamond chestplate" and "netherite chestplate"
+    set {chestplateenchants::*} to "protection 1" and "protection 2"
+    set {leggings::*} to "iron leggings" and "diamond leggings" and "netherite leggings"
+    set {leggingsenchants::*} to "protection 1" and "protection 2"
+    set {boots::*} to "iron boots" and "diamond boots" and "netherite boots"
+    set {bootsenchants::*} to "protection 1" and "protection 2"
+    set {offhanditems::*} to "totem of undying" and "shield"
+
+command /generatekit [<integer>]:
+    permission: op
+    usage: /generatekit <amount>
+    trigger:
+        delete yaml "config"
+        unload yaml "config"
+        load yaml "plugins/generatedyamls/kits.yml" as "config"
+        set yaml list "kits:" from "config" to ""
+        set yaml list "kits:.1" from "config" to ""
+        save yaml "config" with an indentation of 2
+        set {_now} to now
+        set {_loop} to 0
+        
+        loop arg 1 times:
+            delete {_enchant}
+            delete {_id}
+            delete {_enchantment}
+            delete {_enchantlevel}
+            delete {_displayname}
+            add 1 to {_loop}
+            # SWORD
+            set {_sword} to {swords::%random integer between 1 and size of {swords::*}%} parsed as item type 
+            set {_enchant} to {swordenchants::%random integer between 1 and size of {swordenchants::*}%} parsed as enchantment type
+            set {_id} to tag "id" of full nbt compound of {_sword}
+            set {_id} to "%{_id}%" in upper case
+            replace all "MINECRAFT:" in {_id} with ""
+            set {_enchantment} to "%enchantment of {_enchant}%" in upper snake case
+            set {_enchantlevel} to enchantment level of {_enchant}
+            set yaml list "kits:.%{_loop}%.%{_id}%" from "config" to ""
+            set yaml list "kits:.%{_loop}%.%{_id}%.slot" from "config" to "0"
+            set yaml list "kits:.%{_loop}%.%{_id}%.enchantments" from "config" to ""
+            set yaml value "kits:.%{_loop}%.%{_id}%.enchantments.%{_enchantment}%" from "config" to {_enchantlevel}
+
+            # AXE
+            set {_axe} to {axes::%random integer between 1 and size of {axes::*}%} parsed as item type 
+            set {_enchant} to {axeenchants::%random integer between 1 and size of {axeenchants::*}%} parsed as enchantment type
+            set {_id} to tag "id" of full nbt compound of {_axe}
+            set {_id} to "%{_id}%" in upper case
+            replace all "MINECRAFT:" in {_id} with ""
+            set {_enchantment} to "%enchantment of {_enchant}%" in upper snake case
+            set {_enchantlevel} to enchantment level of {_enchant}
+            set yaml list "kits:.%{_loop}%.%{_id}%" from "config" to ""
+            set yaml list "kits:.%{_loop}%.%{_id}%.slot" from "config" to "1"
+            set yaml list "kits:.%{_loop}%.%{_id}%.enchantments" from "config" to ""
+            set yaml value "kits:.%{_loop}%.%{_id}%.enchantments.%{_enchantment}%" from "config" to {_enchantlevel}
+
+            #PICKAXE
+            set {_pickaxe} to {pickaxes::%random integer between 1 and size of {pickaxes::*}%} parsed as item type 
+            set {_enchant} to {pickaxeenchants::%random integer between 1 and size of {pickaxeenchants::*}%} parsed as enchantment type
+            set {_id} to tag "id" of full nbt compound of {_pickaxe}
+            set {_id} to "%{_id}%" in upper case
+            replace all "MINECRAFT:" in {_id} with ""
+            set {_enchantment} to "%enchantment of {_enchant}%" in upper snake case
+            set {_enchantlevel} to enchantment level of {_enchant}
+            set yaml list "kits:.%{_loop}%.%{_id}%" from "config" to ""
+            set yaml list "kits:.%{_loop}%.%{_id}%.slot" from "config" to "2"
+            set yaml list "kits:.%{_loop}%.%{_id}%.enchantments" from "config" to ""
+            set yaml value "kits:.%{_loop}%.%{_id}%.enchantments.%{_enchantment}%" from "config" to {_enchantlevel}
+
+            #BOWS
+            set {_bow} to {bows::%random integer between 1 and size of {pickaxes::*}%} parsed as item type 
+            set {_enchant} to {normalbowenchant::%random integer between 1 and size of {normalbowenchant::*}%} parsed as enchantment type if {_bow} is bow 
+            set {_enchant} to {crossbowenchant::%random integer between 1 and size of {crossbowenchant::*}%} parsed as enchantment type if {_bow} is crossbow
+            set {_id} to tag "id" of full nbt compound of {_bow}
+            set {_id} to "%{_id}%" in upper case
+            replace all "MINECRAFT:" in {_id} with ""
+            set {_enchantment} to "%enchantment of {_enchant}%" in upper snake case
+            set {_enchantlevel} to enchantment level of {_enchant}
+            set yaml list "kits:.%{_loop}%.%{_id}%" from "config" to ""
+            set yaml list "kits:.%{_loop}%.%{_id}%.slot" from "config" to "3"
+            set yaml list "kits:.%{_loop}%.%{_id}%.enchantments" from "config" to ""
+            set yaml value "kits:.%{_loop}%.%{_id}%.enchantments.%{_enchantment}%" from "config" to {_enchantlevel}
+
+            #FOOD
+            set {_food} to {foods::%random integer between 1 and size of {foods::*}%} parsed as item type
+            set {_id} to tag "id" of full nbt compound of {_food}
+            set {_id} to "%{_id}%" in upper case
+            replace all "MINECRAFT:" in {_id} with ""
+            set yaml list "kits:.%{_loop}%.%{_id}%" from "config" to ""
+            set yaml value "kits:.%{_loop}%.%{_id}%.quantity" from "config" to "%{foodamount}%"
+            set yaml list "kits:.%{_loop}%.%{_id}%.slot" from "config" to "4"
+
+            #BLOCKS
+            set {_block} to {blocks::%random integer between 1 and size of {blocks::*}%} parsed as item type
+            set {_id} to tag "id" of full nbt compound of {_block}
+            set {_id} to "%{_id}%" in upper case
+            replace all "MINECRAFT:" in {_id} with ""
+            set yaml list "kits:.%{_loop}%.%{_id}%" from "config" to ""
+            set yaml value "kits:.%{_loop}%.%{_id}%.quantity" from "config" to "%{blockamount}%"
+            set yaml list "kits:.%{_loop}%.%{_id}%.slot" from "config" to "5"
+
+            #SLOT 6
+            set {_id} to tag "id" of full nbt compound of {slot6}
+            set {_id} to "%{_id}%" in upper case
+            replace all "MINECRAFT:" in {_id} with ""
+            set yaml list "kits:.%{_loop}%.%{_id}%" from "config" to ""
+            set yaml list "kits:.%{_loop}%.%{_id}%.slot" from "config" to "6"
+
+            #SLOT 7
+            set {_id} to tag "id" of full nbt compound of {slot7}
+            set {_id} to "%{_id}%" in upper case
+            replace all "MINECRAFT:" in {_id} with ""
+            set yaml list "kits:.%{_loop}%.%{_id}%" from "config" to ""
+            set yaml list "kits:.%{_loop}%.%{_id}%.slot" from "config" to "7"
+#has-hidden-enchantment-effect: true
+            #SLOT 8
+            delete {_enchant}
+            delete {_nbtTag}
+            set {_random} to random integer between 1 and size of {slot8::*}
+            set {_item} to {slot8::%{_random}%}
+            set {_enchant} to {slot8enchants::%{_random}%} parsed as enchantment type if {slot8enchants::%{_random}%} is set
+            set {_enchantment} to "%enchantment of {_enchant}%" in upper snake case if {_enchant} is set
+            set {_enchantlevel} to enchantment level of {_enchant} if {_enchant} is set
+            set {_id} to tag "id" of full nbt compound of {_item}
+            set {_id} to "%{_id}%" in upper case
+            set {_displayname} to {_item}'s name if {_item}'s name is set
+            replace all "/" in {_displayname} with "&"
+            set {_nbtTag} to {slot8nbt::%{_random}%} if {slot8nbt::%{_random}%} is set
+            replace all "MINECRAFT:" in {_id} with ""
+
+            #          ItemFlags:
+          #- HIDE_ENCHANTS
+            set yaml list "kits:.%{_loop}%.%{_id}%" from "config" to ""
+            set yaml value "kits:.%{_loop}%.%{_id}%.nbtTag" from "config" to {_nbtTag} if {_nbtTag} is set
+            set yaml value "kits:.%{_loop}%.%{_id}%.quantity" from "config" to {slot8amount::%random integer between 1 and size of {slot8amount::*}%}
+            set yaml list "kits:.%{_loop}%.%{_id}%.slot" from "config" to "8"
+            set yaml list "kits.%{_loop}%.%{_id}%.enchantments" from "config" to "" if {_enchant} is set
+            set yaml value "kits:.%{_loop}%.%{_id}%.enchantments.%{_enchantment}%" from "config" to {_enchantlevel} if {_enchant} is set
+            set yaml list "kits:.%{_loop}%.%{_id}%.has-hidden-enchantment-effect" from "config" to true if {_enchant} is set
+
+            # SLOT 9
+
+            set {_id} to tag "id" of full nbt compound of {slot9}
+            set {_id} to "%{_id}%" in upper case
+            replace all "MINECRAFT:" in {_id} with ""
+            set yaml list "kits:.%{_loop}%.%{_id}%" from "config" to ""
+            set yaml value "kits:.%{_loop}%.%{_id}%.quantity" from "config" to "%{slot9amount}%"
+            set yaml list "kits:.%{_loop}%.%{_id}%.slot" from "config" to "9"
+
+            #HEAD
+            set {_helmet} to {helmet::%random integer between 1 and size of {helmet::*}%} parsed as item type 
+            set {_enchant} to {helmetenchants::%random integer between 1 and size of {helmetenchants::*}%} parsed as enchantment type
+            set {_id} to tag "id" of full nbt compound of {_helmet}
+            set {_id} to "%{_id}%" in upper case
+            replace all "MINECRAFT:" in {_id} with ""
+            set {_enchantment} to "%enchantment of {_enchant}%" in upper snake case
+            set {_enchantlevel} to enchantment level of {_enchant}
+            set yaml list "kits:.%{_loop}%.%{_id}%" from "config" to ""
+            set yaml list "kits:.%{_loop}%.%{_id}%.slot" from "config" to "HEAD"
+            set yaml list "kits:.%{_loop}%.%{_id}%.enchantments" from "config" to ""
+            set yaml value "kits:.%{_loop}%.%{_id}%.enchantments.%{_enchantment}%" from "config" to {_enchantlevel}
+
+
+            #CHESTPLATE
+            set {_chestplate} to {chestplate::%random integer between 1 and size of {chestplate::*}%} parsed as item type 
+            set {_enchant} to {chestplateenchants::%random integer between 1 and size of {chestplateenchants::*}%} parsed as enchantment type
+            set {_id} to tag "id" of full nbt compound of {_chestplate}
+            set {_id} to "%{_id}%" in upper case
+            replace all "MINECRAFT:" in {_id} with ""
+            set {_enchantment} to "%enchantment of {_enchant}%" in upper snake case
+            set {_enchantlevel} to enchantment level of {_enchant}
+            set yaml list "kits:.%{_loop}%.%{_id}%" from "config" to ""
+            set yaml list "kits:.%{_loop}%.%{_id}%.slot" from "config" to "CHEST"
+            set yaml list "kits:.%{_loop}%.%{_id}%.enchantments" from "config" to ""
+            set yaml value "kits:.%{_loop}%.%{_id}%.enchantments.%{_enchantment}%" from "config" to {_enchantlevel}
+
+
+
+            #LEGS
+            set {_leggings} to {leggings::%random integer between 1 and size of {leggings::*}%} parsed as item type 
+            set {_enchant} to {leggingsenchants::%random integer between 1 and size of {leggingsenchants::*}%} parsed as enchantment type
+            set {_id} to tag "id" of full nbt compound of {_leggings}
+            set {_id} to "%{_id}%" in upper case
+            replace all "MINECRAFT:" in {_id} with ""
+            set {_enchantment} to "%enchantment of {_enchant}%" in upper snake case
+            set {_enchantlevel} to enchantment level of {_enchant}
+            set yaml list "kits:.%{_loop}%.%{_id}%" from "config" to ""
+            set yaml list "kits:.%{_loop}%.%{_id}%.slot" from "config" to "LEGS"
+            set yaml list "kits:.%{_loop}%.%{_id}%.enchantments" from "config" to ""
+            set yaml value "kits:.%{_loop}%.%{_id}%.enchantments.%{_enchantment}%" from "config" to {_enchantlevel}
+
+
+
+            #BOOTS
+            set {_boots} to {boots::%random integer between 1 and size of {boots::*}%} parsed as item type 
+            set {_enchant} to {bootsenchants::%random integer between 1 and size of {bootsenchants::*}%} parsed as enchantment type
+            set {_id} to tag "id" of full nbt compound of {_boots}
+            set {_id} to "%{_id}%" in upper case
+            replace all "MINECRAFT:" in {_id} with ""
+            set {_enchantment} to "%enchantment of {_enchant}%" in upper snake case
+            set {_enchantlevel} to enchantment level of {_enchant}
+            set yaml list "kits:.%{_loop}%.%{_id}%" from "config" to ""
+            set yaml list "kits:.%{_loop}%.%{_id}%.slot" from "config" to "FEET"
+            set yaml list "kits:.%{_loop}%.%{_id}%.enchantments" from "config" to ""
+            set yaml value "kits:.%{_loop}%.%{_id}%.enchantments.%{_enchantment}%" from "config" to {_enchantlevel}
+
+            #OFFHAND
+            set {_offhand} to {offhanditems::%random integer between 1 and size of {offhanditems::*}%} parsed as item type
+            set {_id} to tag "id" of full nbt compound of {_offhand}
+            set {_id} to "%{_id}%" in upper case
+            replace all "MINECRAFT:" in {_id} with ""
+            set yaml value "kits:.%{_loop}%.%{_id}%.quantity" from "config" to "1"
+            set yaml list "kits:.%{_loop}%.%{_id}%" from "config" to ""
+            set yaml list "kits:.%{_loop}%.%{_id}%.slot" from "config" to "OFF_HAND"
+
+        #SAVE
+        save yaml "config"
+        send "&aCompleted generating kits. Please check [plugins/generatedyamls/kits.yml] for generated file. [%difference between now and {_now}%]"
+
+
+

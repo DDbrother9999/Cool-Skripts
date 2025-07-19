@@ -1,0 +1,2 @@
+on enchant:
+	addprogressquest(player,"Weekly","Enchanter III")

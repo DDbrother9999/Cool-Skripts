@@ -1,0 +1,19 @@
+on load:
+	set {ThunderHammer} to unbreakable golden axe of sharpness 5, knockback 2, fire aspect 2 named "&x&f&b&b&c&0&0&lT&x&f&b&c&0&0&e&lh&x&f&b&c&4&1&b&lu&x&f&c&c&8&2&9&ln&x&f&c&c&c&3&6&ld&x&f&c&d&0&4&4&le&x&f&c&d&4&5&1&lr &x&f&c&d&8&5&f&lH&x&f&c&d&c&6&c&la&x&f&d&e&0&7&a&lm&x&f&d&e&4&8&7&lm&x&f&d&e&8&9&5&le&x&f&d&e&c&a&2&lr"
+
+command /givethunderhammer:
+	permission: op
+	trigger:
+		give {ThunderHammer} to player
+		send "&aYou have been given the Thunder Hammer!" to player
+
+on damage:
+	name of attacker's tool is "&x&f&b&b&c&0&0&lT&x&f&b&c&0&0&e&lh&x&f&b&c&4&1&b&lu&x&f&c&c&8&2&9&ln&x&f&c&c&c&3&6&ld&x&f&c&d&0&4&4&le&x&f&c&d&4&5&1&lr &x&f&c&d&8&5&f&lH&x&f&c&d&c&6&c&la&x&f&d&e&0&7&a&lm&x&f&d&e&4&8&7&lm&x&f&d&e&8&9&5&le&x&f&d&e&c&a&2&lr"
+	debug("Using thunder hammer")
+	chance of 50%:
+		cancel event
+		strike lightning at victim's position
+		victim's health is less than 3:
+			kill victim
+		victim's health is greater than 1:
+			damage victim by 3

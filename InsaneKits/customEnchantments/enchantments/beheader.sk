@@ -1,0 +1,29 @@
+on death:
+    hasCEnchant(attacker's tool, "beheader") is true
+
+    chance of 13.33*getCEnchantLevel(attacker's tool, "beheader")%:
+
+        set {_size} to length of victim's name
+        set {_lore} to "&8Tasty!%nl%&5Effects:%nl%&9Absorption I (02:00)%nl%&9Health Boost I (00:35)%nl%&9Regeneration III (00:08)"
+        if char at {_size}-1 in victim's name is "s":
+            drop 1 of victim's skull named "&7[&3☠&7]&7&l %victim's name%&3' Head" with lore {_lore} at victim
+        else:
+            drop 1 of victim's skull named "&7[&3☠&7]&7&l %victim's name%&3's Head" with lore {_lore} at victim
+        
+on right click:
+    if line 1 of player's tool's lore is "&8Tasty!":
+        set {_true} to true
+        remove 1 of player's tool from player's tool
+    else if line 1 of player's off hand tool's lore is "&8Tasty!":
+        set {_true} to true
+        remove 1 of player's off hand tool from player's off hand tool
+    {_true} is true
+    cancel event
+
+    play sound "entity.player.burp" with volume 1 and pitch 1 at player
+
+    apply absorption to player for 2 minutes replacing existing effect
+    apply health boost to player for 35 seconds replacing existing effect
+    apply regeneration of tier 3 to player for 8 seconds replacing existing effect
+
+    

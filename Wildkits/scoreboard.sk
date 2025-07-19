@@ -1,0 +1,35 @@
+import:
+    net.leonemc.core.util.bukkit.CC
+    net.leonemc.core.Core
+    net.leonemc.core.user.UserManager
+
+on join:
+    while player is online:
+        set {_user} to Core.getInstance().getUserManager().get(player)
+        set {_kills} to {_user}.getKills()
+        set {_deaths} to {_user}.getDeaths()
+        set title of player's scoreboard to "&6&lWildKits"
+        set line 14 of player's scoreboard to "&8&m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯"
+        set line 13 of player's scoreboard to "&e&lPLAYER"
+        set line 12 of player's scoreboard to "&6&l| &7Rank: &f%CC.translate(player's prefix)%"
+        set line 11 of player's scoreboard to "&6&l| &7Kills: &f%{_kills}%"
+        set line 10 of player's scoreboard to "&6&l| &7Deaths: &f%{_deaths}%"
+        if {deaths::%player's uuid%} is 0:
+            set line 9 of player's scoreboard to "&6&l| &7KDR: &f%{_kills}%" 
+        else:
+            if {kills::%player's uuid%} is higher than 0:
+                set line 9 of player's scoreboard to "&6&l| &7KDR: &f%{_kills}/{_deaths}%"  
+        set line 8 of player's scoreboard to "&d"
+        set line 7 of player's scoreboard to "&e&lSERVER"
+        set line 6 of player's scoreboard to the value of placeholder "&6&l| %%core_koth_time%%" from player
+        set line 5 of player's scoreboard to "&6&l| &7TPS: &f%tps from last minute%"
+        set line 4 of player's scoreboard to "&6&l| &7Joins: &f%{uniquejoins}%"
+        set line 3 of player's scoreboard to "&6&l| &7Online: &f%number of players%/%max player count%"
+        set line 2 of player's scoreboard to "&8&m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯"
+        set line 1 of player's scoreboard to "&7wildkits.minehut.gg"
+        wait 20 tick 
+
+command /testhex:
+    trigger:
+        set {_prefix} to CC.translate(player's prefix)
+        send {_prefix} to player

@@ -1,0 +1,216 @@
+# sweep attack, thorns, the void, magma, a lightning, drowning, dragonfire, an attack, drown, an entity attack, melt, freeze, falling block, contact, fire, an entity explosion, lightning, a fall, entity explosion, void, a lightning strike, suffocation, suicide, wither effect, a plugin, lightning strike, entity attack, a potion, a wither, sweeping, melting, a falling block, unknown, starvation, lava, fall, hot floor, attack, a block explosion, dryout, burn, hitting wall while flying, potion, world border, flying into a wall, cramming, poison, sonic boom, suffocate, custom, kill, killed, a fire, burning, a projectile, plugin, wither potion effect, block explosion, projectile, wither, dragon's breath
+
+# Made by TheProB (.theprob DC) for InsaneKits
+
+on skript start:
+    set {-sessionID} to 0
+
+
+command /editkmecategories:
+    permission: kme.editcategories 
+    trigger:
+        openEditCategoryGUI(player)
+
+local function openEditCategoryGUI(player: player):
+    create a gui with virtual chest inventory with 6 rows named "&6Categories"
+    edit last gui:
+        format gui slot (0,1,2,3,4,5,6,8) with gray stained glass pane
+        format gui slot 7 with gold ingot named "&fCreate category":
+            openEditingCategoryGUI(player, false)
+
+        set {_loop} to 0
+        loop {categories::*}:
+            set {_id} to loop-value
+            set {_lore::*} to lore of {categories::%{_id}%::icon}
+            add "&8ID: %{_id}%%nl%&cRight click and shift to destroy category" to {_lore::*}
+            format gui slot 9+{_loop} with {categories::%{_id}%::icon} with lore {_lore::*}:
+                if "%click type%" is "right mouse button with shift":
+                    deleteCategoryWithID({_id})
+                    openEditCategoryGUI(player)
+                else if "%click type%" is "left mouse button with shift":
+                    openInitialCategoryGUI(player, {_id})
+                else if "%click type%" is "left mouse button":
+                    editKMEmessages(player, {_id})
+
+            add 1 to {_loop}
+
+
+    open last gui to {_player}
+
+local function openEditingCategoryGUI(player: player, currentlyInCreation: boolean = false, oldID: text = "This isn't actually an ID!\,m"):
+
+    if {_currentlyInCreation} is false:
+        add 1 to {-sessionID}
+        set {_sessionID} to {-sessionID}
+        set metadata "categorySessionID" of {_player} to {_sessionID}
+        set {-%{_sessionID}%currentSession::name} to "&bCategory Name"
+        set {-%{_sessionID}%currentSession::id} to "&8not set"
+        set {-%{_sessionID}%currentSession::icon} to nether star named "&eCategory Icon" with lore "&8This is the default one."
+        set {-%{_sessionID}%currentSession::alwaysVisible} to false
+
+    set {_sessionID} to metadata "categorySessionID" of {_player}
+
+    if {_oldID} is not "This isn't actually an ID!\,m":
+        set {-%{_sessionID}%currentSession::oldID} to {_oldID}
+    if metadata "newIDCategoryChat" of {_player} is set:
+        set {_newID} to metadata "newIDCategoryChat" of {_player}
+        clear metadata "newIDCategoryChat" of {_player}
+        set {-%{_sessionID}%currentSession::id} to {_newID}
+
+    create a gui with virtual chest inventory with 3 rows named "&cEditing Category"
+    edit last gui:
+        format gui slot 4 with {-%{_sessionID}%currentSession::icon}
+
+        format gui slot 10 with nether star named "i have nothing to put here lol"
+        format gui slot 11 with name tag named "&9Change ID" with lore "&8id: %{-%{_sessionID}%currentSession::id}%%nl%&4WARNING:%nl%&cChanging this will cause all owners of this pack to lose their kill messages!":
+            close player's inventory
+            send "&aType the new ID in chat."
+            set metadata "newIDCategoryChat" of player to true
+
+        format gui slot 13 with end crystal named "&b%{-%{_sessionID}%currentSession::name}%" with lore "&8id: %{-%{_sessionID}%currentSession::id}%"
+
+        format gui slot 15 with chest named "&9Change Category Icon" with lore "&8Drag item onto this chest.%nl%&8Right click to grab previous icon.":
+            if "%click type%" is "right mouse button":
+                give {-%{_sessionID}%currentSession::icon} to player
+            else if player's cursor slot is not air:
+                set {_cursorSlot} to player's cursor slot 
+                set {-%{_sessionID}%currentSession::icon} to {_cursorSlot}
+                openEditingCategoryGUI(player, true)
+            
+
+        if {-%{_sessionID}%currentSession::alwaysVisible} is false:
+            format gui slot 16 with redstone block named "&fAlways visible?" with lore "&cClick to change.%nl%&cNo%nl%&cIf no, will be visible when player has a message in this category.%nl%&aIf yes, it will always show.":
+                set {-%{_sessionID}%currentSession::alwaysVisible} to true
+                openEditingCategoryGUI(player, true)
+        else:
+            format gui slot 16 with glowstone named "&fAlways visible?" with lore "&cClick to change.%nl%&aYes%nl%&cIf no, will be visible when player has a message in this category.%nl%&aIf yes, it will always show.":
+                set {-%{_sessionID}%currentSession::alwaysVisible} to false
+                openEditingCategoryGUI(player, true)
+
+        format gui slot 21 with red dye named "&cCancel" with lore "&8Go back":
+            clear metadata "categorySessionID" of player
+            openEditCategoryGUI(player)
+        format gui slot 23 with yellow dye named "&eConfirm" with lore "&8Upload to categories?":
+            
+            set {_list::1} to {-%{_sessionID}%currentSession::name}
+            set {_list::2} to {-%{_sessionID}%currentSession::id}
+            set {_list::3} to {-%{_sessionID}%currentSession::icon}
+            set {_list::4} to {-%{_sessionID}%currentSession::alwaysVisible}
+            if {-%{_sessionID}%currentSession::oldID} is set:
+                loop 13 times:
+                    add 1 to {_loop}
+                    add {categories::%{-%{_sessionID}%currentSession::oldID}%::killmessages::%{_loop}%} ? "<none>" to {_killMessagesA::*}
+            deleteCategoryWithID({-%{_sessionID}%currentSession::oldID})
+            uploadToCategories({_list::*}, {_killMessagesA::*})
+            openEditCategoryGUI(player)
+            clear metadata "categorySessionID" of player
+    
+    open last gui to {_player}
+
+local function openInitialCategoryGUI(player: player, categoryID: text):
+    add 1 to {-sessionID}
+    set {_sessionID} to {-sessionID}
+    set metadata "categorySessionID" of {_player} to {_sessionID}
+    set {-%{_sessionID}%currentSession::name} to {categories::%{_categoryID}%::name}
+    set {-%{_sessionID}%currentSession::id} to {_categoryID}
+    set {-%{_sessionID}%currentSession::icon} to {categories::%{_categoryID}%::icon}
+    set {-%{_sessionID}%currentSession::alwaysVisible} to {categories::%{_categoryID}%::alwaysVisible}
+    openEditingCategoryGUI({_player}, true, {_categoryID})
+
+local function deleteCategoryWithID(id: text):
+    delete {categories::%{_id}%}
+    clear {categories::%{_id}%::*}
+
+local function uploadToCategories(list: objects, killMessagesA: texts):
+    set {_name} to {_list::1}
+    set {_id} to {_list::2}
+    set {_icon} to {_list::3}
+    set {_alwaysVisible} to {_list::4}
+
+    set {categories::%{_id}%} to {_id}
+    set {categories::%{_id}%::name} to {_name}
+    set {categories::%{_id}%::icon} to {_icon}
+    set {categories::%{_id}%::alwaysVisible} to {_alwaysVisible}
+
+    if {_killMessagesA::*} is set:
+        loop 13 times:
+            add 1 to {_loop}
+            set {categories::%{_id}%::killmessages::%{_loop}%} to {_killMessagesA::%{_loop}%}
+    else:
+        set {_loop} to 1
+        loop 13 times:
+            set {categories::%{_id}%::killmessages::%{_loop}%} to "Not Set"
+            add 1 to {_loop}
+
+
+on chat with priority lowest:
+    metadata "newIDCategoryChat" of player is true
+    set metadata "newIDCategoryChat" of player to message
+    cancel event
+    openEditingCategoryGUI(player, true)
+
+local function editKMEmessages(p: player, kmPack: text):
+    create a new gui with virtual chest inventory with 4 rows named "&fEditing..."
+    edit last gui:
+        format gui slot (integers between 0 and 8) with lime stained glass pane named " "
+        format gui slot (integers between 27 and 35) with lime stained glass pane named " "
+        format gui slot 4 with {categories::%{_kmPack}%::icon}
+
+        set {_killmessages::*} to {categories::%{_kmPack}%::killmessages::*}
+
+        set {_loop} to 1
+        loop 13 times:
+            set {_list::*} to getKillMessageFromID({_loop})
+            format gui slot {_loop}+8 with {_list::1} named {_list::2} with lore "Kill Message:%nl%%{categories::%{_kmPack}%::killmessages::%{_loop}%}%":
+                editKillMessage(player, {_kmPack}, {_loop})
+            
+            add 1 to {_loop}
+
+    open last gui to {_p}
+
+local function editKillMessage(player: player, kmPack: text, index: integer):
+    create a new gui with virtual chest inventory with 1 row named "&fEditing Kill Message %{_index}%"
+    edit last gui:
+
+        format gui slot 1 with nether star named "Use %%attacker%% and %%victim%% to describe the attacker and victim! :skull: and :shrug: are also valid things in it."
+            
+        format gui slot 6 with nametag named "&aEdit Kill Message with Attacker" with lore "%{categories::%{_kmPack}%::killmessages::%{_index}%}%%nl%&aClick to type in chat, or drag an item with a name onto this to change name!":
+            if player's cursor slot is air:
+                send "&aPlease type message in chat to change kill message." to player
+                set metadata "changingkillmessage2" of player to {_kmPack}
+                set metadata "changingkillmessageindex2" of player to {_index}
+                close player's inventory
+            else:
+                set {_var} to player's cursor slot's name
+                replace all ":shrug:" in {_var} with "¯\_(ツ)_/¯"
+                replace all ":skull:" in {_var} with "☠"
+                set {categories::%{_kmPack}%::killmessages::%{_index}%} to {_var}
+                editKillMessage(player, {_kmPack}, {_index})                
+
+        if {categories::%{_kmPack}%::killmessages::%{_index}%::alwaysShown} is true:
+            format gui slot 5 with glowstone named "&eAlways Shown":
+                set {categories::%{_kmPack}%::killmessages::%{_index}%::alwaysShown} to false
+                editKillMessage(player, {_kmPack}, {_index})
+        else:
+            format gui slot 5 with redstone block named "&cNot Shown":
+                set {categories::%{_kmPack}%::killmessages::%{_index}%::alwaysShown} to true
+                editKillMessage(player, {_kmPack}, {_index})
+
+        format gui slot 4 with barrier named "&cBack":
+            editKMEmessages(player, {_kmPack})
+
+
+    open last gui to {_player}
+
+on chat with priority lowest:
+    metadata "changingkillmessage2" of player is set
+    cancel event
+    set {_kmPack} to metadata "changingkillmessage2" of player
+    set {_index} to metadata "changingkillmessageindex2" of player
+    set {_message} to colored message
+    replace all ":skull:" in {_message} with "☠"
+    replace all ":shrug:" in {_message} with "¯\_(ツ)_/¯"
+    set {categories::%{_kmPack}%::killmessages::%{_index}%} to {_message}
+    editKillMessage(player, {_kmPack}, {_index})
+    clear metadata "changingkillmessage2" of player
+    clear metadata "changingkillmessageindex2" of player

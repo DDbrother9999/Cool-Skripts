@@ -1,0 +1,31 @@
+# Minecraft Skript for:
+# Name: Water boots
+# Color: &#c53515&lL&#bf3c20&la&#b8432b&lv&#b24a36&la &#ac5141&lB&#a5574b&lo&#9f5e56&lo&#986561&lt&#926c6c&ls
+# Item: Leather boots
+# Ability: when wearing 0 lava damage is taken and the lava your in/standing on gets turned to magma in a 2x2 area.
+# This is enchantable
+
+on load:
+	set {WaterBoots} to leather boots named "&x&0&0&3&8&f&f&lW&x&0&f&4&e&f&d&la&x&1&e&6&4&f&a&lt&x&2&e&7&a&f&8&le&x&3&d&9&0&f&6&lr &x&4&c&a&7&f&3&lB&x&5&b&b&d&f&1&lo&x&6&b&d&3&e&f&lo&x&7&a&e&9&e&c&lt&x&8&9&f&f&e&a&ls" with lore "&r&7Removes drowning%nl%&r&7and makes ice."
+	dye {WaterBoots} cyan
+
+on any movement:
+	"%region at player%" does not contain "spawn"
+	name of player's boots is "&x&0&0&3&8&f&f&lW&x&0&f&4&e&f&d&la&x&1&e&6&4&f&a&lt&x&2&e&7&a&f&8&le&x&3&d&9&0&f&6&lr &x&4&c&a&7&f&3&lB&x&5&b&b&d&f&1&lo&x&6&b&d&3&e&f&lo&x&7&a&e&9&e&c&lt&x&8&9&f&f&e&a&ls"
+	# Loop around blocks near player, check if they're lava then convert to magma
+	loop blocks in radius 2 around player:
+		if loop-block is water:
+			set loop-block to ice
+
+on damage:
+	name of victim's boots is "&x&0&0&3&8&f&f&lW&x&0&f&4&e&f&d&la&x&1&e&6&4&f&a&lt&x&2&e&7&a&f&8&le&x&3&d&9&0&f&6&lr &x&4&c&a&7&f&3&lB&x&5&b&b&d&f&1&lo&x&6&b&d&3&e&f&lo&x&7&a&e&9&e&c&lt&x&8&9&f&f&e&a&ls"
+	if damage cause is drowning:
+		cancel event
+	else if damage cause is freeze:
+		cancel event
+
+command /givewaterboots:
+	permission: op
+	trigger:
+		give player 1 of {WaterBoots}
+		send "&aYou have been given water boots." to player

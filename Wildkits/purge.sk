@@ -1,0 +1,44 @@
+command /purge [<text>]:
+	permission: op
+	trigger:
+		if arg-1 is "deep":
+			if executor is console:
+				broadcast "&4&m============================"
+				broadcast "&c&lPurge &8&l» &rUnused data is being purged, this may cause server lag!"
+				broadcast "&4&m============================"
+				wait 5 seconds
+				delete {-dashendercooldown::*}
+				delete {accused::*}
+				delete {fireworklvl::*}
+				loop all offline players:
+					delete {egg.%loop-offlineplayer's uuid%}
+					delete {swap.%loop-offlineplayer's uuid%}
+					if {deaths::%loop-offlineplayer's uuid%} is 0:
+						delete {deaths::%loop-offlineplayer's uuid%}
+					if {kills::%loop-offlineplayer's uuid%} is 0:
+						delete {kills::%loop-offlineplayer's uuid%}
+					if {etokens::%loop-offlineplayer's uuid%} is 0:
+						delete {etokens::%loop-offlineplayer's uuid%}
+					if {kdr::%loop-offlineplayer's uuid%} is 0:
+						delete {kdr::%loop-offlineplayer's uuid%}
+					if {killstreak::%loop-offlineplayer's uuid%} is 0:
+						delete {killstreak::%loop-offlineplayer's uuid%}
+					if {kitlvl::%loop-offlineplayer's uuid%} is 0:
+						delete {kitlvl::%loop-offlineplayer's uuid%}
+					if {level::%loop-offlineplayer's uuid%} is 0:
+						delete {level::%loop-offlineplayer's uuid%}
+					if {storedlvl::%loop-offlineplayer's uuid%} is 0:
+						delete {storedlvl::%loop-offlineplayer's uuid%}
+					delete {firework.%loop-offlineplayer's uuid%}
+				send "Done!"
+			else:
+				send "&cThis command can only be executed via console."
+		else if arg-1 is "test":
+			send "test"
+		
+
+on tab complete of "/purge":
+	if player has permission "op":
+		add "test" to {_tabs::*}
+	add "quick", "test", and "deep" to {_tabs::*}
+	set tab completions for position 1 to {_tabs::*}

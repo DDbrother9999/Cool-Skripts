@@ -1,0 +1,8 @@
+function HastePet(p: text):
+	set {_p} to {_p} parsed as player
+	stop if checkPetCD({_p}'s tool, {_p}) is false
+	set {_level} to int tag "Pet;level" of nbt compound of {_p}'s tool
+	set {_length} to {_level} * 30
+	set {Pets::Haste::%{_p}'s uuid%::lastUsed} to unix timestamp of now
+	apply potion of haste to {_p} for "%{_length}% seconds" parsed as timespan
+	send "&eYou gained the haste effect for %{_length}% seconds" to {_p}

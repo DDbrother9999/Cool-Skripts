@@ -1,0 +1,16 @@
+on join:
+    apply potion of night vision of tier 1 without any particles to the player for 999 days
+
+	
+on resurrect attempt:
+	if entity is player:
+		wait 1 ticks
+		apply potion of night vision of tier 1 without any particles to player for 999 days
+
+on respawn:
+	if entity is player:
+		wait 1 ticks
+		apply potion of night vision of tier 1 without any particles to player for 999 days
+
+
+

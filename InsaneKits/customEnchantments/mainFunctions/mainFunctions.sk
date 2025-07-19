@@ -1,0 +1,51 @@
+# Function will return an enchantment and the enchantment level as a string, returned as "EnchantmentName:EnchantLevel".
+
+function checkForCEnchants(tool: item) :: texts:
+    set {_nbt} to nbt compound of {_tool}
+
+    set {_compoundTag::*} to compound tag "customEnchants" of {_nbt}
+    loop {_compoundTag::*}:
+        set {_name} to "%loop-value%"
+
+        replace all "{" in {_name} with ""
+        replace all "}" in {_name} with ""
+
+        add {_name} to {_enchantment::*}
+
+    return {_enchantment::*}
+
+function hasCEnchant(tool: item, enchant: text) :: boolean:
+    set {_enchantList::*} to checkForCEnchants({_tool})
+
+    if {_enchantList::*} is not set:
+        return false
+
+    loop {_enchantList::*}:
+        loop-value split at ":" contains {_enchant}
+        return true
+    return false
+
+function getCEnchantOnTool(tool: item, enchant: text) :: text:
+    set {_enchantList::*} to checkForCEnchants({_tool})
+
+    loop {_enchantList::*}:
+        loop-value split at ":" contains {_enchant}
+        return loop-value
+
+    stop
+
+function getCEnchantLevel(tool: item, enchant: text) :: integer:
+    hasCEnchant({_tool}, {_enchant}) is true # may be a bit inefficient, but haven't tested yet
+
+    set {_enchant} to getCEnchantOnTool({_tool}, {_enchant})
+    set {_enchant::*} to {_enchant} split at ":"
+
+    return {_enchant::2} parsed as integer
+
+function getCEnchantName(tool: item, enchant: text) :: text:
+    hasCEnchant({_tool}, {_enchant}) is true # may be a bit inefficient, but haven't tested yet
+
+    set {_enchant} to getCEnchantOnTool({_tool}, {_enchant})
+    set {_enchant::*} to {_enchant} split at ":"
+
+    return {_enchant::1}

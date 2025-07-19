@@ -1,0 +1,129 @@
+function AcreateEnderchestInventory(p: offline player, p2: player):
+    set {_page} to 1
+    loop ecgetPages() times:
+        set {_inventory} to AecgetBaseInventory({_page}, {_p}, {_p2})
+        set metadata "viewingecPage%{_page}%" of {_p2} to {_inventory}
+        set metadata "viewingPlayerEC" of {_p2} to {_p}
+
+        set {_itemIndex} to 0
+        loop 45 times:
+            set slot {_itemIndex}+9 of {_inventory} to ecgetItem({_p}, {_page}, {_itemIndex})
+            add 1 to {_itemIndex}
+        add 1 to {_page}
+
+function AecgetBaseInventory(currentPage: integer = 1, p: offline player, p2: player) :: inventory:
+    set {_inventory} to virtual chest inventory with 6 rows named "&fEnder Chest (Viewing %{_p}%)"
+
+    set slot (integers between 0 and 8) of {_inventory} to gray stained glass pane named "&f"
+
+    set {_loop} to 0
+    loop ecgetPages() times:
+        if {_loop}+1 is {_currentPage}:
+            set slot {_loop} of {_inventory} to light blue stained glass pane named "&bPage %{_currentPage}%"
+        else:
+            set slot {_loop} of {_inventory} to blue stained glass pane named "&fPage %{_loop}+1%"
+        add 1 to {_loop}
+
+
+    return {_inventory}
+
+function OfflineecSavePage(p: offline player, page: integer, p2: player):
+    load yaml "plugins/Skript/yamlData/%{_p}'s uuid%/page%{_page}%" as "loadedYaml"
+    set {_inventory} to metadata "viewingecPage%{_page}%" of {_p2}
+    set {_loop} to 0
+    loop 45 times:
+        set {_item} to slot {_loop}+9 of {_inventory}
+        if {_item} is not air:
+            set yaml value "page.%{_loop}%" of "loadedYaml" to {_item} 
+        else:
+            delete yaml value "page.%{_loop}%" of "loadedYaml"
+        add 1 to {_loop}
+    
+    save yaml "loadedYaml"
+    
+function OfflineecSaveAll(p: offline player, p2: player):
+    set {_loop} to 1
+    loop 9 times:
+        OfflineecSavePage({_p}, {_loop}, {_p2})
+        add 1 to {_loop}
+
+on inventory click with priority lowest:
+    ecgetEnabled() is true
+    event-inventory is player's current inventory
+    set {_player} to metadata "viewingPlayerEC" of player
+    name of player's current inventory is "&fEnder Chest (Viewing %{_player}%)"
+    index of event-slot is between 0 and 8
+    cancel event 
+
+    event-slot is not light blue stained glass pane or gray stained glass pane or red stained glass pane
+    if difference between metadata "ecDelay" of player and now is less than 0.2 seconds:
+        stop
+
+    
+    set metadata "ecDelay" of player to now
+    open metadata "viewingecPage%index of event-slot + 1%" of player to player
+    play sound "block.ender_chest.open" with volume 0.4 and pitch 1.2 to player
+
+on inventory click with priority lowest:
+    ecgetEnabled() is true
+    event-inventory is player's current inventory
+    set {_loop} to 1
+    metadata "currentlyViewingAnEnderchest" of player is set
+    name of player's current inventory is "&fEnder Chest "
+    index of event-slot is between 0 and 8
+    cancel event 
+
+    event-slot is not light blue stained glass pane or gray stained glass pane or red stained glass pane
+    if difference between metadata "ecDelay" of player and now is less than 0.2 seconds:
+        stop
+
+    
+    set metadata "ecDelay" of player to now
+    open metadata "viewingecPage%index of event-slot + 1%" of player to player
+    play sound "block.ender_chest.open" with volume 0.4 and pitch 1.2 to player
+    
+
+on inventory close:
+    wait 1 tick
+    name of player's current inventory does not contain "Ender Chest"
+    player has permission "cerium.enderchest.modifyOthers"
+    delete metadata "currentlyViewingAnEnderchest" of player
+    set {_player} to metadata "viewingPlayerEC" of player
+    {_player} is set
+    OfflineecSaveAll({_player}, player)
+    clear metadata "viewingPlayerEC" of player
+
+command /ec [<text>]:
+    permission: cerium.enderchest
+    permission message: &cYou cannot use this command
+    aliases: enderchest, enderc, echest
+    trigger:   
+        if arg 1 is not set:
+            if ecgetEnabled() is true:
+                set metadata "echasOpened" of player to true
+                open metadata "ecPage%metadata "lastPageEC" of player ? 1%" of player to player
+            else:
+                send "&cEnderchest not enabled."
+        else if arg 1 is set:
+            set {_p2} to arg 1 parsed as offline player
+            if player does not have permission "cerium.enderchest.modifyOthers":
+                send "&cYou cannot use this command"
+                stop
+            if {_p2} is online:
+                set {_loop} to 1
+                loop 9 times:
+                    set metadata "viewingecPage%{_loop}%" of player to metadata "ecPage%{_loop}%" of {_p2}
+                    add 1 to {_loop}
+                open metadata "viewingecPage1" of player to player
+                set metadata "currentlyViewingAnEnderchest" of player to true
+                set metadata "echasOpened" of {_p2} to true
+            else if {_p2} is offline:
+                AcreateEnderchestInventory({_p2}, player)
+                open metadata "viewingecPage1" of player to player
+            else:
+                send "&cAn error occured when running this command. Sad."
+
+on tab complete for "/ec" and "/enderchest" and "/echest" and "/enderc":
+    set tab completions for position 1 to all players
+	
+#god this thing is so scuffed i don't feel like messing with it aaaahhhhh

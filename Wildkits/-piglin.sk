@@ -1,0 +1,394 @@
+options:
+	logbossactions: false # Log boss attacks?
+
+	#Piglin global
+	piglinname: &4&k| &r&cPiglin Boss&r &4&k| # Default = &cPiglin boss
+	piglinhealth: 20 # Default = 20
+	playerdetectrange: 30 # Default = 30
+	piglinswiftness: 4 # Default = 3
+	piglinstrength: 1 # Default = 3
+
+	#Rewards
+	maxdamagepos: 99999 # Just some math, Default = 99999
+	scrapvariable: {items::scrap} # Scrap item
+	wandvariable: {items::wand} # Wand item
+	minimumdamageforetokens: 5 # Default = 5
+	etokenreward: 10 # Default = 10
+
+	#Timers
+	piglinregentimer: 10 # Default = 5, timer in seconds for heal
+	piglinregen: 1 # Default = 2, how much to regen.
+	piglinstrikestimer: 15 # Default = 30, timer in seconds for strikes
+	piglinpushtimer: 5 # Default = 10, timer in seconds for push
+
+	#LIGHTNING ATTACK
+	salvosoflightning: 5 #Default = 5, the amount of salvos of lightning before waiting a tick.
+	lightningpersalvo: 15 #Default = 5, the amount of lightning to spawn per salvo. This * salvos = amount of lightning summoned.
+	rangeoflightning: 10 #Default = 20, the range the lightning spawns in. E.g. 20 means a random offset of either -20 or 20, or anything in between.
+	spawnbabypiglinonlightning: true #Default = true, have a chance to spawn a baby zombie?
+	chanceofbabypiglin: 20% #Default = 5%, whats the chance?
+
+	# FIREBALL ATTACK
+	explforce: 5 # Default = 3
+	movespeed: 7 # Default = 5, max 10
+	wizcooldown: 3 seconds # Default = 5 seconds
+
+on load:
+	set {@scrapvariable} to coal of mending named "&c&lPiglin Scrap" with lore "&7Place three in the crafting menu vertically to craft a wand!" with enchants flag hidden
+	set {@wandvariable} to stick of mending named "&c&lPiglin's Wand" with lore "&7Only works in Arena!" and "" and "&7Left-Click: Ice Ball" and "&7Right-Click: Frost Dome" with enchants flag hidden
+
+command /testtesttest:
+	permission: op
+	trigger:
+		give {@wandvariable} to player
+on spawn of a mob:
+  if entity is not a zombified piglin:
+    cancel event	
+
+function getNearestPlayer(l: location, n: number) :: object:
+	loop all players in radius {_n} of {_l}:
+		"%loop-player's gamemode%" is not "spectator" or "creative"
+		set {_d} to the distance between {_l} and loop-value
+		set {_r::%{_d}%} to loop-value
+	return first element of {_r::*}
+	return 2nd element of {_r::*}
+	return 3rd element of {_r::*}
+
+function particle(t: text, e: entity):
+	if {_t} is "cloud":
+		lerp 10 of cloud at {_e} ~ vector(1, 1, 1) with extra 0.5
+	else if {_t} is "flash":
+		lerp 100 of flash at {_e} ~ vector(1, 1, 1) with extra 0.5
+	else if {_t} is "portal":
+		lerp 1000 of portal at {_e} ~ vector(1, 1, 1) with extra 0.01
+	else if {_t} is "reverse_portal":
+		lerp 1000 of reverse portal at {_e} ~ vector(0, 1, 0) with extra 4
+
+function attack(t: text, e: entity, p: player):
+	broadcast "&aBoss used &e%{_t}%&a!" if {@logbossactions} is true
+	if {_t} is "push":
+		particle("cloud", {_e})
+		play sound "entity.ender_dragon.shoot" at {_e} for all players
+		push {_p} upwards at speed 2
+		send "&cThe piglin boss pushed you!" to {_p}
+		wait 10 ticks
+		push {_p} (direction from {_p} to location of {_e}) at speed 0.7
+	else if {_t} is "strikes":
+		particle("cloud", {_e})
+		play sound "entity.dragon_fireball.explode" at {_e} for all players
+		set {_loc} to {_p}'s location
+		set {_loc}'s yaw to {_p}'s yaw
+		set {_loc}'s pitch to {_p}'s pitch
+		loop {@salvosoflightning} times:
+			loop {@lightningpersalvo} times:
+				set x position of {_loc} to (x position of {_loc} + (random integer between (0 - {@rangeoflightning}) and {@rangeoflightning}))
+				set z position of {_loc} to (z position of {_loc} + (random integer between (0 - {@rangeoflightning}) and {@rangeoflightning}))
+				strike lightning at {_loc}
+				{@spawnbabypiglinonlightning} is true
+				chance of {@chanceofbabypiglin}:
+					spawn a baby zombie pigman at {_loc}
+					equipMinion(last spawned entity, {_p})
+			wait 5 ticks
+
+function equipMinion(e: entity, p: player):
+	set {_e}'s health to 1
+	apply strength 2 to {_e} for 999999 seconds
+	equip {_e} with diamond helmet of protection 1
+	equip {_e} with diamond chestplate of protection 1
+	equip {_e} with diamond leggings of protection 1
+	equip {_e} with diamond boots of protection 1
+	set name of {_e} to "&8Piglin Minion"
+	set metadata value "boss_minion" of {_e} to true
+	add {_e} to {minionsofpiglin::*}
+	set path target with speed 2 of {_e} to {_p}
+
+command /setpiglinspawn:
+	permission: op
+	permission message: &cYou have no permission to execute this command!
+	trigger:
+		add player's location to {piglinspawn::*}
+		send "&aSuccesfully added &e%player's location%&a to the piglin spawns!"
+
+command /clearpiglinspawn:
+	permission: op
+	permission message: &cYou have no permission to execute this command!
+	trigger:
+		clear {piglinspawn::*}
+		send "&aSuccesfully cleared the piglin spawns."
+
+command /listpiglinspawn:
+	permission: op
+	permission message: &cYou have no permission to execute this command!
+	trigger:
+		send "&aListing piglin spawns ---"
+		set {_empt} to true
+		loop {piglinspawn::*}:
+			set {_empt} to false
+			send "&a> Spawn at &e%loop-value%"
+		if {_empt} is true:
+			send "&aNo piglin spawns were found."
+
+on load:
+	if {@scrapvariable} is not set:
+		send "&cWarning: The scrap variable is not set! ({@scrapvariable})"
+	if {@wandvariable} is not set:
+		send "&cWarning: The wand variable is not set! ({@wandvariable})"
+	register new shaped recipe for {@wandvariable} using air, {@scrapvariable}, air, air, {@scrapvariable}, air, air, {@scrapvariable} and air with id "table_wand"
+
+function explosion(loc: location):
+	create a safe explosion of force {@explforce} at {_loc}	
+
+function IsOnCooldown(p: player, l: timespan) :: boolean:
+	set {_} to difference between {-Cooldown::%{_p}'s uuid%::%name of {_p}'s held item%} and now
+	if {_} is less than {_l}:
+		send "&cWait &4%difference between {_l} and {_}%&c before using this item again!" to {_p}
+		return false
+	else:
+		set {-Cooldown::%{_p}'s uuid%::%name of {_p}'s held item%} to now
+		return true
+
+function Sphere(l: location, n: number, t: particle, n2: number):
+	wait 1 tick
+	loop 45 times:
+		loop 45 times:
+			set {_v} to spherical vector radius {_n}, yaw (loop-value-1 * 8), pitch (loop-value-2 * 8)
+			lerp 1 of {_t} at {_l} ~ {_v} with offset vector(0,0,0) with extra {_n2}
+
+on left click:
+	if 1 of player's held item is 1 of {@wandvariable}:
+		player is in the region "arena"
+		player's targeted block is set
+		cancel event
+		IsOnCooldown(player, {@wizcooldown}) is true
+		set {_a} to player's location
+		set {_b} to target block
+		{_b} is set
+		set {_v} to vector from {_a} to {_b}
+		set {_count} to 0
+		spawn an armor stand at {_a}
+		set {_fireball} to last spawned armor stand
+		add "{CustomNameVisible:0,NoGravity:1b,Small:1,Invisible:1,Invulnerable:1,NoBasePlate:1,DisabledSlots:2039583}" to nbt of {_fireball}
+		set {_head} to "Toadential" parsed as offlineplayer
+		set helmet of {_fireball} to skull of {_head}
+		loop (vector length of {_v} / 0.1) times:
+			# make 1 of dust using dustOption(rgb(0, 0, 0), 1) at {_a} ~ {_v}
+			make 0 of soul_fire_flame at {_a} ~ {_v}
+			set {_nv} to {_v}
+			set vector length of {_nv} to (loop-number + 20) * 0.1
+			set {_target} to {_a} ~ {_nv}
+			teleport {_fireball} to {_target} ~ vector(0, -1, 0)
+			set vector length of {_v} to loop-number * 0.1
+			add 1 to {_count}
+			if {_count} is (11 - {@movespeed}):
+				set {_count} to 0
+				wait 1 tick
+				play sound "ENTITY_CREEPER_PRIMED" with volume 2 with pitch 1 at {_a} ~ {_v} for all players
+		kill {_fireball}
+		explosion({_b})
+
+on right click:
+	if 1 of player's held item is 1 of {@wandvariable}:
+		player is in the region "arena"
+		player's targeted block is set
+		cancel event
+		IsOnCooldown(player, {@wizcooldown}) is true
+		set {_a} to player's location
+		set {_b} to player's targeted block
+		set {_v} to vector from {_a} to {_b}
+		set {_count} to 0
+		loop (vector length of {_v} / 0.1) times:
+			# make 1 of dust using dustOption(rgb(0, 0, 0), 1) at {_a} ~ {_v}
+			make 0 of dust_color_transition using dustTransition(white, white, 3) at {_a} ~ {_v}
+			set vector length of {_v} to loop-number * 0.1
+			add 1 to {_count}
+			if {_count} is 5:
+				set {_count} to 0
+				wait 1 tick
+				play sound "ENTITY_CREEPER_PRIMED" with volume 2 with pitch 1 at {_a} ~ {_v} for all players
+				lerp 1 of dust_color_transition using dustTransition(white, white, 3) at {_a} ~ {_v} with offset vector(0, 1, 0) with extra 1
+				lerp 1 of firework at {_a} ~ {_v} with extra 1
+		loop 5 times:
+			Sphere({_b}, 5, snowflake, 0)
+			loop all entities in radius 5 of {_b} where [input is not player]:
+				damage loop-entity by 2 hearts
+			play sound "block.beacon.deactivate" with volume 2 at pitch 1.5 at {_b}
+			wait 10 tick
+
+every 60 minutes:
+	set {_l} to random element out of {piglinspawn::*}
+	if {_l} is set:
+		kill all zombified piglins
+		wait 10 seconds
+		clear {piglindamagedata::*}
+		clear {killpiglinboss}
+		spawn an adult zombified piglin at {_l}
+		set {_e} to last spawned entity
+		set name of {_e} to "{@piglinname}"
+		set metadata value "boss" of {_e} to true
+		set {_e}'s max health to {@piglinhealth}
+		set {_e}'s health to {@piglinhealth}
+		apply swiftness {@piglinswiftness} to {_e} for 999999 seconds
+		apply strength {@piglinstrength} to {_e} for 999999 seconds
+		apply glowing to {_e} for 999999 seconds
+		apply jumpboost to 2 to {_e} for 999999 seconds
+		#if {@nerfwsboss} is true:
+		#	apply slowness 1 to {_e} for 999999 seconds
+		equip {_e} with netherite helmet of protection 4
+		equip {_e} with netherite chestplate of protection 4
+		equip {_e} with netherite leggings of protection 4
+		equip {_e} with netherite boots of protection 4
+		equip {_e} with blaze rod of lure 1 with all flags hidden
+		set {_bar} to boss bar named "PiglinBoss" with title "&cPiglin Boss" with color bar red with style solid with progress 100
+		set bossbar visibility of {_bar} to true
+		set {_timer1} to 0
+		set {_timer2} to 0
+		set {_timer3} to 0
+		broadcast "&eThe Piglin Boss appeared at x: %x coordinate of {_e}'s location%, y: %y coordinate of {_e}'s location% z: %z coordinate of {_e}'s location%"
+		while {_e} is alive:
+			wait 20 ticks
+			remove all players from bar players of {_bar}
+			loop all players in radius {@playerdetectrange} of {_e}:
+				add loop-player to bar players of {_bar}
+			if {killpiglinboss} is set:
+				wait 2 seconds
+				kill {_e}
+				clear {killpiglinboss}
+			add 1 to {_timer1}
+			if {_timer1} >= {@piglinregentimer}:
+				if {_e}'s health > 4:
+					set {_timer1} to 0
+					add {@piglinregen} to {_e}'s health
+			add 1 to {_timer2}
+			if {_timer2} >= {@piglinstrikestimer}:
+				if getNearestPlayer({_e}'s location, {@playerdetectrange}) is set:
+					set {_p} to getNearestPlayer({_e}'s location, {@playerdetectrange})
+					set {_timer2} to 0
+					attack("strikes", {_e}, {_p})
+			add 1 to {_timer3}
+			if {_timer3} >= {@piglinpushtimer}:
+				if getNearestPlayer({_e}'s location, {@playerdetectrange}) is set:
+					set {_p} to getNearestPlayer({_e}'s location, {@playerdetectrange})
+					set {_timer3} to 0
+					attack("push", {_e}, {_p})
+			set bar progress of {_bar} to (({_e}'s health / {@piglinhealth}) * 100)    
+			on death:
+				if victim is zombie piglin:
+					delete bossbar named "PiglinBoss"
+				loop {minionsofpiglin::*}:
+					kill loop-value
+				clear {minionsofpiglin::*}
+				broadcast "&eThe Piglin boss has been slain!"
+		#		loop {piglindamagedata::*}:
+		#			set {_ldamagedata::%{@maxdamagepos} - loop-value%} to (loop-index parsed as player)
+				#set {_i} to 0
+				#broadcast ""
+				#broadcast "&aTop damage dealers --"
+				#loop {_ldamagedata::*}:
+					#add 1 to {_i}
+					#if {_i} <= 3:
+			#			broadcast "&a%{_i}%. &e%loop-value%&a - &e%{@maxdamagepos} - (loop-index parsed as number)%"
+			#			give {@scrapvariable} to ("%loop-value%" parsed as player)
+			#			send "&aYou placed %{_i}%th and recieved a scrap from the boss!" to ("%loop-value%" parsed as player)
+				#	else:
+				#		if (loop-index parsed as number) >= {@minimumdamageforetokens}:
+					#		add {@etokenreward} to {eTokens::%loop-value%}
+					#		send "&aYou recieved &e{@etokenreward}&a eTokens for dealing at least &e{@minimumdamageforetokens}&a damage!" to ("%loop-value%" parsed as player)
+
+on damage:
+	if metadata value "boss" of victim is true:
+		if attacker is not a player:
+			cancel event
+		else:
+			add damage to {piglindamagedata::%attacker's uuid%}
+
+	if metadata value "boss_minion" of victim is true:
+		attacker is not a player
+		damage cause is not unknown
+		cancel event
+
+on death:
+	if metadata value "boss" of victim is true:
+		set {killpiglinboss} to true
+		clear the drops
+	if metadata value "boss_minion" of victim is true:
+		clear the drops
+
+on load:
+	set {_l} to random element out of {piglinspawn::*}
+	if {_l} is set:
+		kill all zombified piglins
+		wait 10 seconds
+		clear {piglindamagedata::*}
+		clear {killpiglinboss}
+		spawn an adult zombified piglin at {_l}
+		set {_e} to last spawned entity
+		set name of {_e} to "{@piglinname}"
+		set metadata value "boss" of {_e} to true
+		set {_e}'s max health to {@piglinhealth}
+		set {_e}'s health to {@piglinhealth}
+		apply swiftness {@piglinswiftness} to {_e} for 999999 seconds
+		apply strength {@piglinstrength} to {_e} for 999999 seconds
+		apply glowing to {_e} for 999999 seconds
+		apply jumpboost to 2 to {_e} for 999999 seconds
+		#if {@nerfwsboss} is true:
+		#	apply slowness 1 to {_e} for 999999 seconds
+		equip {_e} with netherite helmet of protection 4
+		equip {_e} with netherite chestplate of protection 4
+		equip {_e} with netherite leggings of protection 4
+		equip {_e} with netherite boots of protection 4
+		equip {_e} with blaze rod of lure 1 with all flags hidden
+		set {_bar} to boss bar named "PiglinBoss" with title "&cPiglin Boss" with color bar red with style solid with progress 100
+		set bossbar visibility of {_bar} to true
+		set {_timer1} to 0
+		set {_timer2} to 0
+		set {_timer3} to 0
+		broadcast "&eThe Piglin Boss appeared at x: %x coordinate of {_e}'s location%, y: %y coordinate of {_e}'s location% z: %z coordinate of {_e}'s location%"
+		while {_e} is alive:
+			wait 20 ticks
+			remove all players from bar players of {_bar}
+			loop all players in radius {@playerdetectrange} of {_e}:
+				add loop-player to bar players of {_bar}
+			if {killpiglinboss} is set:
+				wait 2 seconds
+				kill {_e}
+				clear {killpiglinboss}
+			add 1 to {_timer1}
+			if {_timer1} >= {@piglinregentimer}:
+				if {_e}'s health > 4:
+					set {_timer1} to 0
+					add {@piglinregen} to {_e}'s health
+			add 1 to {_timer2}
+			if {_timer2} >= {@piglinstrikestimer}:
+				if getNearestPlayer({_e}'s location, {@playerdetectrange}) is set:
+					set {_p} to getNearestPlayer({_e}'s location, {@playerdetectrange})
+					set {_timer2} to 0
+					attack("strikes", {_e}, {_p})
+			add 1 to {_timer3}
+			if {_timer3} >= {@piglinpushtimer}:
+				if getNearestPlayer({_e}'s location, {@playerdetectrange}) is set:
+					set {_p} to getNearestPlayer({_e}'s location, {@playerdetectrange})
+					set {_timer3} to 0
+					attack("push", {_e}, {_p})
+			set bar progress of {_bar} to (({_e}'s health / {@piglinhealth}) * 100)    
+			on death:
+				if victim is zombie piglin:
+					delete bossbar named "PiglinBoss"
+				loop {minionsofpiglin::*}:
+					kill loop-value
+				clear {minionsofpiglin::*}
+				broadcast "&eThe Piglin boss has been slain!"
+		#		loop {piglindamagedata::*}:
+		#			set {_ldamagedata::%{@maxdamagepos} - loop-value%} to (loop-index parsed as player)
+				#set {_i} to 0
+				#broadcast ""
+				#broadcast "&aTop damage dealers --"
+				#loop {_ldamagedata::*}:
+					#add 1 to {_i}
+					#if {_i} <= 3:
+			#			broadcast "&a%{_i}%. &e%loop-value%&a - &e%{@maxdamagepos} - (loop-index parsed as number)%"
+			#			give {@scrapvariable} to ("%loop-value%" parsed as player)
+			#			send "&aYou placed %{_i}%th and recieved a scrap from the boss!" to ("%loop-value%" parsed as player)
+				#	else:
+				#		if (loop-index parsed as number) >= {@minimumdamageforetokens}:
+					#		add {@etokenreward} to {eTokens::%loop-value%}
+					#		send "&aYou recieved &e{@etokenreward}&a eTokens for dealing at least &e{@minimumdamageforetokens}&a damage!" to ("%loop-value%" parsed as player)

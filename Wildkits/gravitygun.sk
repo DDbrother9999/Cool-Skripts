@@ -1,0 +1,229 @@
+on load:
+	clear {slimedelay::*}
+
+command /givehstar:
+	permission: op
+	trigger:	
+		give player nether star named "&e&lHeavenly Star" with lore "&r&7Left-Click: Repulsion%nl%&r&7Right-Click: Quake Shift%nl%&r&7Sneak + Left-Click: Bind%nl%&r&7Sneak + Right-Click: Gravitational Displacement"
+
+command /ride <player> <player>:
+	permission: op
+	trigger:
+		make arg-1 ride arg-2
+
+function getStats(d: number, p: entity) :: number:
+	generic armor total attribute of {_p} is set
+	set {_a} to generic armor total attribute value of {_p}
+	set {_at} to generic armor toughness total attribute value of {_p}
+	#if {_p} has resistance:
+	#	set {_ag::*} to {_p}'s active potion effects
+	#	set {_ag::*} to "%{_ag::*}%" split at " "
+	#	loop {_ag::*}:
+	#		if loop-value contains "resistance":
+	#			set {_dhsd} to "%loop-index%" parsed as integer+3
+	#			send loop-index to {_p}
+	#		if loop-index parsed as integer is {_dhsd}:
+	#			set {_rl} to "%loop-value%" parsed as integer
+	#			stop loop
+	set {_g} to {_d}*(1-min(20, max({_a}/5, {_a}-{_d} / (2+{_at}/4)))/25)
+	if {_rl} is set:
+		set {_g} to {_g}*(1-({_rl}*0.2))
+	set {_protection} to 0
+	if {_p}'s helmet slot is enchanted with protection:
+		add {_p}'s helmet slot's level of protection to {_protection}
+	if {_p}'s chestplate slot is enchanted with protection:
+		add {_p}'s chestplate slot's level of protection to {_protection}
+	if {_p}'s leggings slot is enchanted with protection:
+		add {_p}'s leggings slot's level of protection to {_protection}
+	if {_p}'s boots slot is enchanted with protection:
+		add {_p}'s boots slot's level of protection to {_protection}
+	if {_protection} is greater than 0:
+		set {_g} to {_g}*(1-(min(20, {_protection})/25))
+	return {_g}
+
+#on left click: Old
+#	"%nbt compound of player's tool%" contains "GravityGun"
+#	cancel event
+#	{gravdelay::%player%} is not set
+#	if {gravreload::%player%} is set:
+#		stop
+#	if {gravbullets::%player%} is not set:
+#		set {gravbullets::%player%} to 3
+#	if {gravbullets::%player%} is greater than 0:
+#		play sound "entity.generic.explode" with volume 3 with pitch 2 at player for all players
+#		remove 1 from {gravbullets::%player%}
+#		if player is sneaking:
+#			if {gravbullets::%player%} is 2:
+#				make 30 of poof at player
+#				push player backwards at speed 4.5
+#				set {gravbullets::%player%} to 0
+#			else:
+#				make 10 of poof at player
+#				push player backwards at speed 2
+#		else:
+#			make 10 of poof at player
+#			push player backwards at speed 2
+#		send action bar "&9%{gravbullets::%player%}%/3 remaining." to player
+#	if {gravbullets::%player%} is less than or equal to 0:
+#		wait 1 second
+#		set {_loop} to 9
+#		set {gravreload::%player%} to true
+#		loop 9 times:
+#			wait 1 second
+#			if mod({_loop}, 3) is 0:
+#				send action bar "&9Reloading..." to player
+#			else if mod({_loop}, 3) is 1:
+#				send action bar "&9Reloading." to player
+#			else if mod({_loop}, 3) is 2:
+#				send action bar "&9Reloading.." to player
+#			remove 1 from {_loop}
+#		send action bar "&93/3 remaining." to player
+#		delete {gravbullets::%player%}
+#		delete {gravreload::%player%}
+
+on left click:
+	"%nbt compound of player's tool%" contains "GravityGun"
+	cancel event
+	if player is sneaking:
+		send "Bind" # Creates temporary dome that player's can't leave
+	else:
+		{gravdelay::%player%} is not set
+		if {gravreload::%player%} is set:
+			stop
+		if {gravbullets::%player%} is not set:
+			set {gravbullets::%player%} to 3
+		if {gravbullets::%player%} is greater than 0:
+			play sound "entity.generic.explode" with volume 3 with pitch 2 at player for all players
+			remove 1 from {gravbullets::%player%}
+			make 10 of poof at player
+			push player backwards at speed 2
+			send action bar "&9%{gravbullets::%player%}%/3 Remaining." to player
+		if {gravbullets::%player%} is less than or equal to 0:
+			wait 1 second
+			set {_loop} to 9
+			set {gravreload::%player%} to true
+			loop 9 times:
+				wait 1 second
+				if mod({_loop}, 3) is 0:
+					send action bar "&9Recharging..." to player
+				else if mod({_loop}, 3) is 1:
+					send action bar "&9Recharging." to player
+				else if mod({_loop}, 3) is 2:
+					send action bar "&9Recharging.." to player
+				remove 1 from {_loop}
+			send action bar "&93/3 remaining." to player
+			delete {gravbullets::%player%}
+			delete {gravreload::%player%}
+		
+on left click:
+	"%nbt compound of player's tool%" contains "GravityGun"
+	{gravdelay::%player%} is not set
+	set {gravdelay::%player%} to true
+	wait 1.2 seconds
+	delete {gravdelay::%player%}
+		
+		
+on right click:
+	"%nbt compound of player's tool%" contains "GravityGun"
+	player's tool is not any shulker box
+	cancel event
+	if player is sneaking:
+		#send "Gravitational Displacement" # Blocks and players around user slowly rise in air then get shot in random directions dealing a bit of damage
+		loop players in radius 10 around player:
+			add loop-player to {_hsgdplayers::*} if loop-player is not player
+		loop blocks in radius 10 around player:
+			loop-block is in the region "arena":
+				loop-block is not air
+				set {_ran} to random integer between 1 and 50
+				if {_ran} is 1:
+					add loop-block to {_hsgdblocks::*}
+		send {_hsgdplayers::*} to player
+		send {_hsgdblocks::*} to player
+	else:
+		event-block is not bedrock or barrier or end portal frame
+		{reboundgrav::%player%} is not set
+		if {gravitygun::%player's uuid%} is true:
+			eject the passengers of {fallingarmorstand::%player%}
+			play sound "entity.generic.explode" with volume 3 with pitch 2 at player for all players
+			loop living entities in radius 2 of {fallingarmorstand::%player%}:
+				if "%loop-entity's type%" contains "falling":
+					set {gravfallingblock::%player%} to loop-entity
+			kill {fallingarmorstand::%player%}
+			delete {fallingarmorstand::%player%}
+			delete {gravitygun::%player's uuid%}
+			set {_block} to {gravfallingblock::%player%}
+			delete {gravfallingblock::%player%}
+			make 10 of poof at {_block}
+			wait 2 ticks
+			kill {fallingarmorstand::%player%}
+			push {_block} in player's direction at speed 2
+			while {_block} is alive:
+				wait 2 ticks
+				loop entities in radius 2 of {_block}'s location:
+					if "%loop-entity's type%" contains "falling":
+						continue
+					damage loop-entity by getStats(5, loop-entity)
+			stop
+		event-block or event-entity is set
+		if event-block is set:
+			if event-block is in region "arena":
+				set {_e} to {_e}
+			else:
+				stop
+		set {gravitygun::%player's uuid%} to true
+		play sound "entity.enderman.teleport" with volume 3 with pitch 2 at player for all players
+		if event-entity is tnt:
+			set {gravfallingblock::%player%} to event-entity
+		else if event-block is set:
+			spawn ("falling %type of event-block%" parsed as entitytype) 1 blocks above player
+			set {gravfallingblock::%player%} to last spawned entity
+			set event-block to air
+		while {gravitygun::%player's uuid%} is true:
+			wait 1 tick
+			kill {fallingarmorstand::%player%}
+			set {_n} to nbt compound from "{Invulnerable:1b,Invisible:1b,NoGravity:1b}"
+			spawn armor stand 4 blocks in front of player with nbt {_n}
+			set {fallingarmorstand::%player%} to last spawned armor stand
+			make {gravfallingblock::%player%} ride {fallingarmorstand::%player%}
+			if {gravfallingblock::%player%} is not alive:
+				eject the passengers of {fallingarmorstand::%player%}
+				kill {fallingarmorstand::%player%}
+				delete {fallingarmorstand::%player%}
+				delete {gravitygun::%player's uuid%} 
+				stop loop
+	
+on right click:
+	set {reboundgrav::%player%} to 1
+	wait 0.1 seconds
+	delete {reboundgrav::%player%}
+	
+on tool change:
+	kill {fallingarmorstand::%player%}
+	delete {gravitygun::%player's uuid%}
+	wait 2 ticks
+	kill {fallingarmorstand::%player%}
+	delete {fallingarmorstand::%player%}
+	
+on death of player:
+	kill {gravfallingblock::%victim%}
+	kill {fallingarmorstand::%victim%}
+	delete {gravitygun::%victim's uuid%}
+	delete {gravfallingblock::%victim%}
+	delete {gravreload::%victim%}
+	delete {gravbullets::%victim%}
+	delete {gravdelay::%victim%}
+	wait 2 ticks
+	kill {fallingarmorstand::%victim%}
+	delete {fallingarmorstand::%victim%}
+	
+on quit:
+	kill {gravfallingblock::%player%}
+	kill {fallingarmorstand::%player%}
+	delete {fallingarmorstand::%player%}
+	delete {gravreload::%player%}
+	delete {gravitygun::%player's uuid%}
+	delete {gravbullets::%player%}
+	delete {gravdelay::%player%}
+	wait 2 ticks
+	kill {fallingarmorstand::%player%}
+	delete {fallingarmorstand::%player%}

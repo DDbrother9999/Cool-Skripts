@@ -1,0 +1,2 @@
+on consume of potion:
+     addprogressquest(player,"Daily","Potioneer I")

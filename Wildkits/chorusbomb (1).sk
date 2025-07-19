@@ -1,0 +1,31 @@
+on load:
+	set {chorusbomb} to chorus flower named "&aChorus Bomb" with lore "&aRandomly teleports players in a radius of 7 blocks!"
+
+on right click:
+	regions at player contains "arena"
+	if player's tool's lore contains "&aRandomly teleports players in a radius of 7 blocks!":
+		if {chorusbombCooldown.%player%} is set:
+			send action bar "&9This is in cooldown!" to player
+			stop
+		set {chorusbombCooldown.%player%} to 1
+		drop chorus flower named "&aChorus Bomb -- &cUnstackable %random integer between 1 and 1000000%" at player's eyes
+		remove 1 chorus flower with lore "&aRandomly teleports players in a radius of 7 blocks!" from player's inventory
+		set {_e} to last dropped item
+		push {_e} in player's direction at speed 1
+		wait 1 second
+		set {_e::*} to all living entities in radius 3 of {_e}'s location
+		set {_l} to 2nd element of {_e::*}'s location
+		loop all living entities in radius 7 of {_e}'s location:
+			set {_l2} to loop-entity's location 
+			teleport loop-entity to {_l}
+			set {_l} to {_l2}
+		create a fake explosion at {_e}'s location
+		kill {_e}
+		wait 9 seconds
+		delete {chorusbombCooldown.%player%}
+			
+		
+		
+on pickup:
+	if event-item's name contains "&aChorus Bomb":
+		cancel event

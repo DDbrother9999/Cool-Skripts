@@ -1,0 +1,33 @@
+command /milestones:
+	trigger:
+		preventCommands(player)
+		set {_lvl} to {BP::%player's uuid%::Level} ? 1
+		open formatBPGui(player,{BP::%player's uuid%::Level}+1) to player
+
+on inventory click:
+	name of player's current inventory is "&e&lMilestones"
+	cancel event
+	if name of event-item is "&cBack":
+		if click action is left mouse button:
+			open formatBPGui(player,moveBP(player,-5)) to player
+		if click action is right mouse button:
+			open formatBPGui(player,moveBP(player,-10)) to player
+		if click action is left mouse button with shift:
+			open formatBPGui(player,moveBP(player,5)) to player
+	if name of event-item is "&cFoward":
+		if click action is left mouse button:
+			open formatBPGui(player,moveBP(player,5)) to player
+		if click action is right mouse button:
+			open formatBPGui(player,moveBP(player,10)) to player
+		if click action is left mouse button with shift:
+			open formatBPGui(player, 96)
+	if name of event-item is "&a&lClaim All":
+		claimAllBPReward(player)
+	cancel event
+
+command /setmilestonelevel <player> <number>:
+	permission: op
+	trigger:
+		set {_p} to arg-1
+		set {BP::%{_p}'s uuid%::Level} to arg-2
+		delete {BP::%{_p}'s uuid%::Exp}

@@ -1,0 +1,94 @@
+import:
+	org.bukkit.Location
+	org.bukkit.Bukkit
+	net.leonemc.core.Core
+	net.leonemc.core.util.bukkit.CC
+	
+
+command /discord:
+	trigger:
+		send "&6&lWildKits Discord Community! &7(Click to join) <link:https://discord.gg/WHEVhKY9Hb><tooltip:&aClick me to join!>%nl%&7 In our discord we do giveaways, events etc!" to player
+		play sound "block.note_block.pling" at volume 1 at pitch 2 to player
+	
+command /resetmap:
+	permission: op
+	trigger:
+		broadcast ""
+		broadcast "&c&lMap is resetting..."
+		broadcast ""
+		execute console command "mrl reset stone -s"
+		execute console command "mrl reset mine -s"
+		execute console command "mrl reset sandstone -s"
+		execute console command "mrl reset air -s"
+        
+		#execute console command "cm reset arenaclear"
+		#execute console command "cm reset arenasandstone"
+		#execute console command "cm reset arenastone"
+        
+		wait 20 ticks
+		loop all players:
+			if loop-player is in the region "arena":
+				if y-coordinate of loop-player < 75:
+					set {_x} to x coordinate of loop-player
+					set {_z} to z coordinate of loop-player
+					execute console command "minecraft:tp %loop-player% %{_x}% 71 %{_z}%"
+		
+every 20 minutes:
+	broadcast ""
+	broadcast "&c&lMap is resetting..."
+	broadcast ""
+        
+	#execute console command "cm reset arenaclear"
+	#execute console command "cm reset arenasandstone"
+	#execute console command "cm reset arenastone"
+
+	execute console command "mrl reset stone -s"
+	execute console command "mrl reset mine -s"
+	execute console command "mrl reset sandstone -s"
+	execute console command "mrl reset air -s"
+
+	wait 20 ticks
+	loop all players:
+		if loop-player is in the region "arena":
+			if y-coordinate of loop-player < 75:
+				set {_x} to x coordinate of loop-player
+				set {_z} to z coordinate of loop-player
+				#execute console command "minecraft:tp %loop-player% %{_x}% 71 %{_z}%"
+				set {_world} to Bukkit.getWorld("world")
+				set {_loc} to new Location({_world}, {_x}, 71, {_z})
+				{_loop_player}.teleport({_loc})
+
+on chat:
+  player has permission "rank.bronze"
+  set {_player} to player
+  set {_user} to Core.getInstance().getUserManager().get({_player})
+  set {_color} to CC.translate({_user}.getChatColor().getColor())
+  set {_sections::*} to message split at " "
+  set {_msg} to ""
+  loop {_sections::*}:
+    if loop-value is "GG":
+      set {_msg} to "%{_msg}%&6&lGG%{_color}% "
+    else if loop-value is "\n":
+      player has permission "op"
+      set {_msg} to "%{_msg}%%nl%%{_color}% "
+    else if loop-value is ":skull:":
+      set {_msg} to "%{_msg}%&r☠%{_color}% "
+    else if loop-value is ":smile:" or ":)":
+      set {_msg} to "%{_msg}%&r☺%{_color}% "
+    else if loop-value is ":frown:" or ":(":
+      set {_msg} to "%{_msg}%&r☹%{_color}% "
+    else if loop-value is ":peace:":
+      set {_msg} to "%{_msg}%&r✌%{_color}% "
+    else if loop-value is "o_o":
+      set {_msg} to "%{_msg}%&r◕_◕%{_color}% "
+    else:
+      set {_msg} to "%{_msg}%%loop-value% "
+  set {_ic::*} to {_msg} split at "[item]"
+  if size of {_ic::*} > 2:
+    cancel event
+    send "&cYou can only use &e[item]&c once per message."
+  set {_ic::*} to {_msg} split at "[i]"
+  if size of {_ic::*} > 2:
+    cancel event
+    send "&cYou can only use &e[item]&c once per message."
+  set message to {_msg}

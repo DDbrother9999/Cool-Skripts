@@ -1,0 +1,119 @@
+on join:
+	if {storedlvl.%player's uuid%} is not set:
+		set {storedlvl.%player's uuid%} to 0 
+		set {xpfix.%player's uuid%} to 1
+	if {xpfix.%player's uuid%} is not set:
+		set {xpfix.%player's uuid%} to 1
+		set {_l} to {storedlvl.%player's uuid%}
+		set {storedlvl.%player's uuid%} to calcExperience({_l})
+		
+		
+on load:
+	set {smh} to 0
+	loop all offline players:
+		set {_p} to loop-offlineplayer
+		if {storedlvl.%({_p} parsed as player)'s uuid%} >= 3000:
+			set {smh} to {smh} + 1
+			set {storedlvl.%({_p} parsed as player)'s uuid%} to 3000
+	execute console command "sc %{smh}%"
+
+command /XPBank:
+	trigger:
+		set {_gui} to a new chest inventory with 1 rows with name "&a&lXP Bank"
+		set slots (integers between 0 and 8) of {_gui} to black glass pane named " " 
+		set slot 3 of {_gui} to bottle o' enchanting named "&aStore" with lore "&9You have: %player's total experience% experience point(s)"
+		set slot 4 of {_gui} to chest named "&aYour Levels" with lore "&9Bank: &a%{storedlvl.%player's uuid%}%" and "&9On you: &a%player's total experience%"
+		set slot 5 of {_gui} to glass bottle named "&cWithdraw" with lore "&9From %{storedlvl.%player's uuid%}% experience point(s)"
+		open {_gui} to player
+
+command /deposit <integer>:
+	trigger:
+		if arg-1 is not set:
+			send "&aPlease specify the number of levels to deposit"
+		if arg-1 is set:
+			if arg - 1 < 0:
+				send "&4Haha very funny" to player
+				stop
+			#if arg-1 is "all":
+			#	set {_num} to {storedlvl.%player's uuid%}
+			#	execute console command "xp add %player% -%{_num}% points"
+			#	add {_num} to {storedlvl.%player's uuid%}
+			#	send "&aSuccesfully transferred &6%{_num}% &aexperience points!"
+			else:
+				set {_num} to arg-1
+				if {_num} <= player's total experience:
+					set the gamerule sendCommandFeedback of world "world" to false
+					execute console command "xp add %player% -%{_num}% points"
+					set the gamerule sendCommandFeedback of world "world" to true
+					add {_num} to {storedlvl.%player's uuid%}
+					send "&aSuccesfully transferred &6%{_num}% &aexperience points!"
+				else:
+					send "&cYou don't have %{_num}% &cexperience points!"
+						
+command /withdraw <integer>:
+	trigger:
+		if arg-1 is not set:
+			send "&aPlease specify the number of levels to withdraw"
+		if arg-1 is set:
+			if arg - 1 < 0:
+				send "&4Haha very funny" to player
+				stop
+			#if arg-1 is "all":
+			#	set {_num} to {storedlvl.%player's uuid%}
+			#	execute console command "xp add DDbrother %{_num}% points"
+			#	remove {_num} from {storedlvl.%player's uuid%}
+			#	send "&aSuccesfully transferred &6%{_num}% &aexperience points!"
+			else:
+				set {_num} to arg-1
+				if {_num} <= {storedlvl.%player's uuid%}:
+					set the gamerule sendCommandFeedback of world "world" to false
+					execute console command "xp add %player% %{_num}% points"
+					set the gamerule sendCommandFeedback of world "world" to true
+					remove {_num} from {storedlvl.%player's uuid%}
+					send "&aSuccesfully transferred &6%{_num}% &aexperience points!"
+				else:
+					send "&cYou don't have %{_num}% &cexperience points stored!"
+			
+command /xppay <player> <integer>:
+	trigger:
+		arg-2 is greater than 0
+		if {storedlvl.%player's uuid%} is greater than or equal to arg 2:
+			add arg-2 to {storedlvl.%arg 1's uuid%}
+			remove arg-2 from {storedlvl.%player's uuid%}
+			send "&aYou have paid %arg 1% %arg 2% experience point(s)." to player
+			send "&aYou have been paid %arg 2% experience points(s) by %player%." to arg 1
+		else:
+			send "&cYou do not have enough experience points for this."
+
+on inventory click:
+	if name of event-inventory is "&a&lXP Bank" or "&6&lDeposit" or "&6&lWithdraw":
+		cancel event
+		if event-slot is bottle o' enchanting:
+			set {_gui} to a new chest inventory with 3 row with name "&6&lDeposit"
+			set slots (integers between 0 and 26) of {_gui} to black glass pane named " "
+			set slot 10 of {_gui} to green wool named "&aDeposit 10"
+			set slot 13 of {_gui} to yellow wool named "&aDeposit 50"
+			set slot 16 of {_gui} to red wool named "&aDeposit all"
+			set slot 22 of {_gui} to bedrock named "&a&lTIP" with lore "&aUse /withdraw and /deposit to quickly" , "&awithdraw and deposit levels!"
+			open {_gui} to player
+		if event-slot is glass bottle:
+			set {_gui} to a new chest inventory with 3 row with name "&6&lWithdraw"
+			set slots (integers between 0 and 26) of {_gui} to black glass pane named " "
+			set slot 10 of {_gui} to green wool named "&aWithdraw 10"
+			set slot 13 of {_gui} to yellow wool named "&aWithdraw 50"
+			set slot 16 of {_gui} to red wool named "&aWithdraw all"
+			set slot 22 of {_gui} to bedrock named "&a&lTIP" with lore "&aUse /withdraw and /deposit to quickly" , "&awithdraw and deposit levels!"
+			open {_gui} to player
+		if event-slot is green wool named "&aDeposit 15":
+			execute player command "deposit 10"
+		if event-slot is yellow wool named "&aDeposit 50":
+			execute player command "deposit 50"
+		if event-slot is red wool named "&aDeposit all":
+			execute player command "deposit all"
+		if event-slot is green wool named "&aWithdraw 10":
+			execute player command "withdraw 10"
+		if event-slot is yellow wool named "&aWithdraw 50":
+			execute player command "withdraw 50"
+		if event-slot is red wool named "&aWithdraw all":
+			execute player command "withdraw all"
+

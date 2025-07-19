@@ -1,0 +1,17 @@
+command /sculk:
+	permission: sculk.rank
+	permission message: &cYou don't have permission! Buy a custom rank with /buy
+	trigger:
+		set {_loc} to player's location
+		loop 5 times:
+			send "&aTeleporting you to Sculk Area &7(%loop-value%)"
+			wait 1 second
+			if distance between {_loc} and player is not 0:
+				send "&cTeleport cancelled: You moved."
+				stop
+		send "&aTeleporting..."
+		send "&b&lWild&3&lKits &8> &cHave fun! The mine resets every half hour"
+		set {_loc} to location(-563, 239, 1115, world "world")
+		set yaw of {_loc} to 19.136
+		set pitch of {_loc} to 10.412
+		teleport player to {_loc}

@@ -1,0 +1,75 @@
+#p is player | type is "daily"/"weekly"/"monthly"|quest is quest name|goal is completion ammount
+
+function colorquests(p: player,type: text,quest: text) :: text:
+	if {Quests::%{_type}%::%{_p}'s uuid%::%{_quest}%} is true:
+		return "&a"
+	else:
+		return "&4"
+
+function progressquests(p: player,type: text, quest: text, goal: number) :: text:
+	if {Quests::%{_type}%::%{_p}'s uuid%::%{_quest}%} is true:
+		return "&a&lCOMPLETED"
+	else:
+		if {Quests::%{_type}%::%{_p}'s uuid%::%{_quest}%} doesn't exist:
+			return "&e&lPROGRESS: 0/%{_goal}%"
+		return "&e&lPROGRESS: %{Quests::%{_type}%::%{_p}'s uuid%::%{_quest}%}%/%{_goal}%"
+
+function formatquestitem(p: player,type: text, quest: text) :: item:
+	set {_desc} to {QuestDesc::%{_type}%::%{_quest}%::1}
+	set {_item} to {QuestDesc::%{_type}%::%{_quest}%::2}
+	set {_goal} to {QuestDesc::%{_type}%::%{_quest}%::3}
+	set {_return} to {_item} named "%colorquests({_p},{_type},{_quest})%%{_quest}%" with lore "%{_desc}%","",progressquests({_p},{_type},{_quest},{_goal}),"&a&lREWARD: %{%{_type}%QuestRewards}%" with all flags hidden
+	enchant {_return} with mending 1
+	return {_return}
+
+
+function addprogressquest(p: player,type:text, quest: text):
+	set {Quests::%{_type}%::%{_p}'s uuid%::%{_quest}%} to {Quests::%{_type}%::%{_p}'s uuid%::%{_quest}%} ? 0
+	add 1 to {Quests::%{_type}%::%{_p}'s uuid%::%{_quest}%}
+	if {Quests::%{_type}%::%{_p}'s uuid%::%{_quest}%} is greater than or equal to {QuestDesc::%{_type}%::%{_quest}%::3}:
+		completequest({_p},{_type},{_quest})
+
+function completequest(p: player,type:text, quest: text):
+	set {Quests::%{_type}%::%{_p}'s uuid%::%{_quest}%} to true
+	send {%{_type}%QuestReward} to {_p}
+	if {BP::%{_p}'s uuid%::Exp} doesn't exist:
+		set {BP::%{_p}'s uuid%::Exp} to 0
+		add {%{_type}%QuestReward} to {BP::%{_p}'s uuid%::Exp}
+	else:
+		add {%{_type}%QuestReward} to {BP::%{_p}'s uuid%::Exp}
+	addprogressquest({_p},"Weekly","Quester")
+	send "&7====================================================&8" to {_p}
+	send "&7" to {_p}
+	send "&a&lYou have completed the &f%{_quest}% &a&lQuest!" to {_p}
+	send "&a&lREWARD: %{%{_type}%QuestRewards}%" to {_p}
+	if checkForBPLevelUp({_p}) is true:
+		send "&a&lYou have leveled up your battlepass!" to {_p}
+		send "&a&lClaim your reward by doing &e&l/battlepass!" to {_p}
+	send "&8" to {_p}
+	send "&7====================================================" to {_p}
+
+function resetQuests(type: text, n: integer):
+	loop all offline players:
+		loop {Active%{_type}%Quests::*}:
+			delete {Quests::%{_type}%::%loop-offlineplayer's uuid%::%loop-value-1%}
+	loop {%{_type}%Quests::*}:
+		set {_t::*} to loop-value split at " "
+		set {_l} to lowercase {_t::1}
+		set {_f} to "%{_l}% %{_t::2}%"
+		disable skript file "InsaneKits/Quests/%{_type}%QuestListeners/%{_f}%%{_type}%Listener.sk"
+	clear {Active%{_type}%Quests::*}
+	while (size of {Active%{_type}%Quests::*}) is smaller than {_n}:
+		wait 1 tick
+		set {_random} to random integer between 1 and (size of {%{_type}%Quests::*})
+		set {_t::*} to {%{_type}%Quests::%{_random}%} split at " "
+		set {_t} to false
+		loop {Active%{_type}%Quests::*}:
+			"%loop-value%" contains {_t::1}
+			set {_t} to true
+		{_t} is false
+		add {%{_type}%Quests::%{_random}%} to {Active%{_type}%Quests::*}
+	loop {Active%{_type}%Quests::*}:
+		set {_t::*} to loop-value split at " "
+		set {_l} to lowercase {_t::1}
+		set {_f} to "%{_l}% %{_t::2}%"
+		enable skript file "InsaneKits/Quests/%{_type}%QuestListeners/%{_f}%%{_type}%Listener.sk"

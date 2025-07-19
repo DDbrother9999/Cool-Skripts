@@ -1,0 +1,20 @@
+on command "/koth":
+    arguments are not set
+    cancel event
+    execute player command "/warp Koth"
+
+command /afk:
+    trigger:
+        execute player command "/warp Afk"
+
+command /crates:
+    trigger:
+        execute player command "/warp Crates"
+
+command "/shop":
+	cancel event
+	execute player command "/warp shop"
+
+command "/parkour":
+	cancel event
+	execute player command "/warp parkour"

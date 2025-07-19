@@ -1,0 +1,359 @@
+import:
+	java.lang.String
+	java.lang.System
+	java.util.Arrays
+	java.util.List
+	java.lang.Double
+	org.bukkit.Location
+	org.bukkit.Bukkit
+
+
+options:
+	CRPM: &cYou don't have permission! Buy a custom rank with /buy
+
+
+command /getcoordsforplot <text>:
+	permission: *
+	permission message: "&cNo perm..."
+	trigger:
+		set {_loc} to player.getLocation()
+
+		set {_x} to {_loc}.getX()
+		set {_y} to {_loc}.getY()
+		set {_z} to {_loc}.getZ()
+
+		set {_text} to "customrank(player, ""%arg-1%"", ""%{_x}% %{_y}% %{_z}%"")"
+		set {_component} to text component from "&aClick to copy the thing to your clipboard!"
+		set click event of {_component} to a new click event to copy "%{_text}%" to clipboard
+
+		send component {_component} to player
+
+command /santa:
+	permission: santa.rank
+	permission message: {@CRPM}
+	trigger:
+		customrank(player, "Santa", "99595.71 4 100536.62")
+command /lazy:
+	permission: lazy.rank
+	permission message: {@CRPM}
+	trigger:
+		customrank(player, "Lazy", "99699.44 5 100028.3")
+command /py:
+	permission: py.rank
+	permission message: {@CRPM}
+	trigger:
+		customrank(player, "Py", "99244.03 4 100006.05")
+command /creybonfog:
+	permission: creybonfog.rank
+	permission message: {@CRPM}
+	trigger:
+		customrank(player, "CreyBonFog", "99698.9 4 100090.7")
+command /turkey:
+	permission: turkey.rank
+	permission message: {@CRPM}
+	trigger:
+		customrank(player, "Turkey", "99586.61 4 100425.3")
+command /friday:
+	permission: friday.rank
+	permission message: {@CRPM}
+	trigger:
+		customrank(player, "Friday", "99424.82 4 100536.36")
+command /father:
+	permission: father.rank
+	permission message: {@CRPM}
+	trigger:
+		customrank(player, "Father", "99765.81 4.5 100410.11")
+command /zeus:
+	permission: zeus.rank
+	permission message: {@CRPM}
+	trigger:
+		customrank(player, "Zeus", "29.06 63 -19.6", true)
+command /lucky:
+	permission: lucky.rank
+	permission message: {@CRPM}
+	trigger:
+		customrank(player, "Lucky", "99786.16 5 100106.02")
+command /void:
+	permission: void.rank
+	permission message: {@CRPM}
+	trigger:
+		customrank(player, "void", "99774.48 6 100324.3")
+command /easy:
+	permission: bozo.rank
+	permission message: {@CRPM}
+	trigger:
+		customrank(player, "Easy", "99677.53 5 100323.31")
+command /hog:
+	permission: hog.rank
+	permission message: {@CRPM}
+	trigger:
+		customrank(player, "Hog", "99784.5 13 100017.5")
+command /axolot:
+	permission: axolot.rank
+	permission message: {@CRPM}
+	trigger:
+		customrank(player, "Axolot", "28.69 63 -117.64", true)
+command /embers:
+	permission: embers.rank
+	permission message: {@CRPM}
+	trigger:
+		customrank(player,"Embers","-681 239 1223")
+command /god:
+	permission: god.rank
+	permission message: {@CRPM}
+	trigger:
+		customrank(player, "god", "63.3 64 -19.54")
+command /heaven:
+	permission: heaven.rank
+	permission message: {@CRPM}
+	trigger:
+		customrank(player,"Heaven","-485 236 1044")
+command /end:
+	permission: end.rank
+	permission message: {@CRPM}
+	trigger:
+		customrank(player,"End","-319 229 842")
+command /ghost:
+	permission: ghost.rank
+	permission message: {@CRPM}
+	trigger:
+		customrank(player,"Ghost","-535 243 1122")
+command /smkf:
+	permission: astronaut.rank
+	permission message: {@CRPM}
+	trigger:
+		customrank(player,"Astronaut","-618 221 1127")
+command /king:
+	permission: king.rank
+	permission message: {@CRPM}
+	trigger:
+		customrank(player,"King","-393 210 145")
+command /lunar:
+	permission: lunar.rank
+	permission message: {@CRPM}
+	trigger:
+		customrank(player,"Lunar","-946 27 1148")
+command /potato:
+	permission: potato.rank
+	permission message: {@CRPM}
+	trigger:
+		customrank(player,"Potato","-440 210 323")
+command /mythic:
+	permission: mythic.rank
+	permission message: {@CRPM}
+	trigger:
+		customrank(player,"Mythic","-612 244 901")
+command /troller:
+	permission: troller.rank
+	permission message: {@CRPM}
+	trigger:
+		customrank(player, "Troller", "99738.48 5 100019.27")
+command /sky:
+	permission: sky.rank
+	permission message: {@CRPM}
+	trigger:
+		customrank(player, "Sky", "99701.46 5 100690.59")
+command /space:
+	permission: space.rank
+	permission message: {@CRPM}
+	trigger:
+		customrank(player, "Space", "99723.42 5 100214.46")
+command /tommie:
+	permission: tommie.rank
+	permission message: {@CRPM}
+	trigger:
+		customrank(player, "Tommie", "74.5 64 -220.5", true)
+command /pokemon:
+	permission: pokemon.rank
+	permission message: {@CRPM}
+	trigger:
+		customrank(player, "Pokemon", "99735.32 4 100316.5")
+command /pumpkin:
+	permission: pumpkin.area
+	permission message: {@CRPM}
+	trigger:
+		customrank(player,"Pumpkin","-409 208 199")
+command /sandy:
+	permission: sandy.rank
+	permission message: {@CRPM}
+	trigger:
+		customrank(player,"Sandy","-506 208 128")
+command /rat:
+	permission: rat.rank
+	permission message: {@CRPM}
+	trigger:
+		customrank(player,"Rat","-337 219 1128")
+command /blossomshaven:
+	permission: builder.rank
+	permission message: {@CRPM}
+	trigger:
+		customrank(player,"Blossom","-691 211 214")
+command /sa:
+	aliases: smokyarea
+	permission: tv.s
+	permission message: {@CRPM}
+	trigger:
+		customrank(player,"Smoky","-38 204 200")
+command /god1:
+	permission: god.nether.rank
+	permission message: {@CRPM}
+	trigger:
+		customrank(player,"God","-384 144 396")
+command /bozo:
+	permission: bozo.rank
+	permission message: {@CRPM}
+	trigger:
+		customrank(player, "Bozo", "17.5 64 -65.5", true)
+command /blue:
+	aliases: /vip, /bronze
+	permission: vip.area
+	permission message: &b&lWild&3&lKits &8> &cYou're not VIP or above! Get it with /buy
+	trigger:
+		customrank(player, "Bronze", "99681.42 5 100417.42")
+command /pink:
+	aliases: /mvp, /silver
+	permission: mvp.area
+	permission message: &b&lWild&3&lKits &8> &cYou're not MVP or above! Get it with /buy
+	trigger:
+		customrank(player, "Silver", "99735.46 5 100411.34")
+command /purple:
+	permission: mvp++.area
+	aliases: /mvp++, /gold
+	permission message: &b&lWild&3&lKits &8> &cYou're not MVP++! Get it with /buy
+	trigger:
+		customrank(player, "Gold", "99759.3 4 100487.49")
+command /shadow:
+	permission: shadow.rank
+	permission message: {@CRPM}
+	trigger:
+		customrank(player, "Shadow", "99817.14 13 100424.32")
+command /quack:
+	permission: quack.rank
+	permission message: {@CRPM}
+	trigger:
+		customrank(player, "Quack", "99747 5 100205")
+
+command /platinum:
+	permission: platinum.area
+	aliases: /platinum
+	permission message: &b&lWild&3&lKits &8> &cYou're not Platinum! Get it with /buy
+	trigger:
+		customrank(player, "Platinum", "99693.13 4 100594.68")
+
+command /angel:
+	permission: angel.rank
+	permission message: {@CRPM}
+	trigger:
+		customrank(player, "Angel", "99786.43 19 100366.49")
+
+command /capybara:
+	permission: capybara.rank
+	permission message: {@CRPM}
+	trigger:
+		customrank(player, "Capybara", "99778.61 4 100564.53")
+
+command /lover:
+	permission: lover.rank
+	permission message: {@CRPM}
+	trigger:
+		customrank(player, "Lover", "99441.5 5 100455.5")
+
+command /dragon:
+	permission: dragon.rank
+	permission message: {@CRPM}
+	trigger:
+		customrank(player, "Dragon", "99645.46 4 100193.54")
+
+command /gigachad:
+	permission: gigachad.rank
+	permission message: {@CRPM}
+	trigger:
+		customrank(player, "Gigachad", "99781.46 5 100200.52")
+
+command /sus:
+	permission: sus.rank
+	permission message: {@CRPM}
+	trigger:
+		customrank(player, "Sus", "99785.38 6 100252.34")
+		
+command /end2:
+	permission: end2.rank
+	permission message: {@CRPM}
+	trigger:
+		customrank(player, "End2", "99769.51 24 100154.5")
+
+command /Umpalumpa:
+	permission: Umpalumpa.rank
+	permission message: {@CRPM}
+	trigger:
+		customrank(player, "Umpalumpa", "99734.01 5 100102.45")
+
+command /cow:
+	permission: cow.rank
+	permission message: {@CRPM}
+	trigger:
+		customrank(player, "cow", "99699.23 5 100113.22")
+command /Vatoloco:
+	permission: VatoLoco.rank
+	permission message: {@CRPM}
+	trigger:
+		customrank(player, "VatoLoco", "99667.3 6 100151.54")
+command /yo:
+	permission: yo.rank
+	permission message: {@CRPM}
+	trigger:
+		customrank(player, "Yo", "99636.5 14 100016.5")
+command /srmember:
+	permission: sr.member.rank
+	permission message: {@CRPM}
+	trigger:
+		customrank(player, "Sr.Member", "99636.87 4 100053.37")
+command /insane:
+	permission: insanekits.rank
+	permission message: {@CRPM}
+	trigger:
+		customrank(player, "InsaneKits", "99652.5 5 100263.5")
+		
+function customrank(p: player, name: text, xyz: text, plotWorld: boolean = false):
+		set {_loc} to {_p}'s location
+
+		# Split it with " " using the String object
+		set {_split} to new String({_xyz}).split(" ")
+
+		# Couldn't get normal String[] arrays to work
+		# so I just made it convert it to a List<String> instead
+		set {_list} to Arrays.asList({_split})
+
+		# Parse the coordinates to integers
+		set {_x} to Double.parseDouble({_list}.get(0)) 
+		set {_y} to Double.parseDouble({_list}.get(1)) 
+		set {_z} to Double.parseDouble({_list}.get(2)) 
+
+		# Get the plot world bukkit object
+		set {_world} to Bukkit.getWorld("world")
+
+		if {_plotWorld}:
+				set {_x} to {_x} + 99709
+				set {_z} to {_z} + 100487
+
+		#Get the location object
+		set {_loc1} to new Location({_world}, {_x}, {_y}, {_z})
+
+		if {_p}'s gamemode is creative:
+				send "&aTeleported!" to {_p}
+
+				# Teleport them using the bukkit method
+				{_p}.teleport({_loc1})
+				stop
+
+		loop 5 times:
+				send "&aTeleporting you to %{_name}% Area &7(%loop-value%)" to {_p}
+				wait 1 second
+				if distance between {_loc} and {_p} is not 0:
+						send "&cTeleport cancelled: You moved." to {_p}
+						stop
+		send "&aTeleporting..." to {_p}
+		send "&b&lWild&3&lKits &8> &cHave fun! The mine resets every half hour" to {_p}
+
+		# Teleport them using the bukkit method
+		{_p}.teleport({_loc1})

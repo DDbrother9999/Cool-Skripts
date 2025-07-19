@@ -1,0 +1,26 @@
+import:
+	org.bukkit.event.block.BlockExplodeEvent as blockExplosion
+    
+on blockExplosion:
+    event.getBlock()'s type is respawn anchor
+    set {_list::*} to players in radius 16 of event.getBlock()
+    set {_player} to {lastplayer}
+    
+    
+    loop {_list::*}:
+        loop-value's health is 0
+
+        set metadata "stopdeathmessage" of loop-value to true
+        giveXPfromKill({_player}, loop-value) if {_player} is not loop-value
+        increaseKills({_player}) if {_player} is not loop-value
+        checkForLevelUp({_player}) if {_player} is not loop-value
+        setkillstreak(loop-value, 0)
+        increaseDeaths(loop-value)
+        send "<##ff0303>☠ &f%loop-value% &cwas blown up by &f%{_player}%" to all players
+
+    
+on right click on respawn anchor or any bed:
+    set {lastplayer} to player
+
+function creditKill(p: player):
+    broadcast "testvalue"

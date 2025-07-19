@@ -1,0 +1,28 @@
+on damage:
+    if metadata tag "fh_frozen" of victim is 1:
+        cancel event
+        stop
+    set {_tool} to attacker's tool
+    if tag "frozenhammer" of nbt compound of {_tool} is 1:
+        attacker is in region "boxs4" parsed as region
+        set {_pos} to victim's location
+        set x coordinate of {_pos} to round(x coordinate of {_pos}) + 0.5
+        set y coordinate of {_pos} to round(y coordinate of {_pos})
+        set z coordinate of {_pos} to round(z coordinate of {_pos}) + 0.5
+        set metadata tag "fh_frozen" of victim to 1
+        teleport victim to {_pos}
+        set {_b1} to block at victim
+        set {_b2} to block above victim
+        set block at {_b1} to ice
+        set block at {_b2} to ice
+        wait 0.1 seconds
+        make victim see {_b1} as air
+        make victim see {_b2} as air
+        wait 1.4 seconds
+        set block at {_b1} to air
+        set block at {_b2} to air
+        delete metadata tag "fh_frozen" of victim
+
+on any movement:
+    if metadata tag "fh_frozen" of player is 1:
+        cancel event

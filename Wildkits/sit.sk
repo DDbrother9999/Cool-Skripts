@@ -1,0 +1,77 @@
+#sit
+
+on right click on any stairs or slab:
+	player's tool is air
+	{sitno::%player%} is not set
+	block 2 blocks above event-block is air
+	block above event-block is air
+	distance between player and event-block is less than or equal to 2
+	difference between player's y coordinate and event-block's y coordinate is less than or equal to 0.8
+	if "%event-block's type%" contains "double":
+		stop
+	if player is riding:
+		kill {sittingarmorstand::%player%}
+		delete {sittingarmorstand::%player%}
+		wait 2 ticks
+	set {_n} to nbt compound from "{Invisible:1b,NoGravity:1b}"
+   # 90 - west | 180 - north | 270 - east | 0 - south
+	if "%event-block's type%" contains "top":
+		set {_loc} to location 1.1 blocks under event-block's location
+		if event-block's facing is set:
+			if event-block's facing is west:	
+				set yaw of {_loc} to 270
+			if event-block's facing is east:
+				set yaw of {_loc} to 90
+			if event-block's facing is north:
+				set yaw of {_loc} to 0
+			if event-block's facing is south:
+				set yaw of {_loc} to 180
+	else:
+		set {_loc} to location 1.6 blocks under event-block's location
+		if event-block's facing is set:
+			if event-block's facing is west:	
+				set yaw of {_loc} to 270
+			if event-block's facing is east:
+				set yaw of {_loc} to 90
+			if event-block's facing is north:
+				set yaw of {_loc} to 0
+			if event-block's facing is south:
+				set yaw of {_loc} to 180
+	spawn armor stand at {_loc} with nbt {_n}
+	set {sittingarmorstand::%player%} to last spawned armor stand
+	wait 2 ticks
+	make player ride {sittingarmorstand::%player%}
+	while player is riding:
+		wait 5 ticks
+		if event-block is air:
+			eject passengers from {sittingarmorstand::%player%}
+			wait 1 ticks
+			kill {sittingarmorstand::%player%}
+			delete {sittingarmorstand::%player%}
+ 
+on right click:
+	{sitno::%player%} is not set
+	set {sitno::%player%} to 1
+	wait 0.7 seconds
+	delete {sitno::%player%}
+  
+on dismount:
+	wait 5 ticks
+	kill {sittingarmorstand::%player%}
+	delete {sittingarmorstand::%player%}
+    
+on death of armor stand:
+	cancel drops
+    
+on quit:
+	kill {sittingarmorstand::%player%}
+	delete {sittingarmorstand::%player%}
+    
+on death:
+	kill {sittingarmorstand::%victim%}
+	delete {sittingarmorstand::%victim%}
+    
+every hour:
+	loop {sittingarmorstand::*}:
+		kill loop-value
+	clear {sittingarmorstand::*}

@@ -1,0 +1,5 @@
+on load:
+    set {DailyLoserQuest} to "II"
+
+on disable:
+    clear {DailyLoserQuest}

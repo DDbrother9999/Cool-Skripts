@@ -1,0 +1,176 @@
+options:
+    prefix: &8┃ &6Coin&eFlip &8»&7
+
+command /cf [<text>]:
+	aliases: cf
+	trigger:
+		set {_t} to arg-1 parsed as integer ? "list"
+		if arg-1 = "delete" or "remove":
+			{cfrequests::*} does not contain name of player:
+				send "{@prefix} &7You didn't place a bid!"
+				stop
+			send "{@prefix} &7Your bid has been removed!"
+			delete {cfrequests::%name of player%::bid}
+			remove name of player from {cfrequests::*}
+			stop
+		if {_t} is "list":
+			coinflipGameGUI(player, 1)
+		else:
+			if getcoins(player) < {_t}:
+				send "{@prefix} &cYou don't have enough money!"
+			else if {_t} < 10:
+				send "{@prefix} &cThe minimum bid is 10!"
+			else if {cfrequests::*} contains name of player:
+				send "{@prefix} &7You already placed a bid!"
+			else:
+				coinflipColorPickGUI(player)
+				set metadata "coinFlipBid" of player to {_t}
+
+on inventory click:
+	name of event-inventory starts with "&8» &6Pick A Color!":
+		cancel event
+		if clicked slot = barrier:
+			close inventory of player
+			send "{@prefix} &cYou canceled the bid on the coinflip!"
+		if "%event-slot%" contains "wool":
+			if metadata "coinflipAccept" of player is set:
+				if {cfrequests::%{_host}%::color} is event-item:
+					send "&cChoose a different color!"
+					stop
+				set {_t::*} to metadata "coinflipAccept" of player split at ";"
+				set {_host} to {_t::1}
+				set {_playerhost} to "%{_host}%" parsed as player
+				set {_bid} to {_t::2} parsed as integer
+				coins(player,0-{_bid})
+				set {_1} to {cfrequests::%{_host}%::color}
+				set {_1} to {_1} named "&f%{_host}%"
+				set {_2} to event-item
+				set {_2} to {_2} named "&f%player%"
+				set {_gui} to chest inventory with 3 rows named "&eCoinflip"
+				set slots (integers between 0 and 27) of {_gui} to gray stained glass pane
+				set slot 10 of {_gui} to skull of player
+				set slot 11 of {_gui} to {_2}
+				set slot 16 of {_gui} to skull of {_host} parsed as player
+				set slot 15 of {_gui} to {_1}
+				set {_d} to {_1}
+				set {_n} to 0
+				while {_n} is less than or equal to 100:
+					set {_t} to {_2} if {_d} is {_1}
+					set {_t} to {_1} if {_d} is {_2}
+					set slot 13 of {_gui} to {_t}
+					open {_gui} to {_playerhost}
+					open {_gui} to player
+					set {_d} to {_t}
+					add (random integer between 3 and 7) to {_n}
+					set {_w} to ceil({_n}*0.1)
+					wait "%{_w}% ticks" parsed as timespan
+				if {_1} is {_d}:
+					set {_winner} to {_host}
+					set {_looser} to player
+				else:
+					set {_winner} to player
+					set {_looser} to {_host}
+				set {_profit} to {_bid}*2*0.95
+				send "{@prefix} &7You have won against &a%{_looser}% &7in coinflip! &8(&a+$%{_profit}%&8) &7(5%% Tax)" to {_winner} parsed as player
+				send "{@prefix} &7You have lost against &c%{_winner}% &7in coinflip! &8(&c-$%{_bid}%&8)" to {_looser} parsed as player
+				broadcast "{@prefix} &7Player &a%{_winner}% &7has won against &c%{_looser}% &7in coinflip with a stake of &e%{_bid}%"
+				coins({_winner} parsed as player,{_profit})
+
+				delete {cfrequests::%{_host}%::bid}
+				remove {_host} from {cfrequests::*}
+				set {_host} to {_host} parsed as player
+				clear metadata "coinFlipBid" of {_host}
+				clear metadata "coinflipAccept" of player
+				close player's inventory
+				#broadcast "Winner: %{_winner}%;Looser: %{_looser}%; Bid: %{_bid}%; Host: %{_host}%"
+
+				add "%{_profit}%" to {cfhistory::%{_winner}%::win::*}
+				add "%{_bid}%" to {cfhistory::%{_looser}%::lose::*}
+				addprogressquest({_winner} parsed as player,"Daily","Winner %{DailyWinnerQuest}%") if {DailyWinnerQuest} is set
+				addprogressquest({_winner} parsed as player,"Weekly","Winner %{WeeklyWinnerQuest}%") if {WeeklyWinnerQuest} is set
+				addprogressquest({_looser} parsed as player,"Daily","Loser %{DailyLoserQuest}%") if {DailyLoserQuest} is set
+				addprogressquest({_looser} parsed as player,"Weekly","Loser %{WeeklyLoserQuest}%") if {WeeklyLoserQuest} is set
+				stop
+			close player's inventory
+			set {cfrequests::%name of player%::bid} to metadata tag "coinFlipBid" of player
+			set {cfrequests::%name of player%::color} to event-item
+			add "%name of player%" to {cfrequests::*}
+
+on inventory click:
+	name of event-inventory starts with "&8» &6Coin&eFlip &8[&7Page"
+	cancel event
+	coinflipGameGUI(player, {-page::%uuid of player%}-1) if clicked slot = red dye named "&cBack &8(&e%{-page::%uuid of player%}-1%&8)"
+	coinflipGameGUI(player, {-page::%uuid of player%}+1) if clicked slot = lime dye named "&aNext page &8(&e%{-page::%uuid of player%}+1%&8)"
+	clicked slot = player head
+	set {_p::*} to unformatted name of clicked slot split at " "
+	set {_host} to first element out of {_p::*}
+	set {_bid} to {cfrequests::%{_host}%::bid}
+	if {_host} = name of player:
+		send "{@prefix} &cYou can't play against yourself!"
+	else if {cfrequests::*} does not contain {_host}:
+		send "{@prefix} &cPlayer not found!"
+	else if getcoins(player) < {_bid}:
+		send "{@prefix} &cYou don't have enough money!"
+	else:
+		coinflipColorPickGUI(player)
+		set metadata "coinflipAccept" of player to "%{_host}%;%{_bid}%"
+
+function coinflipColorPickGUI(p: player):
+    set {_chest2} to chest inventory with 5 rows named "&8» &6Pick A Color!"
+    set slot (0, 1, 2, 6, 7, 8, 9, 10, 16, 17, 18, 19, 25, 26, 27, 28, 34, 35, 36, 37, 38, 42, 43, 44, 13, 21, 23, and 31) of {_chest2} to gray stained glass pane named " "
+    set slot 3 of {_chest2} to light gray wool named "&7Pick Light Gray!"
+    set slot 4 of {_chest2} to gray wool named "&8Pick Gray!"
+    set slot 5 of {_chest2} to black wool named "§x§0§8§0§4§0§1Pick Black!"
+    set slot 11 of {_chest2} to pink wool named "&dPick Pink!"
+    set slot 12 of {_chest2} to white wool named "&fPick White!"
+    set slot 14 of {_chest2} to brown wool named "§x§6§7§3§2§0§cPick Brown!"
+    set slot 15 of {_chest2} to red wool named "&cPick Red!"
+    set slot 20 of {_chest2} to magenta wool named "§x§f§f§2§8§a§9Pick Magenta!"
+    set slot 24 of {_chest2} to orange wool named "§x§f§f§7§c§1§ePick Orange!"
+    set slot 29 of {_chest2} to purple wool named "&5Pick Purple!"
+    set slot 30 of {_chest2} to blue wool named "&9Pick Blue!"
+    set slot 32 of {_chest2} to lime wool named "&aPick Lime!"
+    set slot 33 of {_chest2} to yellow wool named "&ePick Yellow!"
+    set slot 39 of {_chest2} to light blue wool named "&bPick Light Blue!"
+    set slot 40 of {_chest2} to cyan wool named "&3Pick Cyan!"
+    set slot 41 of {_chest2} to green wool named "&2Pick Green!"
+    open {_chest2} to {_p}
+
+function coinflipGameGUI(p: player, page: number=1):
+	set {_list::*} to {cfrequests::*}
+	set {_nextpage} to ({_page}+1) if (1st element of (pagination({_list::*}, {_page}+1, 21)) is set)
+	set {_previouspage} to ({_page}-1) if (1st element of (pagination({_list::*}, {_page}-1, 21)) is set)
+	set {_verified::*} to pagination({_list::*}, {_page}, 21)
+	set {_chest} to chest inventory with 5 rows named "&8» &6Coin&eFlip &8[&7Page %{_page}%&8]"
+	set {_slots::*} to (numbers between 10 and 16), (numbers between 19 and 25) and (numbers between 28 and 34)
+	set {_n} to 1
+	set slot (integers between 0 and 8), (17, 26, 35, 44, 9, 18, 27 and 36) and (integers from 37 to 44) of {_chest} to gray stained glass pane named " "
+	loop {_verified::*}:
+		set {_color::*} to "%{cfrequests::%loop-value%::color}%" split at " "
+		set {_c} to "%first character of {_color::1} in upper case%%last (length of {_color::1} - 1) characters of {_color::1} in lower case%"
+		if {_c} is "light":
+			set {_c} to "%{_c}% %first character of {_color::2} in upper case%%last (length of {_color::2} - 1) characters of {_color::2} in lower case%"
+		set slot ({_n}st element of {_slots::*}) of {_chest} to (skull of loop-value parsed as player named "&e%loop-value% &8[&6$%{cfrequests::%loop-value%::bid}%&8]" with lore "&8▶ &7Color: %{_c}%","&8▶ &7ᴄʟɪᴄᴋ ᴛᴏ ᴀᴄᴄᴇᴘᴛ")
+		add 1 to {_n}
+	set slot 38 of {_chest} to red dye named "&cBack &8(&e%{_previouspage}%&8)" if {_previouspage} is set
+	set {_profit} to 0
+	loop {cfhistory::%{_p}%::win::*}:
+		add loop-value parsed as integer to {_profit}
+	loop {cfhistory::%{_p}%::lose::*}:
+		subtract loop-value parsed as integer from {_profit}
+	if {_profit} < 0:
+		set {_profit} to "&c%{_profit}%&4$"
+	else:
+		set {_profit} to "&a%{_profit}%&2$"
+	set slot 40 of {_chest} to book named "&c&lStatistics" with lore "&8❖ &fPlayer: &e%{_p}%","&8❖ &fWon: &a%size of {cfhistory::%{_p}%::win::*}%","&8❖ &fLost: &c%size of {cfhistory::%{_p}%::lose::*}%","&8❖ &fProfit: %{_profit}%","&8❖ &fWin Percentage &d%(size of {cfhistory::%{_p}%::win::*})/((size of {cfhistory::%{_p}%::win::*})+(size of {cfhistory::%{_p}%::lose::*}))*100%&5%%"
+	set slot 42 of {_chest} to lime dye named "&aNext page &8(&e%{_nextpage}%&8)" if {_nextpage} is set
+	set {-page::%uuid of {_p}%} to {_page}
+	open {_chest} to {_p}
+
+function pagination(objects: objects, page: number, elementsPerPage: number) :: objects:
+    set {_page} to floor({_page})
+    set {_elementsPerPage} to floor({_elementsPerPage})
+    set {_startIndex} to ({_page} -1)*{_elementsPerPage}
+    loop {_elementsPerPage} times:
+        add (({_startIndex} + loop-value)th element out of {_objects::*}) to {_objs::*}
+    return {_objs::*}

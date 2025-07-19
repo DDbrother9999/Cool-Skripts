@@ -1,0 +1,1060 @@
+options:
+    server: "wildkits"
+    fileName: "duels"
+    prefix: "&6&lDuels &7»&b"  
+
+
+#------------------ DUEL CUSTOM KIT GUI BELOW
+
+command /duelkiteditor:
+    aliases: /dke
+    trigger:
+        if player has permission "duels.use" or "dueladmin.use":
+            createCCGui(player, "GuiBase")
+        else:
+            send "%{@prefix}% &cYou cannot use this feature!"
+
+on command "/viewduelkit":
+    cancel event
+    set {_p} to metadata "lastCustomKitPlayer" of player
+    set {_p} to "%{_p}%"
+    set {_extra} to metadata "lastCustomKitNumber" of player
+    set {_extra} to "%{_extra}%"
+    viewDuelCCKit({_p}, player, {_extra})
+function viewDuelCCKit(p: text, p2: player, extra: text):
+    set {_p} to {_p} parsed as offline player
+    loop {customkit%{_extra}%.%{_p}'s uuid%::*}:
+        set {_kit::%loop-index%} to loop-value
+
+    set {_customkitname} to {_kit::name} if {_kit::name} is set
+    set {_customkitname} to "Custom Kit" if {_kit::name} is not set
+    create a new gui with virtual chest inventory with 6 rows named "%{_p}%'s Kit %{_extra}% - %{_customkitname}%"
+    edit last gui:
+        format gui slot 0 with red stained glass pane named "&cBack":
+            close player's inventory
+        format gui slot 1,2,3,4,5,6,7,8,9,14,15,17 with gray stained glass pane named " "
+        set {_loop} to 0
+        loop 41 times:
+            if {_kit::%{_loop}%} is set:
+                set {_kitplaceholder.%{_loop}%} to {_kit::%{_loop}%} named "&fSlot %{_loop}%"
+            else:
+                if {_loop} is greater than or equal to 36:
+                    set {_kitplaceholder.%{_loop}%} to blue stained glass pane named "&fSlot %{_loop}%"
+                else if {_loop} is less than or equal to 8:
+                    set {_kitplaceholder.%{_loop}%} to light gray stained glass pane named "&fSlot %{_loop}%"
+                else:
+                    set {_kitplaceholder.%{_loop}%} to red stained glass pane named "&fSlot %{_loop}%"
+            add 1 to {_loop}
+        set {_loop} to 0
+        format gui slot 10 with {_kitplaceholder.39} named "&fSlot 39 (Helmet)"
+        format gui slot 11 with {_kitplaceholder.38} named "&fSlot 38 (Chestplate)"
+        format gui slot 12 with {_kitplaceholder.37} named "&fSlot 37 (Leggings)"
+        format gui slot 13 with {_kitplaceholder.36} named "&fSlot 36 (Boots)"
+        format gui slot 16 with {_kitplaceholder.40} named "&fSlot 40 (Offhand)"
+        format gui slot 26 with {_kitplaceholder.0}
+        format gui slot 25 with {_kitplaceholder.1}
+        format gui slot 24 with {_kitplaceholder.2}
+        format gui slot 23 with {_kitplaceholder.3}
+        format gui slot 22 with {_kitplaceholder.4}
+        format gui slot 21 with {_kitplaceholder.5}
+        format gui slot 20 with {_kitplaceholder.6}
+        format gui slot 19 with {_kitplaceholder.7}
+        format gui slot 18 with {_kitplaceholder.8}
+        set {_loop} to 53
+        set {_loop2} to 9
+        loop 27 times:
+            format gui slot {_loop} with {_kitplaceholder.%{_loop2}%}
+            add 1 to {_loop2}
+            remove 1 from {_loop}
+    open last gui to {_p2}
+
+#\send "e" if ({arenapos1.Arena}'s x coordinate <= player's x coordinate) and ({arenapos2.Arena}'s x coordinate >= player's x coordinate)
+
+function createCCGui(p: player, name: text, extra: text = "None", extra2: integer = 0, extra3: item = air, extra4: integer = 0, extra5: text = "None"):
+    set {_item} to {_kit::%{_extra2}%}
+    set {_item} to air if {_kit::%{_extra2}%} is not set
+    set {_item} to {_extra3} if {_extra3} is not air
+    if maximum stack size of {_item} is less than tag "Count" of full nbt compound of {_item}:
+        set {_nbt} to full nbt compound of {_item}
+        set tag "Count" of {_nbt} to maximum stack size of {_item}
+        set {_item} to item from nbt {_nbt}
+        set {_extra3} to {_item}
+
+    if {_name} is "GuiBase":
+
+
+        create a new gui with virtual chest inventory with 3 rows named "Custom Kits"
+        edit last gui:
+            format gui slot 0,1,2,3,4,5,6,7,8,9,17,18,19,20,21,22,23,24,25,26 with gray stained glass pane named " "
+            format gui slot 10,11,15,16 with light gray stained glass pane named " "
+            set {_customkit1name} to {customkit1.%{_p}'s uuid%::name} if {customkit1.%{_p}'s uuid%::name} is set
+            set {_customkit2name} to {customkit2.%{_p}'s uuid%::name} if {customkit2.%{_p}'s uuid%::name} is set
+            set {_customkit3name} to {customkit3.%{_p}'s uuid%::name} if {customkit3.%{_p}'s uuid%::name} is set
+            set {_customkit1name} to "Custom Kit" if {customkit1.%{_p}'s uuid%::name} is not set
+            set {_customkit2name} to "Custom Kit" if {customkit2.%{_p}'s uuid%::name} is not set
+            set {_customkit3name} to "Custom Kit" if {customkit3.%{_p}'s uuid%::name} is not set
+            format gui slot 12 with paper named "&a%{_customkit1name}%" with lore "&7[Click to Edit]":
+                createCCGui(player, "GuiTwo", "1")
+            format gui slot 13 with paper named "&a%{_customkit2name}%" with lore "&7[Click to Edit]":
+                createCCGui(player, "GuiTwo", "2")
+            format gui slot 14 with paper named "&a%{_customkit3name}%" with lore "&7[Click to Edit]":
+                createCCGui(player, "GuiTwo", "3")
+        open last gui to {_p}
+
+
+    else if {_name} is "GuiTwo":
+        if {_extra3} is not air:
+            set {customkit%{_extra}%.%{_p}'s uuid%::%{_extra2}%} to {_extra3}
+            set variable "customkit%{_extra}%.%{_p}'s uuid%::%{_extra2}%" in channel "duels" to {_extra3}
+            loop 41 times:
+                set {_loop} to loop-value - 1
+                set variable "customkit%{_extra}%.%{_p}'s uuid%::%{_loop}%" in channel "duels" to {customkit%{_extra}%.%{_p}'s uuid%::%{_loop}%}
+        loop {customkit%{_extra}%.%{_p}'s uuid%::*}:
+            set {_kit::%loop-index%} to loop-value
+
+        set {_customkitname} to {_kit::name} if {_kit::name} is set
+        set {_customkitname} to "Custom Kit" if {_kit::name} is not set
+        
+        
+        create a new gui with id "CCGuiTwo.%{_p}'s uuid%" with virtual chest inventory with 6 rows named "%{_customkitname}% - Editing"
+        edit last gui:
+            format gui slot 0 with red stained glass pane named "&cBack":
+                createCCGui(player, "GuiBase")
+            format gui slot 1 with nametag named "&fName Kit":
+                set metadata "NameKit" of player to {_extra}
+                close player's inventory
+                renameKit(player)
+            format gui slot 2 with nether star named "&bKit Options" with lore "&aOpen GUI &e[CLICK]":
+                openKitSettingsMenu({_p}, {_extra})
+            format gui slot 3,4,5,6,7,8,9,14,15,17 with gray stained glass pane named " "
+            set {_loop} to 0
+            loop 41 times:
+                if {_kit::%{_loop}%} is set:
+                    set {_kitplaceholder.%{_loop}%} to {_kit::%{_loop}%} named "&fSlot %{_loop}%"
+                else:
+                    if {_loop} is greater than or equal to 36:
+                        set {_kitplaceholder.%{_loop}%} to blue stained glass pane named "&fSlot %{_loop}%"
+                    else if {_loop} is less than or equal to 8:
+                        set {_kitplaceholder.%{_loop}%} to light gray stained glass pane named "&fSlot %{_loop}%"
+                    else:
+                        set {_kitplaceholder.%{_loop}%} to red stained glass pane named "&fSlot %{_loop}%"
+                add 1 to {_loop}
+            set {_loop} to 0
+            format gui slot 10 with {_kitplaceholder.39} named "&fSlot 39 (Helmet)":
+                createCCGui(player, "CCEditGuiOne", {_extra}, 39)
+            format gui slot 11 with {_kitplaceholder.38} named "&fSlot 38 (Chestplate)":
+                createCCGui(player, "CCEditGuiOne", {_extra}, 38)
+            format gui slot 12 with {_kitplaceholder.37} named "&fSlot 37 (Leggings)":
+                createCCGui(player, "CCEditGuiOne", {_extra}, 37)
+            format gui slot 13 with {_kitplaceholder.36} named "&fSlot 36 (Boots)":
+                createCCGui(player, "CCEditGuiOne", {_extra}, 36)
+            format gui slot 16 with {_kitplaceholder.40} named "&fSlot 40 (Offhand)":
+                createCCGui(player, "CCEditGuiOne", {_extra}, 40)
+            format gui slot 45 with {_kitplaceholder.0}:
+                createCCGui(player, "CCEditGuiOne", {_extra}, 0)
+            format gui slot 46 with {_kitplaceholder.1}:
+                createCCGui(player, "CCEditGuiOne", {_extra}, 1)
+            format gui slot 47 with {_kitplaceholder.2}:
+                createCCGui(player, "CCEditGuiOne", {_extra}, 2)
+            format gui slot 48 with {_kitplaceholder.3}:
+                createCCGui(player, "CCEditGuiOne", {_extra}, 3)
+            format gui slot 49 with {_kitplaceholder.4}:
+                createCCGui(player, "CCEditGuiOne", {_extra}, 4)
+            format gui slot 50 with {_kitplaceholder.5}:
+                createCCGui(player, "CCEditGuiOne", {_extra}, 5)
+            format gui slot 51 with {_kitplaceholder.6}:
+                createCCGui(player, "CCEditGuiOne", {_extra}, 6)
+            format gui slot 52 with {_kitplaceholder.7}:
+                createCCGui(player, "CCEditGuiOne", {_extra}, 7)
+            format gui slot 53 with {_kitplaceholder.8}:
+                createCCGui(player, "CCEditGuiOne", {_extra}, 8)
+            set {_loop} to 18
+            set {_loop2} to 9
+            loop 27 times:
+                format gui slot {_loop} with {_kitplaceholder.%{_loop2}%}:
+                    createCCGui(player, "CCEditGuiOne", {_extra}, {_loop2})
+                add 1 to {_loop2}
+                add 1 to {_loop}
+        open last gui to {_p}
+
+    else if {_name} is "CCEditGuiOne":
+
+
+        loop {customkit%{_extra}%.%{_p}'s uuid%::*}:
+            set {_kit::%loop-index%} to loop-value
+        set {_item} to {_kit::%{_extra2}%}
+        set {_item} to air if {_kit::%{_extra2}%} is not set
+        set {_item} to {_extra3} if {_extra3} is not air
+        set {_customkitname} to {_kit::name} if {_kit::name} is set
+        set {_customkitname} to "Custom Kit" if {_kit::name} is not set
+        create a new gui with virtual chest inventory with 6 rows named "%{_customkitname}% - Editing Slot %{_extra2}%"
+        edit last gui:
+            set {_itemplaceholder} to {_kit::%{_extra2}%} if {_kit::%{_extra2}%} is set
+            set {_itemplaceholder} to orange stained glass pane named "&fSlot %{_extra2}%" if {_kit::%{_extra2}%} is not set    
+            set {_itemplaceholder} to {_extra3} if {_extra3} is not air
+            format gui slot 4 with {_itemplaceholder}
+            format gui slot 5 with barrier named "&cDelete Item":
+                delete {customkit%{_extra}%.%{_p}'s uuid%::%{_extra2}%}
+                createCCGui(player, "GuiTwo", {_extra})
+            format gui slot 0 with red stained glass pane named "&cBack":
+                createCCGui(player, "GuiTwo", {_extra})
+            format gui slot 8 with lime stained glass pane named "&aSave Item":
+                createCCGui(player, "GuiTwo", {_extra}, {_extra2}, {_item})
+                set {recentitem3.%{_p}'s uuid%} to {recentitem2.%{_p}'s uuid%}
+                set {recentitem2.%{_p}'s uuid%} to {recentitem1.%{_p}'s uuid%}
+                set {recentitem1.%{_p}'s uuid%} to {_item}
+            format gui slot 3 with writable book named "&fEdit Item":
+                createCCGui(player, "GuiEditItem", {_extra}, {_extra2}, {_item})
+            format gui slot 20 with water bottle of mending 1 with enchants flag hidden named "&fPotions":
+                createCCGui(player, "GuiEditPotionsN", {_extra}, {_extra2}, {_item})
+            format gui slot 22 with stone named "&fBlocks":
+                createCCGui(player, "GuiEditBlocks", {_extra}, {_extra2}, {_item})
+            format gui slot 24 with iron axe named "&fTools & Armor":
+                createCCGui(player, "GuiEditTools", {_extra}, {_extra2}, {_item}, 5) if {customkit%{_extra}%.%{_p}'s uuid%::oldcombatmechanics} is not set
+                createCCGui(player, "GuiEditTools", {_extra}, {_extra2}, {_item}, 4) if {customkit%{_extra}%.%{_p}'s uuid%::oldcombatmechanics} is set
+            format gui slot 30 with cooked beef named "&fFood":
+                createCCGui(player, "GuiEditFood", {_extra}, {_extra2}, {_item})
+            format gui slot 32 with saddle named "&fMisc.":
+                createCCGui(player, "GuiEditMisc", {_extra}, {_extra2}, {_item})
+            format gui slot 1,2,6,7,9,17,18,26,27,35,36,44,45,46,47,48,49,50,51,52,53 with gray stained glass pane named " "
+            format gui slot 10,11,12,13,14,15,16,19,25,28,34,37,38,42,43 with light gray stained glass pane named " "
+            format gui slot 39,40,41 with red stained glass pane named "&cQuick Access" with lore "&8Recently selected items appear here!"
+            if {recentitem1.%{_p}'s uuid%} is set:
+                format gui slot 39 with {recentitem1.%{_p}'s uuid%}:
+                    createCCGui(player, "GuiTwo", {_extra}, {_extra2}, {recentitem1.%{_p}'s uuid%})
+            if {recentitem2.%{_p}'s uuid%} is set:
+                format gui slot 40 with {recentitem2.%{_p}'s uuid%}:
+                    createCCGui(player, "GuiTwo", {_extra}, {_extra2}, {recentitem2.%{_p}'s uuid%})
+            if {recentitem3.%{_p}'s uuid%} is set:
+                format gui slot 41 with {recentitem3.%{_p}'s uuid%}:
+                    createCCGui(player, "GuiTwo", {_extra}, {_extra2}, {recentitem3.%{_p}'s uuid%})
+        open last gui to {_p}
+    else if {_name} is "GuiEditPotionsN":
+        loop {customkit%{_extra}%.%{_p}'s uuid%::*}:
+            set {_kit::%loop-index%} to loop-value
+        set {_customkitname} to {_kit::name} if {_kit::name} is set
+        set {_customkitname} to "Custom Kit" if {_kit::name} is not set
+        set {_itemplaceholder} to orange stained glass pane named "&fSlot %{_extra2}%"
+        set {_itemplaceholder} to {_extra3} if {_extra3} is not air
+        create a new gui with virtual chest inventory with 6 rows named "%{_customkitname}% - Editing Slot %{_extra2}%"
+        edit last gui:
+            format gui slot 0 with red stained glass pane named "&cBack":
+                createCCGui(player, "CCEditGuiOne", {_extra}, {_extra2}, {_extra3})
+            format gui slot 1 with water bottle named "&fType: Normal":
+                createCCGui(player, "GuiEditPotionsS", {_extra}, {_extra2}, {_extra3})
+            format gui slot 2,3,5,6,7,8 with gray stained glass pane named " "
+            format gui slot 9,10,11,12,13,14,15,16,17 with light gray stained glass pane named " "
+            format gui slot 4 with {_itemplaceholder}
+            format gui slot 18 with long invisibility potion:
+                getCCItem(player, "GuiEditPotionsN", {_extra}, {_extra2}, {_extra3}, "minecraft:potion", "potion", "long_invisibility")
+            format gui slot 19 with long leaping potion:
+                getCCItem(player, "GuiEditPotionsN", {_extra}, {_extra2}, {_extra3}, "minecraft:potion", "potion", "long_leaping")
+            format gui slot 20 with long fire resistance potion:
+                getCCItem(player, "GuiEditPotionsN", {_extra}, {_extra2}, {_extra3}, "minecraft:potion", "potion", "long_fire_resistance")
+            format gui slot 21 with long swiftness potion:
+                getCCItem(player, "GuiEditPotionsN", {_extra}, {_extra2}, {_extra3}, "minecraft:potion", "potion", "long_swiftness")
+            format gui slot 22 with strong turtle master potion:
+                getCCItem(player, "GuiEditPotionsN", {_extra}, {_extra2}, {_extra3}, "minecraft:potion", "potion", "strong_turtle_master")
+            format gui slot 23 with strong healing potion:
+                getCCItem(player, "GuiEditPotionsN", {_extra}, {_extra2}, {_extra3}, "minecraft:potion", "potion", "strong_healing")
+            format gui slot 24 with strong harming potion:
+                getCCItem(player, "GuiEditPotionsN", {_extra}, {_extra2}, {_extra3}, "minecraft:potion", "potion", "strong_harming")
+            format gui slot 25 with strong poison potion:
+                getCCItem(player, "GuiEditPotionsN", {_extra}, {_extra2}, {_extra3}, "minecraft:potion", "potion", "strong_poison")
+            format gui slot 26 with strong regeneration potion:
+                getCCItem(player, "GuiEditPotionsN", {_extra}, {_extra2}, {_extra3}, "minecraft:potion", "potion", "strong_regeneration")
+            format gui slot 27 with long slow falling potion:
+                getCCItem(player, "GuiEditPotionsN", {_extra}, {_extra2}, {_extra3}, "minecraft:potion", "potion", "long_slow_falling")
+            format gui slot 28 with long weakness potion:
+                getCCItem(player, "GuiEditPotionsN", {_extra}, {_extra2}, {_extra3}, "minecraft:potion", "potion", "long_weakness")
+            format gui slot 29 with long strength potion:
+                getCCItem(player, "GuiEditPotionsN", {_extra}, {_extra2}, {_extra3}, "minecraft:potion", "potion", "long_strength")
+        open last gui to {_p}
+    else if {_name} is "GuiEditPotionsS":
+        loop {customkit%{_extra}%.%{_p}'s uuid%::*}:
+            set {_kit::%loop-index%} to loop-value
+        set {_customkitname} to {_kit::name} if {_kit::name} is set
+        set {_customkitname} to "Custom Kit" if {_kit::name} is not set
+        set {_itemplaceholder} to orange stained glass pane named "&fSlot %{_extra2}%"
+        set {_itemplaceholder} to {_extra3} if {_extra3} is not air
+        create a new gui with virtual chest inventory with 6 rows named "%{_customkitname}% - Editing Slot %{_extra2}%"
+        edit last gui:
+            format gui slot 0 with red stained glass pane named "&cBack":
+                createCCGui(player, "CCEditGuiOne", {_extra}, {_extra2}, {_extra3})
+            format gui slot 1 with splash potion of water named "&fType: Splash":
+                createCCGui(player, "GuiEditPotionsN", {_extra}, {_extra2}, {_extra3})
+            format gui slot 2,3,5,6,7,8 with gray stained glass pane named " "
+            format gui slot 9,10,11,12,13,14,15,16,17 with light gray stained glass pane named " "
+            format gui slot 4 with {_itemplaceholder}
+            format gui slot 18 with splash potion of long invisibility:
+                getCCItem(player, "GuiEditPotionsS", {_extra}, {_extra2}, {_extra3}, "minecraft:splash_potion", "potion", "long_invisibility")
+            format gui slot 19 with splash potion of long leaping:
+                getCCItem(player, "GuiEditPotionsS", {_extra}, {_extra2}, {_extra3}, "minecraft:splash_potion", "potion", "long_leaping")
+            format gui slot 20 with splash potion of long fire resistance:
+                getCCItem(player, "GuiEditPotionsS", {_extra}, {_extra2}, {_extra3}, "minecraft:splash_potion", "potion", "long_fire_resistance")
+            format gui slot 21 with splash potion of long swiftness:
+                getCCItem(player, "GuiEditPotionsS", {_extra}, {_extra2}, {_extra3}, "minecraft:splash_potion", "potion", "long_swiftness")
+            format gui slot 22 with splash potion of strong turtle master:
+                getCCItem(player, "GuiEditPotionsS", {_extra}, {_extra2}, {_extra3}, "minecraft:splash_potion", "potion", "strong_turtle_master")
+            format gui slot 23 with splash potion of strong healing:
+                getCCItem(player, "GuiEditPotionsS", {_extra}, {_extra2}, {_extra3}, "minecraft:splash_potion", "potion", "strong_healing")
+            format gui slot 24 with splash potion of strong harming:
+                getCCItem(player, "GuiEditPotionsS", {_extra}, {_extra2}, {_extra3}, "minecraft:splash_potion", "potion", "strong_harming")
+            format gui slot 25 with splash potion of strong poison:
+                getCCItem(player, "GuiEditPotionsS", {_extra}, {_extra2}, {_extra3}, "minecraft:splash_potion", "potion", "strong_poison")
+            format gui slot 26 with splash potion of strong regeneration:
+                getCCItem(player, "GuiEditPotionsS", {_extra}, {_extra2}, {_extra3}, "minecraft:splash_potion", "potion", "strong_regeneration")
+            format gui slot 27 with splash potion of long slow falling:
+                getCCItem(player, "GuiEditPotionsS", {_extra}, {_extra2}, {_extra3}, "minecraft:splash_potion", "potion", "long_slow_falling")
+            format gui slot 28 with splash potion of long weakness:
+                getCCItem(player, "GuiEditPotionsS", {_extra}, {_extra2}, {_extra3}, "minecraft:splash_potion", "potion", "long_weakness")
+            format gui slot 29 with splash potion of long strength:
+                getCCItem(player, "GuiEditPotionsS", {_extra}, {_extra2}, {_extra3}, "minecraft:splash_potion", "potion", "long_strength")
+        open last gui to {_p}
+
+    else if {_name} is "GuiEditBlocks":
+        loop {customkit%{_extra}%.%{_p}'s uuid%::*}:
+            set {_kit::%loop-index%} to loop-value
+        set {_customkitname} to {_kit::name} if {_kit::name} is set
+        set {_customkitname} to "Custom Kit" if {_kit::name} is not set
+        set {_itemplaceholder} to orange stained glass pane named "&fSlot %{_extra2}%"
+        set {_itemplaceholder} to {_extra3} if {_extra3} is not air
+        create a new gui with virtual chest inventory with 6 rows named "%{_customkitname}% - Editing Slot %{_extra2}%"
+        edit last gui:
+            format gui slot 0 with red stained glass pane named "&cBack":
+                createCCGui(player, "CCEditGuiOne", {_extra}, {_extra2}, {_extra3})
+            format gui slot 1,2,3,5,6,7,8 with gray stained glass pane named " "
+            format gui slot 9,10,11,12,13,14,15,16,17 with light gray stained glass pane named " "
+            format gui slot 4 with {_itemplaceholder}
+            format gui slot 18 with stone:
+                getCCItem(player, "GuiEditBlocks", {_extra}, {_extra2}, {_extra3}, "minecraft:stone")
+            format gui slot 19 with sandstone:
+                getCCItem(player, "GuiEditBlocks", {_extra}, {_extra2}, {_extra3}, "minecraft:sandstone")
+            format gui slot 20 with oak log:
+                getCCItem(player, "GuiEditBlocks", {_extra}, {_extra2}, {_extra3}, "minecraft:oak_log")
+            format gui slot 21 with spruce log:
+                getCCItem(player, "GuiEditBlocks", {_extra}, {_extra2}, {_extra3}, "minecraft:spruce_log")
+            format gui slot 22 with birch log:
+                getCCItem(player, "GuiEditBlocks", {_extra}, {_extra2}, {_extra3}, "minecraft:birch_log")
+            format gui slot 23 with dark oak log:
+                getCCItem(player, "GuiEditBlocks", {_extra}, {_extra2}, {_extra3}, "minecraft:dark_oak_log")
+            format gui slot 24 with jungle log:
+                getCCItem(player, "GuiEditBlocks", {_extra}, {_extra2}, {_extra3}, "minecraft:jungle_log")
+            format gui slot 25 with acacia log:
+                getCCItem(player, "GuiEditBlocks", {_extra}, {_extra2}, {_extra3}, "minecraft:acacia_log")
+            format gui slot 26 with mangrove log:
+                getCCItem(player, "GuiEditBlocks", {_extra}, {_extra2}, {_extra3}, "minecraft:mangrove_log")
+            format gui slot 27 with calcite:
+                getCCItem(player, "GuiEditBlocks", {_extra}, {_extra2}, {_extra3}, "minecraft:calcite")
+            format gui slot 28 with obsidian:
+                getCCItem(player, "GuiEditBlocks", {_extra}, {_extra2}, {_extra3}, "minecraft:obsidian")
+            format gui slot 29 with oak planks:
+                getCCItem(player, "GuiEditBlocks", {_extra}, {_extra2}, {_extra3}, "minecraft:oak_planks")
+            format gui slot 30 with spruce planks:
+                getCCItem(player, "GuiEditBlocks", {_extra}, {_extra2}, {_extra3}, "minecraft:spruce_planks")
+            format gui slot 31 with birch planks:
+                getCCItem(player, "GuiEditBlocks", {_extra}, {_extra2}, {_extra3}, "minecraft:birch_planks")
+            format gui slot 32 with dark oak planks:
+                getCCItem(player, "GuiEditBlocks", {_extra}, {_extra2}, {_extra3}, "minecraft:dark_oak_planks")
+            format gui slot 33 with jungle planks:
+                getCCItem(player, "GuiEditBlocks", {_extra}, {_extra2}, {_extra3}, "minecraft:jungle_planks")
+            format gui slot 34 with acacia planks:
+                getCCItem(player, "GuiEditBlocks", {_extra}, {_extra2}, {_extra3}, "minecraft:acacia_planks")
+            format gui slot 35 with mangrove planks:
+                getCCItem(player, "GuiEditBlocks", {_extra}, {_extra2}, {_extra3}, "minecraft:mangrove_planks")
+            format gui slot 36 with warped stem:
+                getCCItem(player, "GuiEditBlocks", {_extra}, {_extra2}, {_extra3}, "minecraft:warped_stem")
+            format gui slot 37 with crimson stem:
+                getCCItem(player, "GuiEditBlocks", {_extra}, {_extra2}, {_extra3}, "minecraft:crimson_stem")
+            format gui slot 38 with gold block:
+                getCCItem(player, "GuiEditBlocks", {_extra}, {_extra2}, {_extra3}, "minecraft:gold_block")
+            format gui slot 39 with diamond block:
+                getCCItem(player, "GuiEditBlocks", {_extra}, {_extra2}, {_extra3}, "minecraft:diamond_block")
+            format gui slot 40 with netherite block:
+                getCCItem(player, "GuiEditBlocks", {_extra}, {_extra2}, {_extra3}, "minecraft:netherite_block")
+            format gui slot 41 with carved pumpkin:
+                getCCItem(player, "GuiEditBlocks", {_extra}, {_extra2}, {_extra3}, "minecraft:carved_pumpkin")
+            format gui slot 42 with pumpkin:
+                getCCItem(player, "GuiEditBlocks", {_extra}, {_extra2}, {_extra3}, "minecraft:pumpkin")
+            format gui slot 43 with copper block:
+                getCCItem(player, "GuiEditBlocks", {_extra}, {_extra2}, {_extra3}, "minecraft:copper_block")
+            format gui slot 44 with iron block:
+                getCCItem(player, "GuiEditBlocks", {_extra}, {_extra2}, {_extra3}, "minecraft:iron_block")
+            format gui slot 45 with warped planks:
+                getCCItem(player, "GuiEditBlocks", {_extra}, {_extra2}, {_extra3}, "minecraft:warped_planks")
+            format gui slot 46 with crimson planks:
+                getCCItem(player, "GuiEditBlocks", {_extra}, {_extra2}, {_extra3}, "minecraft:crimson_planks")
+            format gui slot 47 with grass block:
+                getCCItem(player, "GuiEditBlocks", {_extra}, {_extra2}, {_extra3}, "minecraft:grass_block")
+            format gui slot 48 with dirt:
+                getCCItem(player, "GuiEditBlocks", {_extra}, {_extra2}, {_extra3}, "minecraft:dirt")
+            format gui slot 49 with coarse dirt:
+                getCCItem(player, "GuiEditBlocks", {_extra}, {_extra2}, {_extra3}, "minecraft:coarse_dirt")
+            format gui slot 50 with sand:
+                getCCItem(player, "GuiEditBlocks", {_extra}, {_extra2}, {_extra3}, "minecraft:sand")
+            format gui slot 51 with sandstone:
+                getCCItem(player, "GuiEditBlocks", {_extra}, {_extra2}, {_extra3}, "minecraft:sandstone")
+        open last gui to {_p}
+    else if {_name} is "GuiEditTools":
+        loop {customkit%{_extra}%.%{_p}'s uuid%::*}:
+            set {_kit::%loop-index%} to loop-value
+        set {_customkitname} to {_kit::name} if {_kit::name} is set
+        set {_customkitname} to "Custom Kit" if {_kit::name} is not set
+        set {_itemplaceholder} to orange stained glass pane named "&fSlot %{_extra2}%"
+        set {_itemplaceholder} to {_extra3} if {_extra3} is not air
+        create a new gui with virtual chest inventory with 6 rows named "%{_customkitname}% - Editing Slot %{_extra2}%"
+        edit last gui:
+            format gui slot 0 with red stained glass pane named "&cBack":
+                createCCGui(player, "CCEditGuiOne", {_extra}, {_extra2}, {_extra3})
+            
+            format gui slot 2,3,5,6,7,8 with gray stained glass pane named " "
+            format gui slot 9,10,11,12,13,14,15,16,17 with light gray stained glass pane named " "
+            format gui slot 4 with {_itemplaceholder}
+            if {_extra4} is 1:
+                format gui slot 1 with oak planks named "&fMaterial Level - 1":
+                    createCCGui(player, "GuiEditTools", {_extra}, {_extra2}, {_extra3}, 2)
+                format gui slot 18 with wooden sword:
+                    getCCItem(player, "GuiEditTools", {_extra}, {_extra2}, {_extra3}, "minecraft:wooden_sword", "specialgui", "none", {_extra4})
+                format gui slot 19 with wooden shovel:
+                    getCCItem(player, "GuiEditTools", {_extra}, {_extra2}, {_extra3}, "minecraft:wooden_shovel", "specialgui", "none", {_extra4})
+                format gui slot 20 with wooden pickaxe:
+                    getCCItem(player, "GuiEditTools", {_extra}, {_extra2}, {_extra3}, "minecraft:wooden_pickaxe", "specialgui", "none", {_extra4})
+                format gui slot 21 with wooden axe:
+                    getCCItem(player, "GuiEditTools", {_extra}, {_extra2}, {_extra3}, "minecraft:wooden_axe", "specialgui", "none", {_extra4})
+                format gui slot 22 with wooden hoe:
+                    getCCItem(player, "GuiEditTools", {_extra}, {_extra2}, {_extra3}, "minecraft:wooden_hoe", "specialgui", "none", {_extra4})
+                format gui slot 23 with leather helmet:
+                    getCCItem(player, "GuiEditTools", {_extra}, {_extra2}, {_extra3}, "minecraft:leather_helmet", "specialgui", "none", {_extra4})
+                format gui slot 24 with leather chestplate:
+                    getCCItem(player, "GuiEditTools", {_extra}, {_extra2}, {_extra3}, "minecraft:leather_chestplate", "specialgui", "none", {_extra4})
+                format gui slot 25 with leather leggings:
+                    getCCItem(player, "GuiEditTools", {_extra}, {_extra2}, {_extra3}, "minecraft:leather_leggings", "specialgui", "none", {_extra4})
+                format gui slot 26 with leather boots:
+                    getCCItem(player, "GuiEditTools", {_extra}, {_extra2}, {_extra3}, "minecraft:leather_boots", "specialgui", "none", {_extra4})
+            else if {_extra4} is 2:
+                format gui slot 1 with stone named "&fMaterial Level - 2":
+                    createCCGui(player, "GuiEditTools", {_extra}, {_extra2}, {_extra3}, 3)
+                format gui slot 18 with stone sword:
+                    getCCItem(player, "GuiEditTools", {_extra}, {_extra2}, {_extra3}, "minecraft:stone_sword", "specialgui", "none", {_extra4})
+                format gui slot 19 with stone shovel:
+                    getCCItem(player, "GuiEditTools", {_extra}, {_extra2}, {_extra3}, "minecraft:stone_shovel", "specialgui", "none", {_extra4})
+                format gui slot 20 with stone pickaxe:
+                    getCCItem(player, "GuiEditTools", {_extra}, {_extra2}, {_extra3}, "minecraft:stone_pickaxe", "specialgui", "none", {_extra4})
+                format gui slot 21 with stone axe:
+                    getCCItem(player, "GuiEditTools", {_extra}, {_extra2}, {_extra3}, "minecraft:stone_axe", "specialgui", "none", {_extra4})
+                format gui slot 22 with stone hoe:
+                    getCCItem(player, "GuiEditTools", {_extra}, {_extra2}, {_extra3}, "minecraft:stone_hoe", "specialgui", "none", {_extra4})
+                format gui slot 23 with chainmail helmet:
+                    getCCItem(player, "GuiEditTools", {_extra}, {_extra2}, {_extra3}, "minecraft:chainmail_helmet", "specialgui", "none", {_extra4})
+                format gui slot 24 with chainmail chestplate:
+                    getCCItem(player, "GuiEditTools", {_extra}, {_extra2}, {_extra3}, "minecraft:chainmail_chestplate", "specialgui", "none", {_extra4})
+                format gui slot 25 with chainmail leggings:
+                    getCCItem(player, "GuiEditTools", {_extra}, {_extra2}, {_extra3}, "minecraft:chaimmail_leggings", "specialgui", "none", {_extra4})
+                format gui slot 26 with chainmail boots:
+                    getCCItem(player, "GuiEditTools", {_extra}, {_extra2}, {_extra3}, "minecraft:chainmail_boots", "specialgui", "none", {_extra4})
+            else if {_extra4} is 3:
+                format gui slot 1 with iron block named "&fMaterial Level - 3":
+                    createCCGui(player, "GuiEditTools", {_extra}, {_extra2}, {_extra3}, 4)
+                format gui slot 18 with iron sword:
+                    getCCItem(player, "GuiEditTools", {_extra}, {_extra2}, {_extra3}, "minecraft:iron_sword", "specialgui", "none", {_extra4})
+                format gui slot 19 with iron shovel:
+                    getCCItem(player, "GuiEditTools", {_extra}, {_extra2}, {_extra3}, "minecraft:iron_shovel", "specialgui", "none", {_extra4})
+                format gui slot 20 with iron pickaxe:
+                    getCCItem(player, "GuiEditTools", {_extra}, {_extra2}, {_extra3}, "minecraft:iron_pickaxe", "specialgui", "none", {_extra4})
+                format gui slot 21 with iron axe:
+                    getCCItem(player, "GuiEditTools", {_extra}, {_extra2}, {_extra3}, "minecraft:iron_axe", "specialgui", "none", {_extra4})
+                format gui slot 22 with iron hoe:
+                    getCCItem(player, "GuiEditTools", {_extra}, {_extra2}, {_extra3}, "minecraft:iron_hoe", "specialgui", "none", {_extra4})
+                format gui slot 23 with iron helmet:
+                    getCCItem(player, "GuiEditTools", {_extra}, {_extra2}, {_extra3}, "minecraft:iron_helmet", "specialgui", "none", {_extra4})
+                format gui slot 24 with iron chestplate:
+                    getCCItem(player, "GuiEditTools", {_extra}, {_extra2}, {_extra3}, "minecraft:iron_chestplate", "specialgui", "none", {_extra4})
+                format gui slot 25 with iron leggings:
+                    getCCItem(player, "GuiEditTools", {_extra}, {_extra2}, {_extra3}, "minecraft:iron_leggings", "specialgui", "none", {_extra4})
+                format gui slot 26 with iron boots:
+                    getCCItem(player, "GuiEditTools", {_extra}, {_extra2}, {_extra3}, "minecraft:iron_boots", "specialgui", "none", {_extra4})
+            else if {_extra4} is 4:
+                format gui slot 1 with diamond block named "&fMaterial Level - 4":
+                    createCCGui(player, "GuiEditTools", {_extra}, {_extra2}, {_extra3}, 5)
+                format gui slot 18 with diamond sword:
+                    getCCItem(player, "GuiEditTools", {_extra}, {_extra2}, {_extra3}, "minecraft:diamond_sword", "specialgui", "none", {_extra4})
+                format gui slot 19 with diamond shovel:
+                    getCCItem(player, "GuiEditTools", {_extra}, {_extra2}, {_extra3}, "minecraft:diamond_shovel", "specialgui", "none", {_extra4})
+                format gui slot 20 with diamond pickaxe:
+                    getCCItem(player, "GuiEditTools", {_extra}, {_extra2}, {_extra3}, "minecraft:diamond_pickaxe", "specialgui", "none", {_extra4})
+                format gui slot 21 with diamond axe:
+                    getCCItem(player, "GuiEditTools", {_extra}, {_extra2}, {_extra3}, "minecraft:diamond_axe", "specialgui", "none", {_extra4})
+                format gui slot 22 with diamond hoe:
+                    getCCItem(player, "GuiEditTools", {_extra}, {_extra2}, {_extra3}, "minecraft:diamond_hoe", "specialgui", "none", {_extra4})
+                format gui slot 23 with diamond helmet:
+                    getCCItem(player, "GuiEditTools", {_extra}, {_extra2}, {_extra3}, "minecraft:diamond_helmet", "specialgui", "none", {_extra4})
+                format gui slot 24 with diamond chestplate:
+                    getCCItem(player, "GuiEditTools", {_extra}, {_extra2}, {_extra3}, "minecraft:diamond_chestplate", "specialgui", "none", {_extra4})
+                format gui slot 25 with diamond leggings:
+                    getCCItem(player, "GuiEditTools", {_extra}, {_extra2}, {_extra3}, "minecraft:diamond_leggings", "specialgui", "none", {_extra4})
+                format gui slot 26 with diamond boots:
+                    getCCItem(player, "GuiEditTools", {_extra}, {_extra2}, {_extra3}, "minecraft:diamond_boots", "specialgui", "none", {_extra4})
+            else if {_extra4} is 5:
+                format gui slot 1 with netherite block named "&fMaterial Level - 5":
+                    createCCGui(player, "GuiEditTools", {_extra}, {_extra2}, {_extra3}, 1)
+                format gui slot 18 with netherite sword:
+                    getCCItem(player, "GuiEditTools", {_extra}, {_extra2}, {_extra3}, "minecraft:netherite_sword", "specialgui", "none", {_extra4})
+                format gui slot 19 with netherite shovel:
+                    getCCItem(player, "GuiEditTools", {_extra}, {_extra2}, {_extra3}, "minecraft:netherite_shovel", "specialgui", "none", {_extra4})
+                format gui slot 20 with netherite pickaxe:
+                    getCCItem(player, "GuiEditTools", {_extra}, {_extra2}, {_extra3}, "minecraft:netherite_pickaxe", "specialgui", "none", {_extra4})
+                format gui slot 21 with netherite axe:
+                    getCCItem(player, "GuiEditTools", {_extra}, {_extra2}, {_extra3}, "minecraft:netherite_axe", "specialgui", "none", {_extra4})
+                format gui slot 22 with netherite hoe:
+                    getCCItem(player, "GuiEditTools", {_extra}, {_extra2}, {_extra3}, "minecraft:netherite_hoe", "specialgui", "none", {_extra4})
+                format gui slot 23 with netherite helmet:
+                    getCCItem(player, "GuiEditTools", {_extra}, {_extra2}, {_extra3}, "minecraft:netherite_helmet", "specialgui", "none", {_extra4})
+                format gui slot 24 with netherite chestplate:
+                    getCCItem(player, "GuiEditTools", {_extra}, {_extra2}, {_extra3}, "minecraft:netherite_chestplate", "specialgui", "none", {_extra4})
+                format gui slot 25 with netherite leggings:
+                    getCCItem(player, "GuiEditTools", {_extra}, {_extra2}, {_extra3}, "minecraft:netherite_leggings", "specialgui", "none", {_extra4})
+                format gui slot 26 with netherite boots:
+                    getCCItem(player, "GuiEditTools", {_extra}, {_extra2}, {_extra3}, "minecraft:netherite_boots", "specialgui", "none", {_extra4})
+
+
+            format gui slot 27 with bow:
+                getCCItem(player, "GuiEditTools", {_extra}, {_extra2}, {_extra3}, "minecraft:bow", "specialgui", "none", {_extra4})
+            format gui slot 28 with arrow:
+                getCCItem(player, "GuiEditTools", {_extra}, {_extra2}, {_extra3}, "minecraft:arrow", "specialgui", "none", {_extra4})
+            format gui slot 29 with fishing rod:
+                getCCItem(player, "GuiEditTools", {_extra}, {_extra2}, {_extra3}, "minecraft:fishing_rod", "specialgui", "none", {_extra4})
+            format gui slot 30 with compass:
+                getCCItem(player, "GuiEditTools", {_extra}, {_extra2}, {_extra3}, "minecraft:compass", "specialgui", "none", {_extra4})
+            format gui slot 32 with long weakness tipped arrow:
+                getCCItem(player, "GuiEditTools", {_extra}, {_extra2}, {_extra3}, "minecraft:tipped_arrow", "potionspecialgui", "long_weakness", {_extra4})
+            format gui slot 33 with strong instant health tipped arrow:
+                getCCItem(player, "GuiEditTools", {_extra}, {_extra2}, {_extra3}, "minecraft:tipped_arrow", "potionspecialgui", "strong_healing", {_extra4})
+            format gui slot 34 with strong turtle master tipped arrow:
+                getCCItem(player, "GuiEditTools", {_extra}, {_extra2}, {_extra3}, "minecraft:tipped_arrow", "potionspecialgui", "strong_turtle_master", {_extra4})
+            format gui slot 35 with strong slowness tipped arrow:
+                getCCItem(player, "GuiEditTools", {_extra}, {_extra2}, {_extra3}, "minecraft:tipped_arrow", "potionspecialgui", "strong_slowness", {_extra4})
+            format gui slot 36 with crossbow:
+                getCCItem(player, "GuiEditTools", {_extra}, {_extra2}, {_extra3}, "minecraft:crossbow", "specialgui", "none", {_extra4})
+            format gui slot 37 with turtle helmet:
+                getCCItem(player, "GuiEditTools", {_extra}, {_extra2}, {_extra3}, "minecraft:turtle_helmet", "specialgui", "none", {_extra4})
+            format gui slot 38 with flint and steel:
+                getCCItem(player, "GuiEditTools", {_extra}, {_extra2}, {_extra3}, "minecraft:flint_and_steel", "specialgui", "none", {_extra4})
+            format gui slot 39 with clock:
+                getCCItem(player, "GuiEditTools", {_extra}, {_extra2}, {_extra3}, "minecraft:clock", "specialgui", "none", {_extra4})
+            format gui slot 41 with long invisibility tipped arrow:
+                getCCItem(player, "GuiEditTools", {_extra}, {_extra2}, {_extra3}, "minecraft:tipped_arrow", "potionspecialgui", "long_invisibility", {_extra4})
+            format gui slot 42 with long leaping tipped arrow:
+                getCCItem(player, "GuiEditTools", {_extra}, {_extra2}, {_extra3}, "minecraft:tipped_arrow", "potionspecialgui", "long_leaping", {_extra4})
+            format gui slot 43 with long fire resistance tipped arrow:
+                getCCItem(player, "GuiEditTools", {_extra}, {_extra2}, {_extra3}, "minecraft:tipped_arrow", "potionspecialgui", "long_fire_resistance", {_extra4})
+            format gui slot 44 with long speed tipped arrow:
+                getCCItem(player, "GuiEditTools", {_extra}, {_extra2}, {_extra3}, "minecraft:tipped_arrow", "potionspecialgui", "long_swiftness", {_extra4})
+            format gui slot 45 with shield:
+                getCCItem(player, "GuiEditTools", {_extra}, {_extra2}, {_extra3}, "minecraft:shield", "specialgui", "none", {_extra4})
+            format gui slot 46 with trident:
+                getCCItem(player, "GuiEditTools", {_extra}, {_extra2}, {_extra3}, "minecraft:trident", "specialgui", "none", {_extra4})
+            format gui slot 47 with spyglass:
+                getCCItem(player, "GuiEditTools", {_extra}, {_extra2}, {_extra3}, "minecraft:spyglass", "specialgui", "none", {_extra4})
+            format gui slot 48 with shears:
+                getCCItem(player, "GuiEditTools", {_extra}, {_extra2}, {_extra3}, "minecraft:shears", "specialgui", "none", {_extra4})
+            format gui slot 51 with strong damage tipped arrow:
+                getCCItem(player, "GuiEditTools", {_extra}, {_extra2}, {_extra3}, "minecraft:tipped_arrow", "potionspecialgui", "strong_harming", {_extra4})
+            format gui slot 52 with long slow falling tipped arrow:
+                getCCItem(player, "GuiEditTools", {_extra}, {_extra2}, {_extra3}, "minecraft:tipped_arrow", "potionspecialgui", "long_slow_falling", {_extra4})
+            format gui slot 53 with strong strength tipped arrow:
+                getCCItem(player, "GuiEditTools", {_extra}, {_extra2}, {_extra3}, "minecraft:tipped_arrow", "potionspecialgui", "strong_strength", {_extra4})
+        open last gui to {_p}
+
+
+    else if {_name} is "GuiEditFood":
+        loop {customkit%{_extra}%.%{_p}'s uuid%::*}:
+            set {_kit::%loop-index%} to loop-value
+        set {_customkitname} to {_kit::name} if {_kit::name} is set
+        set {_customkitname} to "Custom Kit" if {_kit::name} is not set
+        set {_itemplaceholder} to orange stained glass pane named "&fSlot %{_extra2}%"
+        set {_itemplaceholder} to {_extra3} if {_extra3} is not air
+        create a new gui with virtual chest inventory with 6 rows named "%{_customkitname}% - Editing Slot %{_extra2}%"
+        edit last gui:
+            format gui slot 0 with red stained glass pane named "&cBack":
+                createCCGui(player, "CCEditGuiOne", {_extra}, {_extra2}, {_extra3})
+            
+            format gui slot 1,2,3,5,6,7,8 with gray stained glass pane named " "
+            format gui slot 9,10,11,12,13,14,15,16,17 with light gray stained glass pane named " "
+            format gui slot 4 with {_itemplaceholder}
+            format gui slot 18 with apple:
+                getCCItem(player, "GuiEditFood", {_extra}, {_extra2}, {_extra3}, "minecraft:apple")
+            format gui slot 19 with cake:
+                getCCItem(player, "GuiEditFood", {_extra}, {_extra2}, {_extra3}, "minecraft:cake")
+            format gui slot 20 with bread:
+                getCCItem(player, "GuiEditFood", {_extra}, {_extra2}, {_extra3}, "minecraft:bread")
+            format gui slot 21 with porkchop:
+                getCCItem(player, "GuiEditFood", {_extra}, {_extra2}, {_extra3}, "minecraft:porkchop")
+            format gui slot 22 with cooked porkchop:
+                getCCItem(player, "GuiEditFood", {_extra}, {_extra2}, {_extra3}, "minecraft:cooked_porkchop")
+            format gui slot 23 with golden apple:
+                getCCItem(player, "GuiEditFood", {_extra}, {_extra2}, {_extra3}, "minecraft:golden_apple")
+            format gui slot 24 with enchanted golden apple:
+                getCCItem(player, "GuiEditFood", {_extra}, {_extra2}, {_extra3}, "minecraft:enchanted_golden_apple")
+            format gui slot 25 with cod:
+                getCCItem(player, "GuiEditFood", {_extra}, {_extra2}, {_extra3}, "minecraft:cod")
+            format gui slot 26 with salmon:
+                getCCItem(player, "GuiEditFood", {_extra}, {_extra2}, {_extra3}, "minecraft:salmon")
+            format gui slot 27 with tropical fish:
+                getCCItem(player, "GuiEditFood", {_extra}, {_extra2}, {_extra3}, "minecraft:tropical_fish")
+            format gui slot 28 with pufferfish:
+                getCCItem(player, "GuiEditFood", {_extra}, {_extra2}, {_extra3}, "minecraft:pufferfish")
+            format gui slot 29 with cooked cod:
+                getCCItem(player, "GuiEditFood", {_extra}, {_extra2}, {_extra3}, "minecraft:cooked_cod")
+            format gui slot 30 with cooked salmon:
+                getCCItem(player, "GuiEditFood", {_extra}, {_extra2}, {_extra3}, "minecraft:cooked_salmon")
+            format gui slot 31 with cookie:
+                getCCItem(player, "GuiEditFood", {_extra}, {_extra2}, {_extra3}, "minecraft:cookie")
+            format gui slot 32 with melon slice:
+                getCCItem(player, "GuiEditFood", {_extra}, {_extra2}, {_extra3}, "minecraft:melon_slice")
+            format gui slot 33 with dried kelp:
+                getCCItem(player, "GuiEditFood", {_extra}, {_extra2}, {_extra3}, "minecraft:dried_kelp")
+            format gui slot 34 with beef:
+                getCCItem(player, "GuiEditFood", {_extra}, {_extra2}, {_extra3}, "minecraft:beef")
+            format gui slot 35 with cooked beef:
+                getCCItem(player, "GuiEditFood", {_extra}, {_extra2}, {_extra3}, "minecraft:cooked_beef")
+            format gui slot 36 with chicken:
+                getCCItem(player, "GuiEditFood", {_extra}, {_extra2}, {_extra3}, "minecraft:chicken")
+            format gui slot 37 with cooked chicken:
+                getCCItem(player, "GuiEditFood", {_extra}, {_extra2}, {_extra3}, "minecraft:cooked_chicken")
+            format gui slot 38 with pumpkin pie:
+                getCCItem(player, "GuiEditFood", {_extra}, {_extra2}, {_extra3}, "minecraft:pumpkin_pie")
+            format gui slot 39 with potato:
+                getCCItem(player, "GuiEditFood", {_extra}, {_extra2}, {_extra3}, "minecraft:potato")
+            format gui slot 40 with baked potato:
+                getCCItem(player, "GuiEditFood", {_extra}, {_extra2}, {_extra3}, "minecraft:baked_potato")
+            format gui slot 41 with mutton:
+                getCCItem(player, "GuiEditFood", {_extra}, {_extra2}, {_extra3}, "minecraft:mutton")
+            format gui slot 42 with cooked mutton:
+                getCCItem(player, "GuiEditFood", {_extra}, {_extra2}, {_extra3}, "minecraft:cooked_mutton")
+            format gui slot 43 with rabbit:
+                getCCItem(player, "GuiEditFood", {_extra}, {_extra2}, {_extra3}, "minecraft:cooked_rabbit")
+            format gui slot 44 with carrot:
+                getCCItem(player, "GuiEditFood", {_extra}, {_extra2}, {_extra3}, "minecraft:carrot")
+            format gui slot 45 with golden carrot:
+                getCCItem(player, "GuiEditFood", {_extra}, {_extra2}, {_extra3}, "minecraft:golden_carrot")
+        open last gui to {_p}
+    else if {_name} is "GuiEditMisc":
+        loop {customkit%{_extra}%.%{_p}'s uuid%::*}:
+            set {_kit::%loop-index%} to loop-value
+        set {_customkitname} to {_kit::name} if {_kit::name} is set
+        set {_customkitname} to "Custom Kit" if {_kit::name} is not set
+        set {_itemplaceholder} to orange stained glass pane named "&fSlot %{_extra2}%"
+        set {_itemplaceholder} to {_extra3} if {_extra3} is not air
+        create a new gui with virtual chest inventory with 6 rows named "%{_customkitname}% - Editing Slot %{_extra2}%"
+        edit last gui:
+            format gui slot 0 with red stained glass pane named "&cBack":
+                createCCGui(player, "CCEditGuiOne", {_extra}, {_extra2}, {_extra3})
+            
+            format gui slot 1,2,3,5,6,7,8 with gray stained glass pane named " "
+            format gui slot 9,10,11,12,13,14,15,16,17 with light gray stained glass pane named " "
+            format gui slot 4 with {_itemplaceholder}
+            format gui slot 18 with respawn anchor:
+                getCCItem(player, "GuiEditMisc", {_extra}, {_extra2}, {_extra3}, "minecraft:respawn_anchor")
+            format gui slot 19 with glowstone:
+                getCCItem(player, "GuiEditMisc", {_extra}, {_extra2}, {_extra3}, "minecraft:glowstone")
+            format gui slot 20 with end crystal:
+                getCCItem(player, "GuiEditMisc", {_extra}, {_extra2}, {_extra3}, "minecraft:end_crystal")
+            format gui slot 21 with totem of undying:
+                getCCItem(player, "GuiEditMisc", {_extra}, {_extra2}, {_extra3}, "minecraft:totem_of_undying")
+            format gui slot 22 with mushroom stew:
+                getCCItem(player, "GuiEditMisc", {_extra}, {_extra2}, {_extra3}, "minecraft:mushroom_stew")
+            format gui slot 23 with minecart:
+                getCCItem(player, "GuiEditMisc", {_extra}, {_extra2}, {_extra3}, "minecraft:minecart")
+            format gui slot 24 with minecart with tnt:
+                getCCItem(player, "GuiEditMisc", {_extra}, {_extra2}, {_extra3}, "minecraft:tnt_minecart")
+            format gui slot 25 with rail:
+                getCCItem(player, "GuiEditMisc", {_extra}, {_extra2}, {_extra3}, "minecraft:rail")
+            format gui slot 26 with oak boat:
+                getCCItem(player, "GuiEditMisc", {_extra}, {_extra2}, {_extra3}, "minecraft:oak_boat")
+            format gui slot 27 with tnt:
+                getCCItem(player, "GuiEditMisc", {_extra}, {_extra2}, {_extra3}, "minecraft:tnt")
+            format gui slot 28 with ender pearl:
+                getCCItem(player, "GuiEditMisc", {_extra}, {_extra2}, {_extra3}, "minecraft:ender_pearl")
+            format gui slot 29 with experience bottle:
+                getCCItem(player, "GuiEditMisc", {_extra}, {_extra2}, {_extra3}, "minecraft:experience_bottle")
+            format gui slot 30 with water bucket:
+                getCCItem(player, "GuiEditMisc", {_extra}, {_extra2}, {_extra3}, "minecraft:water_bucket")
+            format gui slot 31 with lava bucket:
+                getCCItem(player, "GuiEditMisc", {_extra}, {_extra2}, {_extra3}, "minecraft:lava_bucket")
+            format gui slot 32 with milk bucket:
+                getCCItem(player, "GuiEditMisc", {_extra}, {_extra2}, {_extra3}, "minecraft:milk_bucket")
+            #format gui slot 33 with chorus flower:
+        open last gui to {_p}
+
+    else if {_name} is "GuiEditItem":
+        loop {customkit%{_extra}%.%{_p}'s uuid%::*}:
+            set {_kit::%loop-index%} to loop-value
+        set {_customkitname} to {_kit::name} if {_kit::name} is set
+        set {_customkitname} to "Custom Kit" if {_kit::name} is not set
+        set {_itemplaceholder} to orange stained glass pane named "&fSlot %{_extra2}%"
+        set {_itemplaceholder} to {_extra3} if {_extra3} is not air
+        create a new gui with virtual chest inventory with 4 rows named "%{_customkitname}% - Editing Slot %{_extra2}%"
+        edit last gui:
+            format gui slot 0 with red stained glass pane named "&cBack":
+                createCCGui(player, "CCEditGuiOne", {_extra}, {_extra2}, {_extra3})
+            format gui slot 1,2,3,5,6,7 with gray stained glass pane named " "
+            format gui slot 8 with enchanted book named "&fEnchantments":
+                createCCGui(player, "GuiEditItemEnchantments", {_extra}, {_extra2}, {_extra3})
+            
+
+            format gui slot 9,10,11,12,13,14,15,16,17,18,26,27,28,29,30,31,32,33,34,35 with light gray stained glass pane named " "
+            format gui slot 4 with {_itemplaceholder}
+            format gui slot 19 with 1 of {_itemplaceholder}:
+                getCCItem(player, "GuiEditItem", {_extra}, {_extra2}, {_extra3}, "None", "Count", "None", 1) 
+            if maximum stack size of {_itemplaceholder} is greater than or equal to 16:
+                format gui slot 20 with 2 of {_itemplaceholder}:
+                    getCCItem(player, "GuiEditItem", {_extra}, {_extra2}, {_extra3}, "None", "Count", "None", 2) 
+                format gui slot 21 with 4 of {_itemplaceholder}:
+                    getCCItem(player, "GuiEditItem", {_extra}, {_extra2}, {_extra3}, "None", "Count", "None", 4) 
+                format gui slot 22 with 8 of {_itemplaceholder}:
+                    getCCItem(player, "GuiEditItem", {_extra}, {_extra2}, {_extra3}, "None", "Count", "None", 8) 
+                format gui slot 23 with 16 of {_itemplaceholder}:
+                    getCCItem(player, "GuiEditItem", {_extra}, {_extra2}, {_extra3}, "None", "Count", "None", 16) 
+            else:
+                format gui slot 20 with 2 barrier blocks named "&cStack Limit Reached"
+                format gui slot 21 with 4 barrier blocks named "&cStack Limit Reached"
+                format gui slot 22 with 8 barrier blocks named "&cStack Limit Reached"
+                format gui slot 23 with 16 barrier blocks named "&cStack Limit Reached"
+            if maximum stack size of {_itemplaceholder} is greater than or equal to 32:
+                format gui slot 24 with 32 of {_itemplaceholder}:
+                    getCCItem(player, "GuiEditItem", {_extra}, {_extra2}, {_extra3}, "None", "Count", "None", 32) 
+                format gui slot 25 with 64 of {_itemplaceholder}:
+                    getCCItem(player, "GuiEditItem", {_extra}, {_extra2}, {_extra3}, "None", "Count", "None", 64) 
+            else:
+                format gui slot 24 with 32 barrier blocks named "&cStack Limit Reached"
+                format gui slot 25 with 64 barrier blocks named "&cStack Limit Reached"
+        open last gui to {_p}
+    else if {_name} is "GuiEditItemEnchantments":
+        loop {customkit%{_extra}%.%{_p}'s uuid%::*}:
+            set {_kit::%loop-index%} to loop-value
+        set {_customkitname} to {_kit::name} if {_kit::name} is set
+        set {_customkitname} to "Custom Kit" if {_kit::name} is not set
+        set {_itemplaceholder} to orange stained glass pane named "&fSlot %{_extra2}%"
+        set {_itemplaceholder} to {_extra3} if {_extra3} is not air
+        create a new gui with virtual chest inventory with 6 rows named "%{_customkitname}% - Editing Slot %{_extra2}%"
+        edit last gui:
+            set {_player} to {_p}
+            format gui slot 0 with red stained glass pane named "&cBack":
+                createCCGui(player, "GuiEditItem", {_extra}, {_extra2}, {_extra3})
+            
+            format gui slot 2,3,5,6,7,8 with gray stained glass pane named " "
+            format gui slot 1 with barrier block named "&fUnenchant Tool":
+                disenchant {_extra3}
+                createCCGui(player, "GuiEditItemEnchantments", {_extra}, {_extra2}, {_extra3})
+            format gui slot 9,10,11,12,13,14,15,16,17 with light gray stained glass pane named " "
+            format gui slot 4 with {_itemplaceholder}
+            set {_slot} to 18
+            loop {allenchants::*}:
+                set {_enchant} to "%loop-value%"
+                if {viewenchantoption::%{_player}'s uuid%} is not set:
+                    if {_extra3} can be enchanted with {_enchant} parsed as enchantment is true:
+                        format gui slot {_slot} with getEnchantedBookItem(loop-value) named "&9%loop-value in proper case%":
+                            createCCGui(player, "CCEnchantmentMenu", {_extra}, {_extra2}, {_extra3}, 0, {_enchant})
+                        add 1 to {_slot}
+                else:
+                    format gui slot {_slot} with getEnchantedBookItem(loop-value) named "&9%loop-value in proper case%":
+                        createCCGui(player, "CCEnchantmentMenu", {_extra}, {_extra2}, {_extra3}, 0, {_enchant})
+                    add 1 to {_slot}
+
+        open last gui to {_p}
+        
+    else if {_name} is "CCEnchantmentMenu":
+        loop {customkit%{_extra}%.%{_p}'s uuid%::*}:
+            set {_kit::%loop-index%} to loop-value
+        set {_customkitname} to {_kit::name} if {_kit::name} is set
+        set {_customkitname} to "Custom Kit" if {_kit::name} is not set
+        set {_itemplaceholder} to orange stained glass pane named "&fSlot %{_extra2}%"
+        set {_itemplaceholder} to {_extra3} if {_extra3} is not air
+        create a new gui with virtual chest inventory with 3 rows named "%{_customkitname}% - Editing Slot %{_extra2}%"
+        edit last gui:
+            format gui slot 0 with red stained glass pane named "&cBack":
+                createCCGui(player, "GuiEditItemEnchantments", {_extra}, {_extra2}, {_extra3})  
+                
+            format gui slot 1,2,3,5,6,7,8,9,17,18,19,20,21,23,24,25,26 with gray stained glass pane named " "
+            format gui slot 22 with barrier named "&cDisenchant Tool of %{_extra5} in proper case%":
+                set {_tags::*} to tag "Enchantments" of nbt compound of {_extra3}
+                loop {_tags::*}:
+                    if tag "id" of loop-value contains {_extra5} in lower snake case:
+                        set tag "id" of loop-value to "nil"
+                set tag "Enchantments" of {_extra3} to {_tags::*}
+                createCCGui(player, "GuiEditItemEnchantments", {_extra}, {_extra2}, {_extra3})  
+            format gui slot 10,16 with light gray stained glass pane named " "
+            format gui slot 4 with {_itemplaceholder}
+            set {_loop} to 11
+            loop 5 times:
+                if {_loop}-10 is less than or equal to {maxenchants::%{_extra5}%}:
+                    
+                    format gui slot {_loop} with getEnchantedBookItem({_extra5} in lower snake case) named "&f%{_extra5} in proper case% %{_loop}-10%":
+                        if {_extra5} is "binding curse":
+                            set {_extra5} to "curse of binding"
+                        enchant {_extra3} with "%{_extra5}% %{_loop}-10%" parsed as enchantment type
+                        createCCGui(player, "GuiEditItemEnchantments", {_extra}, {_extra2}, {_extra3})  
+                else:
+                    format gui slot {_loop} with barrier block named "&f%{_extra5} in proper case% %{_loop}-10%"
+                add 1 to {_loop}
+            open last gui to {_p}
+
+function openKitSettingsMenu(p: player, extra: text):
+    create a new gui with virtual chest inventory with 4 rows named "&8Kit %{_extra}% - Modify Kit Options"
+    edit last gui: 
+        format gui slot 0 with red stained glass pane named "&cBack":
+            createCCGui(player, "GuiTwo", {_extra})
+        format gui slot 1,2,3,5,6,7,8,9,17,18,26,27,28,29,30,31,32,33,34,35 with gray stained glass pane named "&8 "
+        format gui slot 4 with beacon named "&bKit Options"
+
+
+        set {_tag} to "&aEnabled" if {customkit%{_extra}%.%{_p}'s uuid%::crafting} is not set
+        set {_tag} to "&cDisabled" if {customkit%{_extra}%.%{_p}'s uuid%::crafting} is set
+        format gui slot 10 with crafting table named "&7Crafting" with lore "%{_tag}%":
+            if {_tag} is "&aEnabled":
+                set {customkit%{_extra}%.%{_p}'s uuid%::crafting} to false
+                set variable "customkit%{_extra}%.%{_p}'s uuid%::crafting" in channel "duels" to false
+            else:
+                delete {customkit%{_extra}%.%{_p}'s uuid%::crafting}
+                delete variable "customkit%{_extra}%.%{_p}'s uuid%::crafting" in channel "duels"
+            openKitSettingsMenu({_p}, {_extra})
+
+        set {_tag} to "&aEnabled" if {customkit%{_extra}%.%{_p}'s uuid%::placing} is not set
+        set {_tag} to "&cDisabled" if {customkit%{_extra}%.%{_p}'s uuid%::placing} is set
+        format gui slot 11 with dirt named "&7Placing" with lore "%{_tag}%":
+            if {_tag} is "&aEnabled":
+                set {customkit%{_extra}%.%{_p}'s uuid%::placing} to false
+                set variable "customkit%{_extra}%.%{_p}'s uuid%::placing" in channel "duels" to false
+            else:
+                delete {customkit%{_extra}%.%{_p}'s uuid%::placing}
+                delete variable "customkit%{_extra}%.%{_p}'s uuid%::placing" in channel "duels"
+            openKitSettingsMenu({_p}, {_extra})
+
+        set {_tag} to "&aEnabled" if {customkit%{_extra}%.%{_p}'s uuid%::breaking} is not set
+        set {_tag} to "&cDisabled" if {customkit%{_extra}%.%{_p}'s uuid%::breaking} is set
+        format gui slot 12 with stone pickaxe named "&7Breaking Blocks" with lore "%{_tag}%":
+            if {_tag} is "&aEnabled":
+                set {customkit%{_extra}%.%{_p}'s uuid%::breaking} to false
+                set variable "customkit%{_extra}%.%{_p}'s uuid%::breaking" in channel "duels" to false
+            else:
+                delete {customkit%{_extra}%.%{_p}'s uuid%::breaking}
+                delete variable "customkit%{_extra}%.%{_p}'s uuid%::breaking" in channel "duels"
+            openKitSettingsMenu({_p}, {_extra})
+
+
+
+
+        format gui slot 13 with clock named "&7Timer" with lore "&aOpen GUI &e[CLICK]":
+            openTimerSettingsMenu({_p}, {_extra})
+
+
+        format gui slot 14 with water bottle named "&7Potion Effects" with lore "&aOpen GUI &e[CLICK]":
+            openPotionSettingsMenu({_p}, {_extra})
+
+
+
+
+        set {_tag} to "&aEnabled" if {customkit%{_extra}%.%{_p}'s uuid%::naturalregen} is not set
+        set {_tag} to "&cDisabled" if {customkit%{_extra}%.%{_p}'s uuid%::naturalregen} is set
+        format gui slot 15 with apple named "&7Natural Regeneration" with lore "%{_tag}%":
+            if {_tag} is "&aEnabled":
+                set {customkit%{_extra}%.%{_p}'s uuid%::naturalregen} to false
+                set variable "customkit%{_extra}%.%{_p}'s uuid%::naturalregen" in channel "duels" to false
+            else:
+                delete {customkit%{_extra}%.%{_p}'s uuid%::naturalregen}
+                delete variable "customkit%{_extra}%.%{_p}'s uuid%::naturalregen" in channel "duels"
+            openKitSettingsMenu({_p}, {_extra})
+
+        set {_tag} to "&aEnabled" if {customkit%{_extra}%.%{_p}'s uuid%::falldamage} is not set
+        set {_tag} to "&cDisabled" if {customkit%{_extra}%.%{_p}'s uuid%::falldamage} is set
+        format gui slot 16 with feather named "&7Fall Damage" with lore "%{_tag}%":
+            if {_tag} is "&aEnabled":
+                set {customkit%{_extra}%.%{_p}'s uuid%::falldamage} to false
+                set variable "customkit%{_extra}%.%{_p}'s uuid%::falldamage" in channel "duels" to false
+            else:
+                delete {customkit%{_extra}%.%{_p}'s uuid%::falldamage}
+                delete variable "customkit%{_extra}%.%{_p}'s uuid%::falldamage" in channel "duels"
+            openKitSettingsMenu({_p}, {_extra})
+
+        set {_tag} to "&aEnabled" if {customkit%{_extra}%.%{_p}'s uuid%::hunger} is not set
+        set {_tag} to "&cDisabled" if {customkit%{_extra}%.%{_p}'s uuid%::hunger} is set
+        format gui slot 19 with bread named "&7Hunger" with lore "%{_tag}%":
+            if {_tag} is "&aEnabled":
+                set {customkit%{_extra}%.%{_p}'s uuid%::hunger} to false
+                set variable "customkit%{_extra}%.%{_p}'s uuid%::hunger" in channel "duels" to false
+            else:
+                delete {customkit%{_extra}%.%{_p}'s uuid%::hunger}
+                delete variable "customkit%{_extra}%.%{_p}'s uuid%::hunger" in channel "duels"
+            openKitSettingsMenu({_p}, {_extra})
+
+        set {_tag} to "&aEnabled" if {customkit%{_extra}%.%{_p}'s uuid%::saturation} is not set
+        set {_tag} to "&cDisabled" if {customkit%{_extra}%.%{_p}'s uuid%::saturation} is set
+        format gui slot 20 with honey bottle named "&7Saturation" with lore "%{_tag}%":
+            if {_tag} is "&aEnabled":
+                set {customkit%{_extra}%.%{_p}'s uuid%::saturation} to false
+                set variable "customkit%{_extra}%.%{_p}'s uuid%::saturation" in channel "duels" to false
+            else:
+                delete {customkit%{_extra}%.%{_p}'s uuid%::saturation}
+                delete variable "customkit%{_extra}%.%{_p}'s uuid%::saturation" in channel "duels"
+            openKitSettingsMenu({_p}, {_extra})
+
+        set {_tag} to "&cDisabled" if {customkit%{_extra}%.%{_p}'s uuid%::oldcombatmechanics} is not set
+        set {_tag} to "&aEnabled" if {customkit%{_extra}%.%{_p}'s uuid%::oldcombatmechanics} is set
+        format gui slot 21 with nether star named "&7Old Combat Mechanics" with lore "%{_tag}%":
+            if {_tag} is "&cDisabled":
+                set {customkit%{_extra}%.%{_p}'s uuid%::oldcombatmechanics} to true
+                set variable "customkit%{_extra}%.%{_p}'s uuid%::oldcombatmechanics" in channel "duels" to true
+            else:
+                delete {customkit%{_extra}%.%{_p}'s uuid%::oldcombatmechanics}
+                delete variable "customkit%{_extra}%.%{_p}'s uuid%::oldcombatmechanics" in channel "duels"
+            openKitSettingsMenu({_p}, {_extra})
+
+    open last gui to {_p}
+
+function openPotionSettingsMenu(p: player, extra: text):
+    delete gui with id "customkitpotions%{_extra}%.%{_p}%"
+    wait 1 tick
+    create a new gui with id "customkitpotions%{_extra}%.%{_p}%" with virtual chest inventory with 6 rows named "&8Kit %{_extra}% - Potion Menu"
+    edit last gui:
+        format gui slot 0 with red stained glass pane named "&cBack":
+            createCCGui(player, "GuiTwo", {_extra})
+        format gui slot 1,2,3,4,5,6,7,8 with gray stained glass pane named " "
+        format gui slot 9,10,11,12,13,14,15,16,17 with light gray stained glass pane named " "
+        getItemforPotionMenu({_p}, {_extra}, "invisibility", 18)
+        getItemforPotionMenu({_p}, {_extra}, "leaping", 19)
+        getItemforPotionMenu({_p}, {_extra}, "fire resistance", 20)
+        getItemforPotionMenu({_p}, {_extra}, "swiftness", 21)
+        getItemforPotionMenu({_p}, {_extra}, "poison", 22)
+        getItemforPotionMenu({_p}, {_extra}, "regeneration", 23)
+        getItemforPotionMenu({_p}, {_extra}, "slow falling", 24)
+        getItemforPotionMenu({_p}, {_extra}, "weakness", 25)
+        getItemforPotionMenu({_p}, {_extra}, "strength", 26)
+    open last gui to {_p}
+
+function getItemforPotionMenu(p: player, extra: text, potion: text, slot: integer) :: item:
+    edit gui with id "customkitpotions%{_extra}%.%{_p}%":
+        set {_tag} to "&aEnabled" if {customkit%{_extra}%.%{_p}'s uuid%::%{_potion}%} is set
+        set {_tag} to "&cDisabled" if {customkit%{_extra}%.%{_p}'s uuid%::%{_potion}%} is not set
+        format gui slot {_slot} with "%{_potion}% potion" parsed as item named "&7%{_potion} in proper case%" with lore "%{_tag}%":
+            if {_tag} is "&cDisabled":
+                set {customkit%{_extra}%.%{_p}'s uuid%::%{_potion}%} to false
+                set variable "customkit%{_extra}%.%{_p}'s uuid%::%{_potion}%" in channel "duels" to false
+            else:
+                delete {customkit%{_extra}%.%{_p}'s uuid%::%{_potion}%}
+                delete variable "customkit%{_extra}%.%{_p}'s uuid%::%{_potion}%" in channel "duels"
+            openPotionSettingsMenu({_p}, {_extra})
+
+
+function openTimerSettingsMenu(p: player, extra: text):
+    create gui with virtual chest inventory with 3 rows named "&8Kit %{_extra}% - Modify Timer"
+    edit last gui:
+        format gui slot 0 with red stained glass pane named "&cBack":
+            openKitSettingsMenu(player, {_extra})
+        format gui slot 1,2,3,4,5,6,7,8,9,17,18,19,20,21,22,23,24,25,26 with gray stained glass pane named "&7 "
+        format gui slot 10 with yellow stained glass pane named "&a1:30":
+            set variable "customkit%{_extra}%.%{_p}'s uuid%::timer" in channel "duels" to 90 seconds
+            openKitSettingsMenu(player, {_extra})
+        format gui slot 12 with yellow stained glass pane named "&a2:30": 
+            set variable "customkit%{_extra}%.%{_p}'s uuid%::timer" in channel "duels" to 150 seconds
+            openKitSettingsMenu(player, {_extra})
+        format gui slot 14 with yellow stained glass pane named "&a10:00":
+            set variable "customkit%{_extra}%.%{_p}'s uuid%::timer" in channel "duels" to 10 minutes
+            openKitSettingsMenu(player, {_extra})
+        format gui slot 16 with red stained glass pane named "&aUnlimited":
+            set variable "customkit%{_extra}%.%{_p}'s uuid%::timer" in channel "duels" to 1000 years
+            openKitSettingsMenu(player, {_extra})
+    open last gui to {_p}
+
+function getEnchantedBookItem(type: text) :: item:
+    set {_nbt} to nbt compound from "{Count:1b,id:""minecraft:enchanted_book"",tag:{StoredEnchantments:[{id:""minecraft:%{_type}%"",lvl:1s}]}}"
+    set {_book} to item from nbt {_nbt}
+    set {_book} to {_book} with all flags hidden
+    return {_book}
+
+function getCCItem(p: player, guiname: text, extra: text, extra2: integer, extra3: item, id: text = "None", name: text = "normal", extraid: text = "None", extraint: integer = 0):
+    if {_name} is "normal":
+        set {_nbt} to full nbt compound of {_extra3}
+        set tag "id" of {_nbt} to {_id}
+        createCCGui({_p}, {_guiname}, {_extra}, {_extra2}, item from nbt {_nbt})
+    else if {_name} is "potion":
+        set {_nbt} to full nbt compound of {_extra3}
+        set tag "id" of {_nbt} to {_id}
+        set tag "tag;Potion" of {_nbt} to {_extraid}
+        createCCGui({_p}, {_guiname}, {_extra}, {_extra2}, item from nbt {_nbt})
+    else if {_name} is "count":
+        set {_nbt} to full nbt compound of {_extra3}
+        set tag "Count" of {_nbt} to {_extraint}
+        createCCGui({_p}, {_guiname}, {_extra}, {_extra2}, item from nbt {_nbt})
+    else if {_name} is "potionspecialgui":
+        set {_nbt} to full nbt compound of {_extra3}
+        set tag "id" of {_nbt} to {_id}
+        set tag "tag;Potion" of {_nbt} to {_extraid}
+        createCCGui({_p}, {_guiname}, {_extra}, {_extra2}, item from nbt {_nbt}, "%{_extraint}%" parsed as integer)
+    else if {_name} is "specialgui":
+        set {_nbt} to full nbt compound of {_extra3}
+        set tag "id" of {_nbt} to {_id}
+        createCCGui({_p}, {_guiname}, {_extra}, {_extra2}, item from nbt {_nbt}, "%{_extraint}%" parsed as integer)
+        
+function renameKit(p: player):
+    wait 4 ticks
+    set {_gui} to a new anvil gui
+    set title of {_gui} to "Rename Kit"
+    set left item of {_gui} to name tag named "Rename"
+    open anvil gui {_gui} to {_p}
+
+on anvil gui close:
+    metadata "NameKit" of player is set
+    clear metadata "NameKit" of player
+    send "&aNaming cancelled."
+
+on anvil gui click:
+    metadata "NameKit" of player is set
+    event-integer is 2
+    set {_extra} to metadata "NameKit" of player
+    set variable "customkit%{_extra}%.%player's uuid%::name" in channel "duels" to event-text
+    delete metadata "NameKit" of player
+    close player's inventory
+    play sound "block.anvil.use" for player
+    wait 4 ticks
+    createCCGui(player, "GuiTwo", {_extra})
+
+
+on quit:
+    delete metadata "NameKit" of player
+
+every 20 seconds:
+    set {maxenchants::frost walker} to 2
+    set {maxenchants::feather falling} to 4
+    set {maxenchants::unbreaking} to 3
+    set {maxenchants::knockback} to 2
+    set {maxenchants::projectile protection} to 4
+    set {maxenchants::respiration} to 3
+    set {maxenchants::punch} to 2
+    set {maxenchants::protection} to 4
+    set {maxenchants::blast protection} to 4
+    set {maxenchants::impaling} to 5
+    set {maxenchants::silk touch} to 1
+    set {maxenchants::infinity} to 1
+    set {maxenchants::thorns} to 3
+    set {maxenchants::multishot} to 1
+    set {maxenchants::fire aspect} to 2
+    set {maxenchants::flame} to 1
+    set {maxenchants::depth strider} to 3
+    set {maxenchants::piercing} to 4
+    set {maxenchants::fire protection} to 4
+    set {maxenchants::sharpness} to 5
+    set {maxenchants::power} to 4
+    set {maxenchants::aqua affinity} to 1
+    set {maxenchants::binding curse} to 1
+    set {maxenchants::efficiency} to 5
+    set {maxenchants::mending} to 1
+    set {maxenchants::riptide} to 3
+    set {maxenchants::quick charge} to 3
+    set {maxenchants::loyalty} to 3
+    clear {allenchants::*}
+    loop {maxenchants::*}:
+        add loop-index to {allenchants::*}
+
+on skript start:
+    wait 5 minutes
+    execute console command "sk reload duels\dke"

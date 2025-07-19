@@ -1,0 +1,120 @@
+options:
+    permissionMessage: "&cYou don't have permission"
+    combatTimeVictim: 12 # seconds
+    combatTimeAttacker: 15 # seconds
+
+on load:
+    set {unblockedCommands::*} to ("sc", "report", "staffchat", "tester", "bid", "viewah", "punish", "ban", "mute", "tempban", "warn", "astro", "alts", "blacklist", "chatlogs" and "tempmute")
+    set {alwaysBlockedCommands::*} to ("spawn" and "duel")
+    set {logOutMessage} to "<##ff0303>☠ &f%%player%% &clogged out while in combat!" # use double % to specify player
+
+on damage of a player:
+    attacker is a player
+
+    if attacker's gamemode is creative:
+        stop
+
+    if attacker's world contains "Events":
+        stop
+
+
+    combatTag(attacker, victim)
+
+on command:
+    stop if executor is console
+    player is in combat
+
+    if {unblockedCommands::*} contains command:
+        stop
+
+    if player does not have the permission "actplus.immune" or "staff.cmds":
+        send "&cYou cannot execute commands in combat!" to player
+        cancel event
+
+on command:
+    stop if executor is console
+    player is in combat
+    if {alwaysBlockedCommands::*} contains command:
+        cancel event
+        send "&cYou cannot execute commands in combat!" to player
+
+# on quit:
+#     delete {combattag::combatant.%player's uuid%}
+#     player is in combat
+#     delete {combattag::combatTime.%player's uuid%}
+#     remove all totems of undying from player's inventory
+#     kill player
+#     set {_msg} to {logOutMessage}
+#     replace all "%%player%%" in {_msg} with player's name
+#     broadcast ""
+#     broadcast {_msg}
+#     broadcast ""
+
+on death of a player:
+    wait 1 tick
+    victim is in combat
+    set {combattag::combatTime.%victim's uuid%} to 0
+
+on region enter:
+    player is in combat
+
+    if "%event-region%" contains "koth_safezone":
+        cancel event
+        send "&cYou cannot enter the safezone whilst combat tagged!"
+    if "%event-region%" contains "spawn":
+        delete {combattag::combatTime.%player's uuid%}
+        delete {combattag::combatant.%player's uuid%}
+
+on skript stop:
+    delete {combattag::*}
+
+command /actimmune:
+    permission: actplus.immune
+    permission message: {@permissionMessage}
+    trigger:
+        set {combattag::combatImmunity.%player's uuid%} to not {combattag::combatImmunity.%player's uuid%} ? false
+        send "&aYou are now immune to combat tag" if {combattag::combatImmunity.%player's uuid%} is true
+        send "&cYou are no longer immune to combat tag" if {combattag::combatImmunity.%player's uuid%} is false
+
+every second:
+    loop all players where [{combattag::combatTime.%input's uuid%} is set]:
+        if {combattag::combatTime.%loop-player's uuid%} is less than 0.1:
+            send action bar "&aYou are no longer in combat" to loop-player
+            delete {combattag::combatTime.%loop-player's uuid%}
+            delete {combattag::combatant.%loop-player's uuid%}
+            stop
+
+        if {combattag::combatTime.%loop-player's uuid%} is greater than 0:
+            if loop-player is not sprinting:
+                send action bar "&cYou are in combat for %{combattag::combatTime.%loop-player's uuid%}% seconds." to loop-player
+                remove 1 from {combattag::combatTime.%loop-player's uuid%}
+            else:
+                send action bar "&cCombat timer frozen while sprinting." to loop-player
+
+
+condition %player% is in combat:
+    check:
+        if {combattag::combatTime.%expression-1's uuid%} is set:
+            return true
+        else:
+            return false
+
+local function combatTag(attacker: player, victim: player):
+    if {combattag::combatImmunity.%{_victim}'s uuid%} is not true:
+        if {combattag::combatTime.%{_victim}'s uuid%} is not set:
+            send action bar "&cYou are now in combat!" to {_victim}
+
+        set {combattag::combatTime.%{_victim}'s uuid%} to {@combatTimeVictim}
+        set {combattag::combatant.%{_victim}'s uuid%} to {_attacker}'s name
+
+
+    if {combattag::combatImmunity.%{_attacker}'s uuid%} is not true:
+        if {combattag::combatTime.%{_attacker}'s uuid%} is not set:
+            send action bar "&cYou are now in combat!" to {_attacker}
+
+        set {combattag::combatTime.%{_attacker}'s uuid%} to {@combatTimeAttacker}
+        set {combattag::combatant.%{_attacker}'s uuid%} to {_victim}'s name 
+
+
+
+

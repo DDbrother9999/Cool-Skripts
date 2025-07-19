@@ -1,0 +1,2 @@
+on jump:
+	addprogressquest(player,"Daily","Jumper I")

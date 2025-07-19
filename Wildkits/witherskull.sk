@@ -1,0 +1,31 @@
+on load:
+	clear {witherProjectiles::*}
+
+on right click with a wither skeleton skull:
+	cancel event
+	if {wither.%player's uuid%} is not set:
+		set {wither.%player's uuid%} to now
+		remove 1 wither skeleton skull from player's inventory
+		spawn wither skull at location in front of player's eyes
+		set {_skull} to last spawned fireball
+		add {_skull} to {witherProjectiles::*}
+		push {_skull} in player's direction at speed 1
+	else if difference between now and {wither.%player's uuid%} < 5 seconds:
+		cancel event
+		send action bar "&5Please wait to use this again!" to player
+		play sound "entity.villager.trade" to player
+	else:
+		delete {wither.%player's uuid%}
+		
+
+on damage:
+	if projectile is set:
+		if {witherProjectiles::*} contains projectile:
+			cancel event
+			remove projectile from {witherProjectiles::*}
+			apply wither to victim for 5 seconds
+
+command /testwither:
+	permission: op
+	trigger:
+		set {witherProjectiles::*} to 0

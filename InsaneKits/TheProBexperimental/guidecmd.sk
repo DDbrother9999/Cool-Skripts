@@ -1,0 +1,71 @@
+
+command /guide [<integer>]:
+    trigger:
+        if arg 1 is not set:
+            execute player command "/guide 1"
+        else if arg 1 is 1:
+            send "&5=====================================================" to player
+            send "&b&lWelcome to InsaneKits&5!"
+            send "&5=====================================================" to player
+            send "&fInsaneKits is a fun random kits server that includes many custom items&5."
+            send "&fWe hope you enjoy playing&5!"
+            send "&fPress the arrow below to continue going through the guide&5."
+            send "&5=====================================================" to player
+            send "&5[&9<cmd:/guide 7><tooltip:&9Previous Page><<reset>&5] &5[&91&5/&97&5] [&9<cmd:/guide 2><tooltip:&9Next Page>><reset>&5]"
+        else if arg 1 is 2:
+            send "&5====================================================="
+            send "&b&lKOTH"
+            send "&5====================================================="
+            send "&fKOTH, or (King of the Hill) is a new feature that has been added this season&5!%nl%&fIf you stay in the center of the KOTH for long enough when it is activated&5,&f you will get a prize&5!&f%nl%To go there, you run &b'/warp koth'&5."
+            send "&5====================================================="
+            send "&5[&9<cmd:/guide 1><tooltip:&9Previous Page><<reset>&5] &5[&92&5/&97&5] [&9<cmd:/guide 3><tooltip:&9Next Page>><reset>&5]"
+        else if arg 1 is 3:
+            send "&5====================================================="
+            send "&b&lTokens"
+            send "&5====================================================="
+            send "&fTokens are the basic type of currency on InsaneKits&5."
+            send "&fYou can obtain tokens by killing other players or selling ores/resources&5."
+            send "&fYou can also get tokens by leveling up. Do &b'/level'&f to check your level-up status&5."
+            send ""
+            send "&fYou are able to use these tokens at the shops at spawn&5,&f but some of these shops use &bcompressed tokens&5."
+            send "&fTo get &bcompressed tokens&f&5, &fthere are shops at spawn where you can compress them, 64 for 1&5."
+            send ""
+            send "&fYou can also store these tokens in your bank&5,&f using the &b'/bank'&f command&5."
+            send "&5====================================================="
+            send "&5[&9<cmd:/guide 2><tooltip:&9Previous Page><<reset>&5] &5[&93&5/&97&5] [&9<cmd:/guide 4><tooltip:&9Next Page>><reset>&5]"
+        else if arg 1 is 4:
+            send "&5====================================================="
+            send "&b&lRanks"
+            send "&5====================================================="
+            send "&fRanks are a store-bought role&5,&f which comes with many perks&5."
+            send ""
+            send "&fExamples of these perks include&5:&f%nl% - A private mining area&5.%nl% &f- A custom role&5.&f%nl% - Custom Kits"
+            send ""
+            send "&fTo visit the &bweb store&f&5,&f click the link below&5: %nl%<link:https://shop.leonemc.net>&5&n[&9&nshop.leonemc.net&5&n]"
+            send "&5====================================================="
+            send "&5[&9<cmd:/guide 3><tooltip:&9Previous Page><<reset>&5] &5[&94&5/&97&5] [&9<cmd:/guide 5><tooltip:&9Next Page>><reset>&5]"
+        else if arg 1 is 5:
+            send "&5====================================================="
+            send "&b&lCrystals"
+            send "&5====================================================="
+            send "&fCrystals are a new type of currency which can be dropped by certain mobs on death&5."
+            send ""
+            send "&fUsing crystals&5,&f you can purchase new armors and tools that you can't purchase using coins&5."
+            send "&5====================================================="
+            send "&5[&9<cmd:/guide 4><tooltip:&9Previous Page><<reset>&5] &5[&95&5/&97&5] [&9<cmd:/guide 6><tooltip:&9Next Page>><reset>&5]"
+        else if arg 1 is 6:
+            send "&5====================================================="
+            send "&b&lWarps"
+            send "&5====================================================="
+            send "&fWarps are a new mechanism that helps you easily traverse the spawn map. Some examples of useful warps are&5:"
+            send "&f - &b/shulkerroom enter%nl%&f - &b/warp KOTH%nl%&f - &b/warp enchantment%nl%&f - &b/warp shops%nl%&f - &b/warp crates%nl%&f - &b/warp afk"
+            send "&5====================================================="
+            send "&5[&9<cmd:/guide 5><tooltip:&9Previous Page><<reset>&5] &5[&96&5/&97&5] [&9<cmd:/guide 7><tooltip:&9Next Page>><reset>&5]"
+        else if arg 1 is 7:
+            send "&5====================================================="
+            send "&b&lRandom Kits"
+            send "&5====================================================="
+            send "&fEvery time you die&5,&f you will recieve a &bnew and random&f kit&5."
+            send "&fThere are other types of kits you can buy from various shops using tokens."
+            send "&5====================================================="
+            send "&5[&9<cmd:/guide 6><tooltip:&9Previous Page><<reset>&5] &5[&97&5/&97&5] [&9<cmd:/guide 1><tooltip:&9Next Page>><reset>&5]"

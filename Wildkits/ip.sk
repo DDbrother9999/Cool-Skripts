@@ -1,0 +1,7 @@
+command /ipadress:
+  aliases: /ip
+  trigger:
+    send ""
+    send "&aThe ip adress is WildKits.minehut.gg"
+    send ""
+

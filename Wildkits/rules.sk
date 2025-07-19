@@ -1,0 +1,45 @@
+command /rules:
+    trigger:
+        rulesGui(player)
+
+function rulesGui(p: player):
+    set metadata tag "rulemenu" of {_p} to chest inventory with 3 rows named "&eRules menu"
+    set slot 10 of metadata tag "rulemenu" of {_p} to book named "&eRule 1" with lore "&aNo Self Promoting"
+    set slot 11 of metadata tag "rulemenu" of {_p} to book named "&eRule 2" with lore "&aBe Ethical"
+    set slot 12 of metadata tag "rulemenu" of {_p} to book named "&eRule 3" with lore "&aUse Common Sense"
+    set slot 13 of metadata tag "rulemenu" of {_p} to book named "&eRule 4" with lore "&aDo Not Hack Or Use Hacked Clients"
+    set slot 14 of metadata tag "rulemenu" of {_p} to book named "&eRule 5" with lore "&aNo Slurs Or Offensive Swears"
+    set slot 15 of metadata tag "rulemenu" of {_p} to book named "&eRule 6" with lore "&aNo Duping Or Exploiting"
+    set slot 16 of metadata tag "rulemenu" of {_p} to book named "&eRule 7" with lore "&aRespect Everyone"
+    set slot 20 of metadata tag "rulemenu" of {_p} to book named "&eRule 8" with lore "&aThese rules apply to everyone"
+    set slot 21 of metadata tag "rulemenu" of {_p} to book named "&eRule 9" with lore "&aDo Not Spam"
+    set slot 22 of metadata tag "rulemenu" of {_p} to book named "&eRule 10" with lore "&aNo NSFW Or Sexual Content"
+    set slot 23 of metadata tag "rulemenu" of {_p} to book named "&eRule 11" with lore "&aNo Begging For Anything!"
+    set slot 24 of metadata tag "rulemenu" of {_p} to book named "&eRule 12" with lore "&aNo Lava Casting!"
+    rulesGuiSides({_p})
+    open (metadata tag "rulemenu" of {_p}) to {_p}
+    
+function rulesGuiSides(p: player):
+    set slot 0 of metadata tag "rulemenu" of {_p} to black stained glass pane named " "
+    set slot 1 of metadata tag "rulemenu" of {_p} to black stained glass pane named " "
+    set slot 2 of metadata tag "rulemenu" of {_p} to black stained glass pane named " "
+    set slot 3 of metadata tag "rulemenu" of {_p} to black stained glass pane named " "
+    set slot 4 of metadata tag "rulemenu" of {_p} to black stained glass pane named " "
+    set slot 5 of metadata tag "rulemenu" of {_p} to black stained glass pane named " "
+    set slot 6 of metadata tag "rulemenu" of {_p} to black stained glass pane named " "
+    set slot 7 of metadata tag "rulemenu" of {_p} to black stained glass pane named " "
+    set slot 8 of metadata tag "rulemenu" of {_p} to black stained glass pane named " "
+    set slot 9 of metadata tag "rulemenu" of {_p} to black stained glass pane named " "
+    set slot 17 of metadata tag "rulemenu" of {_p} to black stained glass pane named " "
+    set slot 18 of metadata tag "rulemenu" of {_p} to black stained glass pane named " "
+    set slot 19 of metadata tag "rulemenu" of {_p} to black stained glass pane named " "
+    set slot 25 of metadata tag "rulemenu" of {_p} to black stained glass pane named " "
+    set slot 26 of metadata tag "rulemenu" of {_p} to black stained glass pane named " "
+    
+on inventory click:
+    if event-inventory = (metadata tag "rulemenu" of player):
+        cancel event
+        
+on inventory close:
+    remove 1 black stained glass pane from player's inventory
+    remove 1 book named "&eRules" from player's inventory

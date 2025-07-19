@@ -1,0 +1,14 @@
+import:
+	net.coreprotect.CoreProtectAPI
+	org.bukkit.Bukkit   
+	java.util.List
+	java.util.ArrayList
+
+on load:
+	set {CoreProtect} to Bukkit.getServer().getPluginManager().getPlugin("CoreProtect")
+	set {CoreProtectAPI} to {CoreProtect}.getAPI()
+	set {_players} to new ArrayList()
+	{_players}.add("DDbrother")
+	loop ...{CoreProtectAPI}.performLookup(360000, {_players}, null, null, null, null, 0, null):
+		broadcast loop-value
+	

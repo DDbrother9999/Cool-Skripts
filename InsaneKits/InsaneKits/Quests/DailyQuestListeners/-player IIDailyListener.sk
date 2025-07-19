@@ -1,0 +1,3 @@
+every minute:
+	loop all players:
+		addprogressquest(loop-player,"Daily","Player II")

@@ -1,0 +1,133 @@
+function tpToAreaWithDelay(p: player, location: location, text: string = ""):
+    #Get the location object
+    set {_x} to {_p}'s location.getX()
+    set {_y} to {_p}'s location.getY()
+    set {_z} to {_p}'s location.getZ()
+    set {_world} to world of {_p}'s location
+    set {_loc1} to new Location({_world}, {_x}, {_y}, {_z})
+
+    if {_p}'s gamemode is creative:
+        send "&aTeleported!" to {_p}
+
+        # Teleport them using the bukkit method
+        {_p}.teleport({_loc1})
+        stop
+
+    loop 5 times:
+        send "&aTeleporting you to %{_text}% &7(%loop-value%)" to {_p}
+        wait 1 second
+        if distance between {_loc1} and {_p} is not 0:
+            send "&cTeleport cancelled: You moved." to {_p}
+            stop
+    {_p}.teleport({_location})
+
+command /startsetup [<offlineplayer>] [<number>]:
+    permission: op
+    trigger:
+        send "&c&lStop acting like an idiot!"
+        stop
+        if arg-1 is not set:
+            send "&c&lError: Player not provided"
+            stop
+        if arg-2 is not set:
+            set {_n} to arg-2
+        else:
+            set {_n} to 1
+        loop arg-2 times:
+            if the block below player is emerald block:
+                set {_x} to x-coordinate of location of player
+                set {_y} to y-coordinate of location of player
+                if {_y}+20 is greater than or equal to 320:
+                    send "&c&lError: Build limit"
+                    stop
+                set {_z} to z-coordinate of location of player
+                set {_p} to arg-1
+                send "&aYour current location is %{_x}%,%{_y}%,%{_z}%"
+                send "&aLoading schematic"
+                execute player command "schem load ddpmine"
+                wait 5 ticks
+                execute player command "//paste"
+                send "&c&lDo not move or type anything"
+                wait 20 ticks
+                execute player command "//pos1"
+                wait 5 ticks
+                execute player command "minecraft:tp %{_x}+53% %{_y}+12% %{_z}+43%"
+                wait 5 ticks
+                execute player command "//pos2"
+                execute player command "lazyregion %{_p}%"
+                execute player command "minecraft:tp %{_x}+21% %{_y}+1% %{_z}+16%"
+                execute player command "//pos1"
+                wait 5 ticks
+                execute player command "minecraft:tp %{_x}+32% %{_y}+4% %{_z}+27%"
+                execute player command "//pos2"
+                wait 5 ticks
+                execute player command "lazymine %{_p}% 20"
+                wait 5 ticks
+                execute player command "minecraft:tp %{_x}+16.9% %{_y}+2% %{_z}+35.9%"
+                set {_loc} to location of player
+                set yaw of {_loc} to -180
+                set pitch of {_loc} to 0
+                teleport player to {_loc}
+                wait 5 ticks
+                execute player command "givepmine %{_p}%"
+                wait 5 ticks
+                execute player command "minecraft:tp %{_x}% %{_y}+13% %{_z}%"
+                set {_loc} to location of player
+                set yaw of {_loc} to 180
+                set pitch of {_loc} to 0
+                teleport player to {_loc}
+            else:
+                send "&c&lError: Not standing on emerald block"
+
+on load:
+	set {RankPmines::1} to "&aVIP"
+	set {RankPmines::2} to "&aVIP&e+"
+	set {RankPmines::3} to "&bMVP"
+	set {RankPmines::4} to "&bMVP&e+"
+
+command /pmine:
+	trigger:
+		if "%region at player%" is not "boxs4":
+			set {_gui} to chest inventory with 5 rows named "&3&lPrivate Mines!"
+			set slots (integers between 0 and 54) of {_gui} to dark gray stained glass pane
+			set slots (integers between 29 and 33) of {_gui} to light gray stained glass pane
+			set slot 4 of {_gui} to nether star
+			set {_s} to 11
+			loop 4 times:
+				add 1 to {_s} if {_s} is 13
+				set {_rank} to {RankPmines::%loop-value%}
+				if player has permission "group.%uncolored {_rank}%":
+					set slot {_s} of {_gui} to emerald ore named "%{_rank}% &aPrivate Mine" with lore "&aYour private %{_rank}% mine!","","&f&nLeft Click to Teleport!"
+				else:
+					set slot {_s} of {_gui} to emerald ore named "%{_rank}% &aPrivate Mine" with lore "&cBuy the %{_rank}% from /gemshop!"
+				add 1 to {_s}
+			set {_s} to 29
+			set {_i} to 1
+			loop {pmines::%player's uuid%::*}:
+				set slot {_s} of {_gui} to diamond ore named "&aPrivate Mine ##%{_i}%" with lore "&f&bLeft Click to Teleport!"
+				add 1 to {_s}
+				add 1 to {_i}
+			open {_gui} to player
+            #tpToAreaWithDelay(player, {pmines.%player's uuid%::%{_pmine}%}, "your PMine")
+		else:
+			send "&cPlease go to spawn first."
+
+on inventory click:
+	name of event-inventory is "&3&lPrivate Mines!"
+	cancel event
+	if event-item is diamond ore:
+		set {_mine} to name of event-item
+		replace all "&aPrivate Mine ##" in {_mine} with ""
+		safeTeleport(player, {pmines::%player's uuid%::%{_mine}%})
+	else if event-item is emerald ore:
+		set {_mine} to uncolored name of event-item
+		replace all "Private Mine" in {_mine} with ""
+		replace all " " in {_mine} with ""
+		if {RankMines::%player's uuid%::%{_mine}%} is not set:
+			#Create Ranked Mine
+			#Stop mine on logout + restart when login User.getlastPlayed() & reset mine if greater than 30m
+			createRankedMine(player, {_mine})
+			wait 20 ticks
+			safeTeleport(player, {RankMines::%player's uuid%::%{_mine}%})
+		else:
+			safeTeleport(player, {RankMines::%player's uuid%::%{_mine}%})

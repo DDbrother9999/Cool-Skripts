@@ -1,0 +1,13 @@
+on place of tnt:
+	if "%region at player%" doesn't contain "boxs4":
+		stop
+	set event-block to air
+	spawn primed tnt at event-location
+	tagEntity(last spawned primed tnt, player)
+    
+on right click with end crystal:
+    wait 1 tick
+    loop entities where [distance between input and player is less than 6]:
+        "%loop-entity's type%" is "ender crystal"
+        getTag(loop-entity) is not set
+        tagEntity(loop-entity, player)

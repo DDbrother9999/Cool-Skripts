@@ -1,0 +1,24 @@
+command ad:
+	aliases: advertise
+	trigger:
+		send "&bHere are some of our ad messages:"
+		send ""
+		send "<suggest command:/ad WildKits &c&l| DEATH = RANDOM KIT ✩ SEASON 2 ✩ 500 SLOTS! |>&a&l&nClick me for Default rank ad<reset>"
+		send ""
+		send "<suggest command:/ad WildKits &c&l| &9&l&nDEATH = RANDOM KIT ✩ &6&l&nSEASON 2 ✩ &a&l&nMH75! &c&l|>&b&l&nClick me for VIP & PRO rank ad<reset>"
+		send ""
+		send "<suggest command:/ad WildKits &c&l| &9&l&nDEATH = RANDOM KIT ✩ &6&l&nCLICK HERE ✩ &a&l&nMH75! &c&l|>&6&l&nClick me for LEGEND & PATRON rank ad<tooltip:&aClick me><reset>"
+		send ""
+        
+command /test:
+    permission: test.op
+    trigger:
+        summon a zombified piglin at player
+        send "script located in ads.sk" 
+
+command /plugin:
+	alias: /pl
+	trigger:
+		send "No" to player
+	
+

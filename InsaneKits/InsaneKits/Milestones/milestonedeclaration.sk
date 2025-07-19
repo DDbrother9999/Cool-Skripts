@@ -1,0 +1,99 @@
+on load:
+	wait 20 ticks
+	clear {BP::Reward::*}
+	set {_i} to 1
+	while {_i} is smaller than or equal to 100:
+		if mod({_i},5)+mod({_i},7) is not 0:
+			set {_r} to random integer between 1 and 2
+			if {_r} is 1:
+				if {_i} is smaller than or equal to 100:
+					set {_cash} to "Large"
+				if {_i} is smaller than or equal to 70:
+					set {_cash} to "Medium"
+				if {_i} is smaller than or equal to 30:
+					set {_cash} to "Small"
+				if {_i} is smaller than or equal to 10:
+					set {_cash} to "Mini"
+				set {BP::Reward::%{_i}%} to {%{_cash}%CashStack}
+			if {_r} is 2:
+				if {_i} is smaller than or equal to 100:
+					set {_exp} to 150
+				if {_i} is smaller than or equal to 70:
+					set {_exp} to 100
+				if {_i} is smaller than or equal to 30:
+					set {_exp} to 50
+				if {_i} is smaller than or equal to 10:
+					set {_exp} to 25
+				set {BP::Reward::%{_i}%} to bottle o' enchanting named "&b%{_exp}% EXP"
+		if mod({_i},7) is 0:
+			if {_i} is smaller than or equal to 100:
+				set {BP::Reward::%{_i}%} to formatBooster(2,1200)
+			if {_i} is smaller than or equal to 70:
+				set {BP::Reward::%{_i}%} to formatBooster(2,600)
+			if {_i} is smaller than or equal to 30:
+				set {BP::Reward::%{_i}%} to formatBooster(2,300)
+			if {_i} is smaller than or equal to 10:
+				set {BP::Reward::%{_i}%} to formatBooster(1.5,300)
+		if mod({_i},5) is 0:
+			set {_gem} to 1
+			set {BP::Reward::%{_i}%} to diamond named "&b%{_gem}% Gems"
+		add 1 to {_i}
+
+on load:
+	wait 20 ticks
+	set {GemCount} to 0
+	clear {AP::Reward::*}
+	set {_i} to 1
+	while {_i} is smaller than or equal to 100:
+		if mod({_i},5)+mod({_i},7) is not 0:
+			set {_r} to random integer between 1 and 4
+			if {_r} is 1:
+				if {_i} is smaller than or equal to 100:
+					set {_cash} to "Ultra"
+				if {_i} is smaller than or equal to 70:
+					set {_cash} to "Mega"
+				if {_i} is smaller than or equal to 30:
+					set {_cash} to "Large"
+				if {_i} is smaller than or equal to 10:
+					set {_cash} to "Medium"
+				set {AP::Reward::%{_i}%} to {%{_cash}%CashStack}
+			if {_r} is 2:
+				if {_i} is smaller than or equal to 100:
+					set {_exp} to 200
+				if {_i} is smaller than or equal to 70:
+					set {_exp} to 150
+				if {_i} is smaller than or equal to 30:
+					set {_exp} to 100
+				if {_i} is smaller than or equal to 10:
+					set {_exp} to 50
+				set {AP::Reward::%{_i}%} to bottle o' enchanting named "&b%{_exp}% EXP"
+			if {_r} is 3 or 4:
+				if {_i} is smaller than or equal to 100:
+					set {_gem} to 10
+				if {_i} is smaller than or equal to 70:
+					set {_gem} to 5
+				if {_i} is smaller than or equal to 30:
+					set {_gem} to 3
+				if {_i} is smaller than or equal to 10:
+					set {_gem} to 1
+				set {AP::Reward::%{_i}%} to {_gem} of diamond named "&b%{_gem}% Gems"
+		if mod({_i},7) is 0:
+			if {_i} is smaller than or equal to 100:
+				set {AP::Reward::%{_i}%} to formatBooster(2.5,1200)
+			if {_i} is smaller than or equal to 70:
+				set {AP::Reward::%{_i}%} to formatBooster(2,900)
+			if {_i} is smaller than or equal to 30:
+				set {AP::Reward::%{_i}%} to formatBooster(2,600)
+			if {_i} is smaller than or equal to 10:
+				set {AP::Reward::%{_i}%} to formatBooster(2,450)
+		if mod({_i},5) is 0:
+			if {_i} is smaller than or equal to 100:
+				set {_gem} to 10
+			if {_i} is smaller than or equal to 70:
+				set {_gem} to 5
+			if {_i} is smaller than or equal to 30:
+				set {_gem} to 3
+			if {_i} is smaller than or equal to 10:
+				set {_gem} to 1
+			set {AP::Reward::%{_i}%} to diamond named "&b%{_gem}% Gems"
+		add 1 to {_i}

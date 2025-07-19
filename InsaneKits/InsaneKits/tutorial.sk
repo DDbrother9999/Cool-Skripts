@@ -1,0 +1,50 @@
+on load:
+	set {Tutorial::Stops::*} to "Welcome","Pit","Shops","Enchant","KOTH","Crates","AFK","Pass","Quests","Vote","Bank","NightMarket","Ranks","Leaderboards","End"
+
+	set {Tutorial::Welcome::Title::*} to "&5&lWelcome to InsaneKits","An &5INSANE &frandomkit pvp server!"
+	set {Tutorial::Pit::Title::*} to "&c&lThe Pit","Drop in the pit and &cfight &fother players!"
+	set {Tutorial::Shops::Title::*} to "&d&lShops","Purchase things with coins at &dthe shop&f!"
+	set {Tutorial::Enchant::Title::*} to "§x§7§f§1§b§f§f&lEnchanting","Enchant your armor to become §x§7§f§1§b§f§fstronger&f!"
+	set {Tutorial::KOTH::Title::*} to "&4&lKing Of The Hill","Fight for a KOTH key hourly! &4(/koth)"
+	set {Tutorial::Crates::Title::*} to "&2&lCrates","Earn crate keys in various ways and use them for &2rewards&f!"
+	set {Tutorial::AFK::Title::*} to "&1&lAFK Pool","Afk for afk keys every 30 minutes. &1(/afk)"
+	set {Tutorial::Pass::Title::*} to "&3&lBattle Pass","Level up through quests for rewards! &3(/milestones)"
+	set {Tutorial::Quests::Title::*} to "&b&lQuests","Complete quests for battlepass xp! &b(/quests)"
+	set {Tutorial::Vote::Title::*} to "&a&lVoting","Vote for the server every 24 hours for rewards! &a(/vote)"
+	set {Tutorial::Bank::Title::*} to "&6&lBank","Deposit and withdraw your tokens! &6(/bank)"
+	set {Tutorial::NightMarket::Title::*} to "§x§9§5§2§d§a§f&lNight Market","Unique items can be bought here! §x§9§5§2§d§a§f(/nightmarket)"
+	set {Tutorial::Ranks::Title::*} to "§x§d§f§9§5§2§7&lRanks","Purchasing ranks supports the server and gives you perks! §x§d§f§9§5§2§7(/buy)"
+	set {Tutorial::Leaderboards::Title::*} to "&e&lLeaderboards","Try to become a &etop &fplayer!"
+	set {Tutorial::End::Title::*} to "&5&lHave Fun","Enjoy your time on &5InsaneKits&f!"
+
+command /settutoriallocation <text>:
+	permission: op
+	trigger:
+		set {Tutorial::%arg-1%::Location} to player's location
+
+on tab complete of "/settutoriallocation":
+	set tab completions for position 1 to {Tutorial::Stops::*}
+
+command /tutorial:
+	trigger:
+		set player's gamemode to spectator
+		loop {Tutorial::Stops::*}:
+			set metadata "Tutorial" of player to loop-value
+			summon armor stand at {Tutorial::%loop-value%::Location}
+			set {_l} to last spawned armor stand
+			set the yaw of {_l} to the yaw of {Tutorial::%loop-value%::Location}
+			set the pitch of {_l} to the pitch of {Tutorial::%loop-value%::Location}
+			add nbt compound of "{Invisible:1b,NoGravity:1b}" to nbt of {_l}
+			forceTarget(player,{_l})
+			send title "%{Tutorial::%loop-value%::Title::1}%" with subtitle "%{Tutorial::%loop-value%::Title::2}%"
+			wait 4 seconds
+			clear metadata "Tutorial" of player
+			wait 5 ticks
+			kill {_l}
+		set player's gamemode to survival
+		teleport player to {setspawn}
+
+local function forceTarget(p: player,l: entity):
+	while (metadata "Tutorial" of {_p}) is set:
+		set {_p}'s spectator target to {_l}
+		wait 1 ticks

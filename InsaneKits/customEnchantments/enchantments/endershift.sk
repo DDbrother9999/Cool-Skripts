@@ -1,0 +1,10 @@
+on sneak toggle:
+    hasCEnchant(player's boots, "ender shift") is true
+    player is sneaking
+
+    if difference between metadata "endershiftCD" of player and now is less than 2 seconds:
+        send action bar "&5Still charging!"
+        stop
+
+    teleport player 3 blocks in front of player's eyes
+    set metadata "endershiftCD" of player to now

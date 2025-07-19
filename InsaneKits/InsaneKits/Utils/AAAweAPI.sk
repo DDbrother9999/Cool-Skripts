@@ -1,0 +1,5 @@
+function worldeditAPI(loc: location) :: object:
+    if {-worldeditAPI::BlockVector3} is not set:
+        return {-worldeditAPI::BukkitUtil}.toVector(location at {_loc}.getBlockX(), {_loc}.getBlockY(), {_loc}.getBlockZ() in world {_loc}.getWorld())
+    else:
+        return {-worldeditAPI::BlockVector3}.at({_loc}.getBlockX(), {_loc}.getBlockY() and {_loc}.getBlockZ())

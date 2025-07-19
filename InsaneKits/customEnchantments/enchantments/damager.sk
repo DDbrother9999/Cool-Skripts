@@ -1,0 +1,14 @@
+on damage:
+    hasCEnchant(attacker's tool, "damaging") is true
+    set {_level} to getCEnchantLevel(attacker's tool, "damaging")
+
+    set {_rand} to random integer between 1 and 4
+    if {_rand} is 1:
+        set durability of victim's helmet to durability of victim's helmet - 1*{_level}
+    else if {_rand} is 2:
+        set durability of victim's chestplate to durability of victim's helmet - 1*{_level}
+    else if {_rand} is 3:
+        set durability of victim's leggings to durability of victim's helmet - 1*{_level}
+    else if {_rand} is 4:
+        set durability of victim's boots to durability of victim's helmet - 1*{_level}
+

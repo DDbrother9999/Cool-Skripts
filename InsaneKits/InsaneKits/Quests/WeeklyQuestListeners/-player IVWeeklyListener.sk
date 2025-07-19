@@ -1,0 +1,6 @@
+every minute:
+	loop all players:
+		add 1 to {-Player IV::%loop-player%}
+		if {-Player IV::%loop-player%} is greater than or equal to 60:
+			clear {-Player IV::%loop-player%}
+			addprogressquest(loop-player,"Weekly","Player IV")

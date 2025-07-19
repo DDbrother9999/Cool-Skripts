@@ -1,0 +1,5 @@
+on damage:
+    hasCEnchant(attacker's tool, "soul stealer") is true
+    set {_damageMulti} to (1+(returnKS(attacker)*0.01))
+    set {_damageMulti} to 2.5 if {_damageMulti} is greater than 2.5
+    set damage to damage*{_damageMulti}

@@ -1,0 +1,197 @@
+#getxp(player), 
+#setxp(player, number), 
+#xp(player, number)
+#Sets the killstreak
+
+on death of player:
+    set death message to ""
+    "%attacker%" is not "ender crystal"
+    attacker is not tnt
+    wait 1 tick
+    if metadata "Killedbydisc" of victim is true:
+        clear metadata "Killedbydisc" of victim
+        stop
+    if metadata "stopdeathmessage" of victim is true:
+        clear metadata "stopdeathmessage" of victim
+        stop
+    if attacker is a player:
+        if attacker is not victim:
+            giveXPfromKill(attacker, victim)
+            increaseKills(attacker)
+            checkForLevelUp(attacker)
+        increaseDeaths(victim)
+        if projectile is set:
+            #send "<##ff0303>☠ &f%victim% &cwas shot by &f%attacker%&c" to all players 
+        else if attacker is set:
+            #send "<##ff0303>☠ &f%victim% &cwas murdered by &f%attacker%" to all players 
+    else if damage was caused by potion:
+        #send "<##ff0303>☠ &f%victim% &cwas killed by %last attacker of victim%" to all players
+        giveXPfromKill(last attacker of victim, victim)
+        increaseKills(last attacker of victim)
+        checkForLevelUp(last attacker of victim)
+        #send "<##ff0303>☠ &f%victim% &cwas killed by &e&k--&cmagic&e&k--&c." to all players 
+    else if damage was caused by lava:
+        #send "<##ff0303>☠ &f%victim% &cthought swimming in lava was a good idea." to all players 
+    else:
+        #send "<##ff0303>☠ &f%victim% &cdied." to all players
+        increaseDeaths(victim)
+    
+
+on death:
+    attacker is not a player
+    victim is a player
+    if "%attacker%" is "tnt" or "ender crystal":
+        #if getTag(attacker) is set:
+            #set {_deathMessage} to "<##ff0303>☠ &f%victim% &cwas blown up by &f%getTag(attacker)%&c" if getTag(attacker) is set
+        #else:
+            #set {_deathMessage} to "<##ff0303>☠ &f%victim% &cwas blown up."
+        
+        #send {_deathMessage} to all players
+
+        getTag(attacker) is set
+        increaseDeaths(victim)
+        getTag(attacker) is not victim
+        increaseKills(getTag(attacker))
+        giveXPfromKill(getTag(attacker), victim)
+        checkForLevelUp(victim)
+        checkForLevelUp(getTag(attacker))
+
+
+function giveXPfromKill(p: player, p2: player):
+	set {_ks} to returnKS({_p})
+	set {_ks} to 1 if {_ks} < 1
+	set {_ksbonus} to log({_ks}+1,60)
+	set {_ksbonus} to roundks({_ksbonus})
+	send "&aYou recieved a %{_ksbonus}%%% bonus! &c(Killstreak: %{_ks}%)" to {_p}
+	set {_xp} to round(((random integer between 1 and 5)*({_ksbonus}/100+1)))
+	set {_t} to round((getTokenLevel({_p}))*({_ksbonus}/100+1))
+	set {_xp} to {_xp} * {booster::%{_p}'s uuid%} if {booster::%{_p}'s uuid%} is set
+	set {_t} to {_t} * {booster::%{_p}'s uuid%} if {booster::%{_p}'s uuid%} is set
+	set {_xp} to {_xp} * {globalbooster} if {globalbooster} is set
+	set {_t} to {_t} * {globalbooster} if {globalbooster} is set
+	set {_xp} to {_xp}*2 if {HappyHour} is true
+	set {_t} to {_t}*2 if {HappyHour} is true
+	send "&aYou have gotten %{_xp}% experience for killing %{_p2}%" to {_p}
+	xp({_p}, {_xp})
+	drop {_t} of {globaltoken} at {_p}
+
+	#EVENT LOGIC
+	#if metadata tag "candyluck" of {_p} is "true":
+	#	chance of 2%:
+	#		drop {Halloweenlegendarycandy} at {_p}
+	#	chance of 10%:
+	#		drop {Halloweenepiccandy} at {_p}
+	#	chance of 50%:
+	#		drop {Halloweenuncommoncandy} at {_p}
+	#else:
+	#	chance of 1%:
+	#		drop {Halloweenlegendarycandy} at {_p}
+	#	chance of 5%:
+	#		drop {Halloweenepiccandy} at {_p}
+	#	chance of 25%:
+	#		drop {Halloweenuncommoncandy} at {_p}
+
+	#KILL CRATE
+	if getKills({_p}) is greater than 100:
+		chance of 5%:
+			drop {KillCrateKey} at {_p}
+			send "&cYou dropped a Kill Crate key!" to {_p}
+	else:
+		chance of 10%:
+			drop {KillCrateKey} at {_p}
+			send "&cYou dropped a Kill Crate key!" to {_p}
+
+command /setkillcrate:
+	permission: op
+	trigger:
+		set {KillCrateKey} to player's tool
+
+local function roundks(i: number) :: integer:
+	set {_i} to {_i}*10
+	set {_i} to {_i}-2
+	set {_i} to round({_i})
+	set {_i} to {_i}*10
+	return {_i}
+
+function getTag(e: entity) :: player:
+    return metadata value "creator" of {_e}
+
+function tagEntity(e: entity, p: player):
+    set metadata value "creator" of {_e} to {_p}
+
+command /setkillstreak <player> <number>:
+	permission: op
+	trigger:
+		set {_p} to arg-1
+		set {_n} to arg-2
+		setkillstreak({_p},{_n})
+
+command /enableHappyHour:
+	permission: op
+	trigger:
+		set {HappyHour} to true
+		loop all players:
+			send "&c-------------------------------" to loop-player
+			send "&a&lHappy Hour has started! Double EXP! &8(Everyday from 6PM to 7PM EST)" to loop-player
+			send "&c-------------------------------" to loop-player
+
+command /disableHappyHour:
+	permission: op
+	trigger:
+		set {HappyHour} to false
+		loop all players:
+			send "&c-------------------------------" to loop-player
+			send "&f&lHappy Hour has ended! &8(Everyday from 6PM to 7PM EST)" to loop-player
+			send "&c-------------------------------" to loop-player
+
+every 5 minutes:
+	if {HappyHour} is true:
+		loop all players:
+			send "&c-------------------------------" to loop-player
+			send "&a&lIt's Insane Hour! (Double EXP) &8(Everyday from 6PM to 7PM EST)" to loop-player
+			send "&c-------------------------------" to loop-player
+			
+on death:
+    checkForLevelUp(victim)
+    checkForLevelUp(attacker)
+function checkForLevelUp(p: player):
+    if getxp({_p}) is higher or equal to 100:
+        if getlevel({_p}) is 100 + returnPrestige({_p}) * 5:
+            stop
+        set {_oldLevel} to getlevel({_p})
+        setxp({_p}, 0)
+        setlevel({_p}, getlevel({_p}) + 1)
+        send title "&a↑ &6LEVEL UP &a↑" with subtitle "&fLevel &6%getlevel({_p})%" to {_p}
+        play sound "entity.player.levelup" at volume 1 at pitch 1 to {_p}
+        set {_r} to 100
+        add (returnPrestige({_p}) * 10) to {_r}
+        coins({_p}, {_r})
+        send "&eYou gained &6%{_r}% tokens &efor your level-up!" to {_p}
+        send "leveled up to level %{_oldLevel}% to %getlevel({_p})%" to console
+        #checkForLevelUp({_p}) - I don't think this is necessary...
+
+command /level:
+	trigger:
+		set {_gui} to a new chest inventory with 6 row with name "&6&lLevels Info Page"
+		set slots (integers between 26 and 37 and integers between 0 and 33) of {_gui} to black glass pane named " "
+		set slots (integers between 32 and 33 and integers between 35 and 44 and integers between 44 and 55) of {_gui} to black glass pane named " "
+		set slot 18 of {_gui} to black glass pane named " " 
+		set slot 37 of {_gui} to experience bottle named "&2Current XP: &a%getxp(player)%/100" with lore " ", "&cThe XP left for you to gain a level" and " "
+		set slot 40 of {_gui} to enchanting table named "&2Your Level: &f%getlevel(player)%" with lore " ", "&cYour level based on the XP you get from kills" and " "
+		set slot 43 of {_gui} to written book named "&2Info" with lore " ", "&cYou can get a &erandom amount of XP&c from each kill", "&cOnce you reach &e100 XP &cyou level up", "&cEach time you level up you instantly recieve a reward" , "&cOnce you reach &elevel %100+(5*returnPrestige(player))% &cyou can prestige" , "&cPrestiging gives you &e10 more eTokens &ceach level up" and " " with all flags hidden
+		set slot 13 of {_gui} to diamond block named "&a&lPrestige" with lore " ", "&fRequires &4level %100 + (returnPrestige(player)*5)%&f: " , " ", "&eIncreases future level-up rewards by &610 eTokens" , "&cThis stacks &8&lindefinitely&r&c so make sure to prestige!" and " "
+		open {_gui} to player
+
+on inventory click:
+	if name of event-inventory is "&6&lLevels Info Page":
+		cancel event
+		if index of event-slot = 13:
+			if level(player) is greater than 99 + (returnPrestige(player)*5):
+				prestige(player, 1)
+				setlevel(player, 1)
+				xp(player, 0)
+				send "&6[&ePRESTIGE&6]: &e&l%player%&r &6Just reached prestige &e&l%returnPrestige(player)%&r&6. &lGG!" to all players
+				#play sound "entity.ender_dragon.death" at volume 1 at pitch 1 to all players
+				send title "&6&lPRESTIGE" with subtitle "&fYou reached prestige &e%returnPrestige(player)%" to player
+			else:
+				send "&fError! You cannot prestige yet!" to player

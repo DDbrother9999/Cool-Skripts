@@ -1,0 +1,5 @@
+on load:
+    set {DailyWinnerQuest} to "I"
+
+on disable:
+    clear {DailyWinnerQuest}

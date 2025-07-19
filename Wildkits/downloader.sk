@@ -1,0 +1,10 @@
+import:
+    java.io.File
+    org.bukkit.Bukkit
+    ch.njol.skript.Skript
+    java.lang.Runnable
+
+command /getskripts:
+    permission: "rank.jrdev"
+    trigger:
+    

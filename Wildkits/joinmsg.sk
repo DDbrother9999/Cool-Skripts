@@ -1,0 +1,10 @@
+on join:
+  if player has played before:
+    set join message to "&7[&a✔&7] %player%"
+  else:
+    add 1 to {uniquejoins}
+    set join message to "&7[&a✔&7] %player%&6 ##%{uniquejoins}%"
+
+on quit:
+  set quit message to "&7[&c❌&7] %player%"
+  

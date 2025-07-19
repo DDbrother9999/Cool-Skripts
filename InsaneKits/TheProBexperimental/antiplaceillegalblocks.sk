@@ -1,0 +1,8 @@
+on place of bedrock:
+    cancel event if player does not have permission "placeillegalblocks.true"
+
+on place of barrier:
+    cancel event if player does not have permission "placeillegalblocks.true"
+
+on place of end portal frame:
+    cancel event if player does not have permission "placeillegalblocks.true"

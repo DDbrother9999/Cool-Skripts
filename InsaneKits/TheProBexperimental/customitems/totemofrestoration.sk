@@ -1,0 +1,18 @@
+on resurrect attempt:
+    set {_tool} to player's off hand tool if "%player's off hand tool's type%" is "totem of undying"
+    set {_tool} to player's tool if "%player's tool's type%" is "totem of undying"
+    "%nbt compound of {_tool}%" contains "restorationtotem"
+    wait 1 tick
+    set player's health to 20
+    set player's hunger to 20
+    set player's saturation to 10
+    loop 10 times:
+        make 5 of heart at player's chest with offset vector(0.5, 0.5, 0.5)
+        wait 2 ticks
+
+command /givetotemofrestoration:
+    permission: customitems.give
+    trigger:
+        set {_totem} to totem of undying of mending 1 named "&cTotem of Restoration" with lore "&7Fully restores both health and hunger.%nl%&8Let's try this again." with all flags hidden
+        set tag "restorationtotem" of nbt compound of {_totem} to true
+        give {_totem} to player

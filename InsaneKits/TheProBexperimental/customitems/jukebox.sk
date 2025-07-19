@@ -1,0 +1,216 @@
+# MADE BY TheProB#4834 for InsaneKits
+
+#death msgs for specific things
+
+on load:
+    #normal jukebox death (1-6)
+    set {jbdeathmessage1} to "<player> rocked too hard."
+    set {jbdeathmessage2} to "<player> felt the music was too good for them"
+    set {jbdeathmessage3} to "The ears of <player> went kaboom."
+    set {jbdeathmessage4} to "<player> was the victim of a faulty jukebox."
+    set {jbdeathmessage5} to "<player> enjoyed the music too much."
+    set {jbdeathmessage6} to "<player> liked the music too much"
+    #died of own jukebox (6-9)
+    set {jbdeathmessage7} to "<player> should never make music again."
+    set {jbdeathmessage8} to "<player> forgot the music was on."
+    set {jbdeathmessage9} to "<player> started the jukebox and forgot to pay."
+    set {jbdeathmessage10} to "<player> went afk after starting some music."
+    #died of spiked discs (10-14)
+    set {jbdeathmessage11} to "<player> died of sound.."
+    set {jbdeathmessage12} to "The disc was sharper than <player> remembered."
+    set {jbdeathmessage13} to "<player> stepped on legos, but worse."
+    set {jbdeathmessage14} to "<player> failed at getting their disc out of the console."
+    set {jbdeathmessage15} to "<player>'s breainm hgursts..."
+
+on load:
+    set {explodingjukebox} to jukebox of mending 0 named "&c&lExploding Jukebox" with lore "&8oh no it explodes" with all flags hidden
+    set tag "iexplode" of nbt compound of {explodingjukebox} to true
+    set tag "customitem" of nbt compound of {explodingjukebox} to true
+
+    set {musicjukebox} to jukebox of mending 0 named "&c&lMusic Jukebox" with lore "&8this one plays music if you place it" with all flags hidden
+    set tag "musicjukebox" of nbt compound of {musicjukebox} to true
+    set tag "customitem" of nbt compound of {musicjukebox} to true
+    
+command /giveexplodingjukebox:
+    permission: op
+    trigger:
+        give {explodingjukebox} to player
+
+command /givemusicjukebox:
+    permission: op
+    trigger:
+        give {musicjukebox} to player
+
+
+
+# MUSIC JUKEBOX
+on place of jukebox:
+    if "%nbt compound of player's tool%" contains "musicjukebox":
+        set {musicjukebox::%event-block's location%} to event-block's location
+
+on right click on jukebox:
+    {musicjukebox::*} contains event-block's location
+    set {_r} to "%random integer between 1000 and 10000000%"
+    create a gui with id {_r} with virtual chest inventory with 3 rows with name "Radio" 
+    open last gui to player
+    cooljukeboxloadingeffect({_r}, music disc 13, 0, event-block's location)
+    cooljukeboxloadingeffect({_r}, music disc blocks, 2, event-block's location)
+    cooljukeboxloadingeffect({_r}, music disc far, 4, event-block's location)
+    cooljukeboxloadingeffect({_r}, music disc mellohi, 6, event-block's location)
+    cooljukeboxloadingeffect({_r}, music disc strad, 8, event-block's location)
+    cooljukeboxloadingeffect({_r}, music disc cat, 10, event-block's location)
+    cooljukeboxloadingeffect({_r}, music disc chirp, 12, event-block's location)
+    cooljukeboxloadingeffect({_r}, music disc mall, 14, event-block's location)
+    cooljukeboxloadingeffect({_r}, music disc stal, 16, event-block's location)
+    cooljukeboxloadingeffect({_r}, music disc ward, 18, event-block's location)
+    cooljukeboxloadingeffect({_r}, music disc pigstep, 20, event-block's location)
+    cooljukeboxloadingeffect({_r}, music disc wait, 22, event-block's location)
+    cooljukeboxloadingeffect({_r}, music disc otherside, 24, event-block's location)
+    cooljukeboxloadingeffect({_r}, music disc 5, 26, event-block's location)
+    cooljukeboxloadingeffect({_r}, music disc 11, 28, event-block's location)
+
+function cooljukeboxloadingeffect(g: text, i: item, slot: integer, loc: location):
+    edit gui with id {_g}:
+        set {_value} to random integer between 1 and 12
+        wait "%{_value}% ticks" parsed as timespan
+        format gui slot {_slot} with {_i}:
+            stop sound {music::%block at {_loc}%} for all players where [distance between input and {_loc} is less than 100]
+            set {_sound} to "%{_i}'s type%"
+            replace all "record" in {_sound} with "music disc"
+            set {_sound} to {_sound} in snake case
+            play sound "%{_sound}%" in snake case at {_loc} for all players where [distance between input and {_loc} is less than 100]
+            set {music::%block at {_loc}%} to {_sound}
+            close player's inventory
+
+on break of jukebox:
+    cancel drops
+    stop sound {music::%event-block%} for all players where [distance between input and event-block's location is less than 100]
+    delete {music::%event-block's location%}
+    delete {musicjukebox::%event-block's location%}
+
+# EXPLODING JUKEBOX
+on place of jukebox:
+    "%nbt compound of player's tool%" contains "iexplode"
+    if difference between metadata "jukeboxcooldown" of player and now is less than 14 seconds:
+        player's gamemode is survival
+        send action bar "&aThis item is on cooldown!" to player
+        cancel event
+        stop
+    set tag "IsPlaying" of nbt compound of event-block to true
+    set metadata "jukeboxcooldown" of player to now
+    set {_value} to random integer between 1 and 15
+    set {dontbreak::%event-block%} to {_value}
+    set {expjukeboxplacer::%event-block%} to player
+    play sound "%{jukeboxdiscs::%{_value}%}%" with volume 0.3 at event-block for all players
+    set {_loop} to 0
+    while block at event-block is jukebox:
+        wait 2 ticks
+        add 1 to {_loop}
+        stop loop if {_loop} is greater than or equal to 70
+    if {dontbreak::%event-block%} is set:
+        set event-block to air
+        stop sound "%{jukeboxdiscs::%{_value}%}%" for all players
+        set {_players::*} to all players where [distance between input and event-block is less than 15]
+        create an explosion of power 5.5 at event-block
+        loop {_players::*}:
+            if loop-value's health is less than or equal to 0:
+                set metadata "Killedbydisc" of loop-value to true
+                if loop-value's name is not player's name:
+                    set {_dm} to grabDeathMessageA(loop-value, 3)
+                    replace all "%%victim%%" in {_dm} with loop-value's name
+                    replace all "%%attacker%%" in {_dm} with player's name
+                    send {_dm} to all players 
+                    increaseKills(player)
+                    giveXPfromKill(player, loop-value)
+                    increaseDeaths(loop-value)
+                else:
+                    set {_dm} to grabDeathMessageNA(loop-value, 3)
+                    replace all "%%victim%%" in {_dm} with loop-value's name
+                    replace all "%%attacker%%" in {_dm} with player's name
+                    send {_dm} to all players 
+        loop {_players::*}:
+            wait 1 tick
+            clear metadata "Killedbydisc" of loop-value
+        kill all dropped jukeboxes
+        delete {dontbreak::%event-block%}
+        shootdiscsoutoflocation(event-block's location, random integer between 10 and 20, {expjukeboxplacer::%event-block%})
+        delete {expjukeboxplacer::%event-block%}
+
+on damage of dropped item:
+    victim's name contains "Unpickupable"
+    cancel event
+
+on explode:
+    loop exploded blocks:
+        if loop-block is jukebox:
+            cancel event
+
+
+function shootdiscsoutoflocation(loc: location, amount: integer, killcredit: player):
+    loop {_amount} times:
+        createdisc({_loc}, {_killcredit})
+
+function createdisc(loc: location, p: player = "Notch" parsed as offline player):
+    set {_value} to random integer between 1 and 15
+    set {_item} to "%{jukeboxdiscs::%{_value}%}%"
+    replace all "_" in {_item} with " "
+    set {_item} to {_item} parsed as item
+    set {_item}'s name to "&cUnpickupable"
+    drop {_item} at {_loc}
+    set {_item} to last dropped item
+    set tag "Health" of {_item} to 9999
+    set metadata "damager" of {_item} to {_killcredit}
+    set {_x} to random number between -2 and 2
+    set {_y} to random number between 0 and 0.5
+    set {_z} to random number between -2 and 2
+    set {_item}'s velocity to vector({_x}, {_y}, {_z})
+    set {_loop} to 0
+    wait 20 tick
+    while {_item} is alive:
+        wait 1 ticks
+        add 1 to {_loop}
+        set {_number} to random number between 140 and 280
+        loop all players where [distance between {_item} and input is less than 2]:
+            loop-player's gamemode is survival  
+            set {_health} to loop-player's health
+            damage loop-player by 1.5 hearts
+            loop-player's health is not {_health}
+            if loop-player's health is less than or equal to 0:
+                set metadata "Killedbydisc" of loop-player to true
+                if loop-player's name is not {_p}'s name:
+                    increaseKills({_p})
+                    giveXPfromKill({_p}, loop-player)
+                    increaseDeaths(loop-player)
+                set {_deathmsg} to {jbdeathmessage%random integer between 11 and 15%}
+                replace all "<player>" in {_deathmsg} with loop-player's name
+                send "&7[&c☠&7] &c%{_deathmsg}% &7(%{_p}%)" to all players 
+                wait 1 tick
+                clear metadata "Killedbydisc" of loop-player
+            kill {_item}
+        stop loop if {_loop} is greater than or equal to {_number}
+    kill {_item}
+
+on pickup:
+    if event-item's name contains "Unpickupable":
+        cancel event
+
+
+#MISC
+
+on load:
+    {jukeboxdiscs::*} is not set
+    add music disc 13 to {jukeboxdiscs::*}
+    add music disc blocks to {jukeboxdiscs::*}
+    add music disc far to {jukeboxdiscs::*}
+    add music disc mellohi to {jukeboxdiscs::*}
+    add music disc strad to {jukeboxdiscs::*}
+    add music disc cat to {jukeboxdiscs::*}
+    add music disc chirp to {jukeboxdiscs::*}
+    add music disc mall to {jukeboxdiscs::*}
+    add music disc stal to {jukeboxdiscs::*}
+    add music disc ward to {jukeboxdiscs::*}
+    add music disc pigstep to {jukeboxdiscs::*}
+    add music disc wait to {jukeboxdiscs::*}
+    add music disc otherside to {jukeboxdiscs::*}
+    add music disc 5 to {jukeboxdiscs::*}
+    add music disc 11 to {jukeboxdiscs::*}

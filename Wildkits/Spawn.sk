@@ -1,0 +1,95 @@
+command /setspawn:
+	permission: spawn.setspawn
+	permission message: &cSorry, but you don't have permission to execute this command!
+	description: Set spawn at your location.
+	trigger:
+		message "&6You have &cset spawn&6 at your location!"
+		set {spawn} to location of block at location of player
+
+command /tpspawn <player>:
+	permission: spawn.spawn
+	permission message: &cSorry, but you don't have permission to execute this command!
+	description: Teleport you to spawn.
+	trigger:
+		if {spawn} isn't set:
+			message "&4Error:&c spawn is not set!"
+			stop
+		else:
+			argument 1 is set:
+				if sender has permission "spawn.spawn.others":
+					if argument is online:
+						teleport argument to {spawn}
+					if sender is a player:
+						message "&6You have been teleported to spawn" to argument 1
+					if sender is not a player:
+						message "&6You have been teleported to spawn" to argument 1
+						teleport player to {spawn}
+				else:
+					message "&cSorry, but you don't have permission to execute this command!"
+
+command /spawn:
+    trigger:
+    	# Made it so player's in creative get teleported instantly
+    	# since I'm way too lazy to wait 5 seconds
+        if player's gamemode is creative:
+            teleport executor to {spawn}
+            send "§aSuccessfully teleported you to spawn."
+            stop
+
+        send "&aTeleporting to spawn &7(5)"
+ 
+        set {_cooldown} to 5
+   
+        set {_loc} to location of player
+        while {_cooldown} is not 0:
+            if {_cooldown} is 0:
+                send "&aSuccessfully teleported you to spawn"
+            else:
+                remove 1 from {_cooldown}
+                wait 1 second
+			
+            if distance between {_loc} and player is not 0:
+                send "&cYou moved!"
+                stop
+            send "&aTeleporting to spawn &7(%{_cooldown}%)"
+        if {_cooldown} is 0:
+            send "&aSuccessfully teleported you to spawn"
+  
+  
+            if distance between {_loc} and player is not 0:
+                send "&cYou moved!"
+                stop
+             
+            set {_loc} to location of player
+         
+            wait a tick
+        teleport executor to {spawn}
+
+
+
+command /delspawn:
+	permission: spawn.spawn.delete
+	permission message: &cSorry, but you don't have permission to execute this command!
+	description: Unset spawn location.
+	trigger:
+		delete {spawn}
+		message "&6You have successfully unset &cspawn6!"
+
+
+on first join:
+    set {_loc} to location(-256, 164, -9, world "world")
+    set yaw of {_loc} to 1.178
+    set pitch of {_loc} to -6.029
+    teleport player to {_loc}
+    
+on join:
+	teleport player to {spawn} if player is in the region "spawn"
+
+on death:
+    # force victim to respawn - testing using the gamerule, uncomment this if stuff breaks :D
+    wait 1 tick
+    teleport victim to {spawn}
+
+on respawn:
+    set respawn location to {spawn}
+    #teleport player to {spawn}

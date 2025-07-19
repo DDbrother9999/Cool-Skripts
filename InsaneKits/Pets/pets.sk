@@ -1,0 +1,360 @@
+import:
+	me.arcaniax.hdb.api.HeadDatabaseAPI
+	org.bukkit.Bukkit
+	ch.njol.skript.Skript
+	java.lang.Runnable
+
+on load:
+	set {HDBA} to new HeadDatabaseAPI()
+	set {PetIDCounter} to {PetIDCounter} ? 1
+	set {PetCandyCounter} to {PetCandyCounter} ? 1
+	set {PetLeashCounter} to {PetLeashCounter} ? 1
+
+command /givepet <text>:
+	permission: op
+	trigger:
+		give givepet(player, {Pets::%arg-1%}) to player
+
+on tab complete of "givepet":
+	loop {Pets::*}:
+		add loop-index to {_list::*}
+	set tab completions for position 1 to {_list::*}
+
+function givepet(p: player,item: item) :: item:
+	set int tag "Pet;id" of nbt compound of {_item} to {PetIDCounter}
+	set string tag "Pet;Owner" of nbt compound of {_item} to "%{_p}%"
+	add 1 to {PetIDCounter}
+	return {_item}
+
+command /configurepets:
+	permission: op
+	trigger:
+		loadPets()
+
+function configurePet(id: integer, name: text, displayname: text, description: text, stats: text, cd: integer, hasLevel: boolean) :: item:
+	set {_stats::*} to split {_stats} at ";"
+	set {_item} to {HDBA}.getItemHead("%{_id}%")
+	set {_item} to {_item} named "%{_displayname}% &7[LVL 1]"
+
+	set {_lore::*} to "&7%{_description}%", "%nl%&f&lStats"
+	loop {_stats::*}:
+		add "&7 %loop-value%" to {_lore::*}
+
+	add "%nl%&f&lCooldown" to {_lore::*}
+	if {_cd} is 0:
+		add " &7No cooldown" to {_lore::*}
+	else:
+		add " &7%{_cd}%m" to {_lore::*}
+	if {_hasLevel} is true:
+		add "%nl%&f&lLevel" to {_lore::*}
+		add " &7&n1&r &7/ 5" to {_lore::*}
+		add "%displayExp(0,1)% &8(0 / 1000)" to {_lore::*}
+	add "" to {_lore::*}
+	add "&7(Right-Click to activate)" to {_lore::*}
+
+	set lore of {_item} to {_lore::*}
+
+	set int tag "Pet;exp" of nbt compound of {_item} to 0
+	set int tag "Pet;level" of nbt compound of {_item} to 1
+	set string tag "Pet;name" of nbt compound of {_item} to {_name}
+	set int tag "Pet;cd" of nbt compound of {_item} to {_cd}
+	set string tag "Pet;lastused" of nbt compound of {_item} to "%unix timestamp of now%"
+	set {_item} to updateLore({_item})
+	return {_item}
+
+function updatePet(item: item,addexp: integer) :: item:
+	set {_exp} to int tag "Pet;exp" of nbt compound of {_item}
+	set {_level} to int tag "Pet;level" of nbt compound of {_item}
+	set {_name} to string tag "Pet;name" of nbt compound of {_item}
+	return {_item} if {_level} is greater than or equal to 5
+	set int tag "Pet;exp" of nbt compound of {_item} to {_exp} + {_addexp}
+	set {_maxexp} to calculateExp({_level})
+	if {_exp} + {_addexp} is greater than or equal to {_maxexp}:
+		add 1 to {_level}
+		set int tag "Pet;level" of nbt compound of {_item} to {_level}
+		set int tag "Pet;exp" of nbt compound of {_item} to 0
+	set {_displayname} to {Pets::%{_name}%::DisplayName}
+	set name of {_item} to "%{_displayname}% &7[LVL %{_level}%]"
+	return updateLore({_item})
+
+function updateLore(item: item) :: item:
+	set {_name} to string tag "Pet;name" of nbt compound of {_item}
+	set {_level} to int tag "Pet;level" of nbt compound of {_item}
+	set {_exp} to int tag "Pet;exp" of nbt compound of {_item}
+	
+	set {_l} to 0
+	set {_skipLine} to 0
+	set {_statsSkipLine} to false
+	loop 20 times:
+		if {_skipLine} is greater than 0:
+			remove 1 from {_skipLine}
+		else if {_statsSkipLine} is true:
+			if line {_l} of lore of {_item} is "":
+				set {_statsSkipLine} to false
+		else if line {_l} of lore of {_item} contains "&f&lLevel":
+			add "&f&lLevel" to {_lore::*}
+			add " &7&n%{_level}%&r &7/ 5" to {_lore::*}
+			if {_level} is greater than or equal to 5:
+				add "%displayExp(10000,4)% &8(MAX)" to {_lore::*}
+			else:
+				add "%displayExp({_exp},{_level})% &8(%{_exp}% / %calculateExp({_level})%)" to {_lore::*}
+			set {_skipLine} to 2
+		else if line {_l} of lore of {_item} contains "&f&lStats":
+			add "&f&lStats" to {_lore::*}
+			set {_stats::*} to split {Pets::%{_name}%::Stats::%{_level}%} at ";"
+			loop {_stats::*}:
+				add "&7 %loop-value-2%" to {_lore::*}
+			add "" to {_lore::*}
+			set {_statsSkipLine} to true
+		else:
+			add line {_l} of lore of {_item} to {_lore::*}
+		add 1 to {_l}
+		
+	set lore of {_item} to {_lore::*}
+	return {_item}
+
+local function displayExp(exp: integer, lvl: integer) :: string:
+	set {_pixels} to 33
+	loop {_exp}/calculateExp({_lvl})*{_pixels} times:
+		set {_return} to "%{_return} ? " "%&a|"
+	loop {_pixels} - {_exp}/calculateExp({_lvl})*{_pixels} times:
+		set {_return} to "%{_return} ? " "%&8|"
+	return {_return}
+
+local function openPetGUI(p: player):
+	create a gui with virtual chest inventory with 6 rows named "&aPets"
+	edit last gui:
+		set {_loop} to 0
+		loop {Pets::*}:
+			set {_lore::*} to loop-value's lore
+			add "&7--------------------%nl%&e&lRight click to give pet" to {_lore::*}
+			format gui slot {_loop} with loop-value with lore {_lore::*}:
+				click type is right mouse button
+				set {_id} to tag "Pet;name" of nbt compound of slot {_loop} of player's current inventory
+				replace all " " in {_id} with ""
+				broadcast {_id}
+				give givepet(player, {Pets::%{_id}%}) to player
+			add 1 to {_loop}
+	open last gui to {_p}
+
+command /petadmin <text> [<integer>]:
+	permission: op
+	trigger:
+		if arg-1 is "upgradeLevel":
+			set player's tool to updatePet(player's tool,10000)
+			send "&aUpgraded Level"
+		else if arg-1 is "debug":
+			set {_tags} to "%compound tag "Pet" of nbt compound of player's tool%"
+			set {_tags::*} to {_tags} split at ","
+			send {_tags::*}
+		else if arg-1 is "resetSpawned":
+			set metadata "Pet%int tag "Pet;id" of nbt compound of player's tool%;spawned" of player to 0
+			send "&aSet spawned to 0"
+		else if arg-1 is "addExp":
+			set player's tool to updatePet(player's tool,arg-2)
+			send "&aAdded %arg-1% Exp!"
+		else if arg-1 is "reload":
+			loadPets()
+			send "&aReloaded all Pets!"
+		else if arg 1 is "opengui":
+			openPetGUI(player)
+			send "&aOpened Pet GUI"
+		else:
+			send "&aNot Found."
+			
+on tab complete of "/petadmin":
+	set tab completions of position 1 to "upgradeLevel","debug","resetSpawned","addExp","reload", "opengui"
+
+on right click with player head:
+	set {_name} to string tag "Pet;name" of nbt compound of player's tool
+	replace all " " with "" in {_name}
+	set {_f::run} to function reference "%{_name}%Pet" called with argument "%player%"
+	set {_proxy} to new proxy instance of Runnable using {_f::*}
+	{_proxy}.run()
+
+function calculateExp(level: number) :: number:
+	set {_expReq::*} to (1000, 2500, 5000, 10000, 0)
+	return {_expReq::%{_level}%}
+
+function checkPetCD(item: item, p: player) :: boolean:
+	return true if (unix timestamp of now - {Pets::%(string tag "Pet;name" of nbt compound of {_item})%::%{_p}' uuid%::lastUsed}) is greater than or equal to (int tag "Pet;cd" of nbt compound of {_item})*60
+	#debug("Difference: %unix timestamp of now - (int tag "Pet;lastused" of nbt compound of {_item})%")
+	if {_p} has permission "*":
+		send "&aCD Bypassed! &8(&e%floor((int tag "Pet;cd" of nbt compound of {_item})*60 - (unix timestamp of now - {Pets::%(string tag ""Pet;name"" of nbt compound of {_item})%::%{_p}'s uuid%::lastUsed}))/60% minutes!&8)" to {_p}
+		return true
+	send "&e%string tag "Pet;name" of nbt compound of {_item}% Pet&c is on cooldown for &e%floor((int tag "Pet;cd" of nbt compound of {_item})*60 - (unix timestamp of now - {Pets::%(string tag ""Pet;name"" of nbt compound of {_item})%::%{_p}'s uuid%::lastUsed}))/60% minutes!" to {_p}
+	return false
+
+function checkCandyCD(item: item, p: player) :: boolean:
+	#debug("Difference: %unix timestamp of now - (int tag "Pet;candylastused" of nbt compound of {_item})%")
+	return true if (unix timestamp of now - (int tag "Pet;candylastused" of nbt compound of {_item})) is greater than or equal to 86400
+	if {_p} has permission "*":
+		send "&aCD Bypassed! &8(&e%floor(86400 - (unix timestamp of now - (int tag "Pet;candylastused" of nbt compound of {_item})))/3600% hours!&8)" to {_p}
+		return true
+	send "&e%string tag "Pet;name" of nbt compound of {_item}% Pet&c is on cooldown for &e%floor(86400 - (unix timestamp of now - (int tag "Pet;candylastused" of nbt compound of {_item})))/3600% hours!" to {_p}
+	return false
+
+function useLeash(item: item, uses: integer) :: item:
+	set int tag "Leash;usesLeft" of nbt compound of {_item} to {_uses}
+	# Add line of lore to show uses left
+	if lore of {_item} does not contain "&7PET LEASHED - Uses Left: &e%{_uses}%" :
+		add "" to lore of {_item}
+		add "&7PET LEASHED - Uses Left: &e%{_uses}%" to lore of {_item}
+	else:
+		set {_l} to 1
+		loop lore of {_item}:
+			if line {_l} of lore of {_item} contains "&7 PET LEASHED - Uses Left: &e":
+				set line {_l} of lore of {_item} to "&7PET LEASHED - Uses Left: &e%{_uses}%"
+			add 1 to {_l}
+	return {_item}
+
+on load:
+	set {PetCandy} to gold nugget named "&c&lRare Candy" with lore "&8Drag and drop to use!","","&7A magical candy that will","&7add &e500xp &7to your pet instantly!","","&7Can only be used every 24 hours!"
+	set {PetLeash} to leash named "&a&lPet Leash" with lore "&8Have in your inventory to use!", "&7A magical item that will keep", "&7your pets on death!", "", "&7Only 5 uses!"
+	set int tag "Leash;uses" of nbt compound of {PetLeash} to 5
+
+on death of player:
+	set {_deathLocation} to location of victim
+	loop the drops:
+		if int tag "Leash;usesLeft" of nbt compound of loop-value is greater than or equal to 1:
+			set {_item} to loop-value
+			set int tag "Leash;usesLeft" of nbt compound of {_item} to int tag "Leash;usesLeft" of nbt compound of {_item} - 1
+			if int tag "Leash;usesLeft" of nbt compound of {_item} is 0:
+				set {removeLeash} to true
+				debug("Remove leash")
+			set {_l} to 1
+			loop lore of {_item}:
+				if line {_l} of lore of {_item} contains "&7PET LEASHED - Uses Left":
+					if {removeLeash} is true:
+						delete line {_l} of lore of {_item}
+						delete line {_l} - 1 of lore of {_item}
+					else:
+						set line {_l} of lore of {_item} to "&7PET LEASHED - Uses Left: &e%int tag "Leash;usesLeft" of nbt compound of {_item}%"
+				add 1 to {_l}
+			set {_item} to useLeash({_item}, int tag "Leash;usesLeft" of nbt compound of {_item})
+			add {_item} to {_pets::*}
+			# debug("Has pet")
+		else:
+			add loop-value to {_items::*}
+	clear the drops
+	drop {_items::*} at {_deathLocation}
+	loop {_pets::*}:
+		add {_item} to {claim::%victim's uuid%::*}
+	wait 5 ticks
+	notifyPlayerofClaim(victim)
+
+on right click on entity with lead:
+	cancel event
+
+on inventory click:
+	set {_item} to event-item
+	int tag "Pet;level" of nbt compound of {_item} is 1 or 2 or 3 or 4 or 5
+	name of player's cursor slot is "&c&lRare Candy"
+	cancel event
+	stop if checkCandyCD({_item},player) is false
+	set int tag "Pet;candylastused" of nbt compound of {_item} to (unix timestamp of now)
+	set slot (index of event-slot) of player's inventory to updatePet({_item}, 500)
+	set player's cursor slot to air
+
+on inventory click:
+	set {_item} to event-item
+	int tag "Pet;level" of nbt compound of {_item} is 1 or 2 or 3 or 4 or 5
+	name of player's cursor slot is "&a&lPet Leash"
+	cancel event
+	if int tag "Leash;usesLeft" of nbt compound of {_item} is greater than or equal to 1:
+		send "&cYou can't use this on a pet that already has a leash!" to player
+		stop
+	set int tag "Leash;usesLeft" of nbt compound of {_item} to int tag "Leash;uses" of nbt compound of player's cursor slot
+	set slot (index of event-slot) of player's inventory to useLeash({_item}, int tag "Leash;usesLeft" of nbt compound of {_item})
+	set player's cursor slot to air
+
+on inventory click:
+	set {_item} to event-item
+	int tag "Pet;level" of nbt compound of {_item} is 1 or 2 or 3 or 4 or 5
+	string tag "Skin;Pet" of nbt compound of player's cursor slot is set
+	cancel event
+	set {_skinType} to string tag "Skin;Pet" of nbt compound of player's cursor slot
+	if string tag "Pet;skin" of nbt compound of {_item} is not "":
+		send "&cYou cannot apply a skin to a pet that already has one!" to player
+		stop
+	if {_skinType} is string tag "Pet;name" of nbt compound of {_item}:
+		# Change the player head used, while keeping the nbt
+		# Set it to the head of the player's cursor (skin)
+		set {_nbt} to nbt compound of {_item}
+		set {_item} to {HDBA}.getItemHead("%{PetSkins::%uncolored name of player's cursor slot%::headID}%")
+		set {_skullOwner} to nbt compound of {_item}
+		set {_item} to {_item} with nbt {_nbt}
+		# Need to add the nbt from the skull back to the item, not updateLore
+		set {_item} to {_item} with nbt {_skullOwner}
+		set {_displayname} to {Pets::%string tag "Pet;name" of nbt compound of {_item}%::DisplayName}
+		set {_level} to int tag "Pet;level" of nbt compound of {_item}
+		set name of {_item} to "%{_displayname}% &7[LVL %{_level}%]"
+		set string tag "Pet;skin" of nbt compound of {_item} to string tag "Skin;Pet" of nbt compound of player's cursor slot
+		set slot (index of event-slot) of player's inventory to {_item}
+		set player's cursor slot to air
+	else:
+		send "&cYou cannot apply that skin to this pet."
+		stop
+
+command /givepetcandy:
+	permission: op
+	trigger:
+		set {_item} to {PetCandy}
+		set int tag "Candy;id" of nbt compound of {_item} to {PetCandyCounter}
+		add 1 to {PetCandyCounter}
+		give {_item} to player
+
+command /givepetleash:
+	permission: op
+	trigger:
+		set {_item} to {PetLeash}
+		set int tag "Leash;id" of nbt compound of {_item} to {PetLeashCounter}
+		add 1 to {PetLeashCounter}
+		give {_item} to player
+
+command /checknbt:
+	permission: op
+	trigger:
+		set {_tags} to "%nbt compound of player's tool%"
+		set {_tags::*} to {_tags} split at ","
+		send {_tags::*}
+        
+on target:
+	target is not player
+	cancel event
+
+# Make an item called "Pet loot bag" that will give you a random pet, excluding the pig pet
+on load:
+	set {PetLootBag} to chest named "&a&lPet Loot Bag" with lore "&8Drag and drop to open!", "&7A magical bag that will give you", "&7a random pet!"
+
+function randomPetNP() :: item:
+	set {_pet} to random element of {Pets::*}
+	if name of {_pet} contains "Pig":
+		set {_pet} to randomPetNP()
+	return {_pet}
+
+on right click:
+	name of player's tool is "&a&lPet Loot Bag"
+	cancel event
+	set {_pet} to randomPetNP()
+	set item amount of player's tool to item amount of player's tool - 1
+	wait 1 tick
+	give givepet(player, {_pet}) to the player
+
+command /givepetlootbag [<number>]:
+	permission: op
+	trigger:
+		if arg-1 is not set:
+			set {_item} to {PetLootBag}
+			add 1 to {PetLootBagCounter}
+			give {_item} to player
+		else:
+			loop arg-1 times:
+				set {_item} to {PetLootBag}
+				add 1 to {PetLootBagCounter}
+				give {_item} to player
+
+command /givepetskin <text>:
+	permission: op
+	trigger:
+		give {PetSkins::%arg-1%} to player

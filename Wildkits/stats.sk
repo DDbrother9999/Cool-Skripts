@@ -1,0 +1,25 @@
+command /stats [<offlineplayer>]:
+	trigger:
+		if arg-1 is not set:
+			send "&lYour Stats &7(&a%player%&7)"
+			send ""
+			send "• Kills: &a%{kills::%player's uuid%}%"
+			send "• Deaths: &a%{deaths::%player's uuid%}%"
+			send "• KDR: &a%{KDR::%player's uuid%}%" 
+			send "• Killstreak: &a%{killstreak::%player's uuid%}%" 
+			send ""
+			send "• Level: &a%{level::%player's uuid%}% &8(&a%{xp::%player's uuid%}%&8/&a75&7)"
+			send "• Current Prestige: &a%{prestige::%player's uuid%}%" 
+			send "• eTokens: &a%{eTokens::%player's uuid%}%" 
+		else:
+			send "&l%arg-1%'s Stats"
+			send ""
+			send "• Kills: &a%{kills::%arg-1's uuid%}%"
+			send "• Deaths: &a%{deaths::%arg-1's uuid%}%"  
+			send "• KDR: &a%{KDR::%arg-1's uuid%}%" 
+			send "• Killstreak: &a%{killstreak::%arg-1's uuid%}%" 
+			send ""
+			send "• Level: &a%{level::%arg-1's uuid%}% &8(&a%{xp::%arg-1's uuid%}%&8/&a75&7)"  
+			send "• Current Prestige: &a%{prestige::%arg-1's uuid%}%" 
+			send "• eTokens: &a%{eTokens::%arg-1's uuid%}%" 
+			

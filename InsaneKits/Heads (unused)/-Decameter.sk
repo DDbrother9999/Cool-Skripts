@@ -1,0 +1,15 @@
+on sneak toggle:
+	player is sneaking
+	string tag "GameValues;head" of nbt compound of player's helmet is "Decameter"
+	
+	if difference between now and {-kansiohead::%player's uuid%} is less than 30 seconds:
+		play sound "entity.villager.no" to player
+		send "&cEffect on Cooldown!"
+		stop
+
+	set player's helmet to updateHead(player's helmet)
+	apply invisibility to player for 12 seconds
+	apply speed 4 to player for 12 seconds
+	set {-kansiohead::%player's uuid%} to now
+	send "&aUsed your Decameter Head Special Effect!"
+	play sound "entity.enderman.teleport" to player

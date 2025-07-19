@@ -1,0 +1,232 @@
+options:
+    defaultShots: 3
+    damage: 5
+
+#function
+function getStats(hearts: number, entity: entity) :: number:
+    generic armor total attribute of {_entity} is set
+    set {_armor} to generic armor total attribute value of {_entity}
+    set {_armortoughness} to generic armor toughness total attribute value of {_entity}
+    set {_amount} to {_hearts}*(1-min(20, max({_armor}/5, {_armor}-{_hearts} / (2+{_armortoughness}/4)))/25)
+    set {_protection} to 0
+    if {_entity}'s helmet slot is enchanted with protection:
+        add {_entity}'s helmet slot's level of protection to {_protection}
+    if {_entity}'s chestplate slot is enchanted with protection:
+        add {_entity}'s chestplate slot's level of protection to {_protection}
+    if {_entity}'s leggings slot is enchanted with protection:
+        add {_entity}'s leggings slot's level of protection to {_protection}
+    if {_entity}'s boots slot is enchanted with protection:
+        add {_entity}'s boots slot's level of protection to {_protection}
+    if {_protection} is greater than 0:
+        set {_amount} to {_amount}*(1-(min(20, {_protection})/25))
+    return {_amount}
+
+# GRAB BLOCK
+
+function startHoldingEntity(player: player, block: entity):
+    #CHECKS
+
+    set {_fallingblock} to {_block}
+    set metadata "gravgunblock" of {_player} to {_fallingblock}
+
+    #ARMORSTAND
+    spawn armor stand at {_player} with nbt nbt compound from "{Invisible:1b,Invulnerable:1b}"
+    set {_armorstand} to last spawned armor stand
+    set metadata "spawnTime" of {_armorstand} to now
+    set {_spawnedAt} to now
+    set metadata "gravgunarmorstand" of {_player} to {_armorstand}
+    #sound
+    play sound "entity.enderman.teleport" with volume 3 and pitch 2 at {_player}
+    #code
+    while difference between now and {_spawnedAt} is less than 15 seconds:
+        wait 1 tick
+        set {_spawnedAt} to metadata "spawnTime" of {_armorstand}
+
+        eject the passengers of {_armorstand}
+        teleport {_armorstand} to location 3 blocks in front of {_player}
+        
+        make {_fallingblock} ride {_armorstand}
+
+        kill {_armorstand} if {_player} is not online
+
+        stop loop if {_armorstand} is not alive
+        stop loop if {_fallingblock} is not alive
+
+    #cleanup
+    kill {_armorstand}
+
+function startHoldingBlock(player: player, block: block):
+    #CHECKS
+    "%regions at {_block}%" contains "boxs3 in world world"
+    block hardness of {_block} < 51
+    block hardness of {_block} > 0
+    {_block}'s type is not any shulker box
+    #BLOCK
+    set {_blocktype} to {_block}'s type
+    set block at {_block} to air
+
+    spawn ("falling %{_blocktype}%" parsed as entitytype) at {_player}'s eyes
+    set {_fallingblock} to last spawned entity
+    set metadata "gravgunblock" of {_player} to {_fallingblock}
+
+    #ARMORSTAND
+    spawn armor stand at {_player} with nbt nbt compound from "{Invisible:1b,Invulnerable:1b}"
+    set {_armorstand} to last spawned armor stand
+    set metadata "spawnTime" of {_armorstand} to now
+    set {_spawnedAt} to now
+    set metadata "gravgunarmorstand" of {_player} to {_armorstand}
+    #sound
+    play sound "entity.enderman.teleport" with volume 3 and pitch 2 at {_player}
+    #code
+    while difference between now and {_spawnedAt} is less than 15 seconds:
+        wait 1 tick
+        set {_spawnedAt} to metadata "spawnTime" of {_armorstand}
+
+        eject the passengers of {_armorstand}
+        teleport {_armorstand} to location 3 blocks in front of {_player}
+        
+        make {_fallingblock} ride {_armorstand}
+
+        kill {_armorstand} if {_player} is not online
+
+        stop loop if {_armorstand} is not alive
+        stop loop if {_fallingblock} is not alive
+
+    #cleanup
+    kill {_armorstand}
+
+
+
+
+
+#LAUNCHPLAYER
+
+
+function launchPlayer(player: player):
+    set {_tool} to {_player}'s tool
+    set {_bullets} to tag "gravbullets" of nbt compound of {_player}'s tool
+    set {_maxbullets} to tag "maxbullets" of nbt compound of {_player}'s tool
+    set {_reloading} to int tag "reloading" of nbt compound of {_player}'s tool
+    if difference between now and unix date of {_reloading} is less than 12 seconds:
+        {_bullets} is less than or equal to 0
+        stop
+    if {_bullets} is less than or equal to 0:
+        set int tag "reloading" of nbt compound of {_player}'s tool to unix timestamp of now
+        wait 1 second
+        set {_loop} to 9
+        loop 9 times:
+            wait 1 second
+            if {_player}'s tool is not {_tool}:
+                send action bar "&6Cancelled reloading." to {_player}
+                stop
+            if mod({_loop}, 3) is 0:
+                send action bar "&6Reloading..." to {_player}
+            else if mod({_loop}, 3) is 1:
+                send action bar "&6Reloading." to {_player}
+            else if mod({_loop}, 3) is 2:
+                send action bar "&6Reloading.." to {_player}
+            remove 1 from {_loop}
+        set tag "gravbullets" of nbt compound of {_player}'s tool to {_maxbullets}
+        send action bar "&6%{_maxbullets}%/%{_maxbullets}% remaining." to {_player}
+    else:
+        remove 1 from {_bullets}
+        make 10 of poof at {_player}
+        play sound "entity.generic.explode" with volume 3 with pitch 2 at {_player}
+        push {_player} backwards at speed 1.5
+        send action bar "&6%{_bullets}%/%{_maxbullets}% remaining." to {_player}
+        set tag "gravbullets" of nbt compound of {_player}'s tool to {_bullets}
+        launchPlayer({_player}) if {_bullets} is 0
+# THROW BLOCK
+
+function throwBlock(player: player):
+    set {_armorstand} to metadata "gravgunarmorstand" of {_player}
+    set {_fallingblock} to metadata "gravgunblock" of {_player}
+    delete metadata "gravgunblock" of {_player}
+    kill {_armorstand}
+
+    make 10 of poof at {_fallingblock}
+    play sound "entity.generic.explode" with volume 3 with pitch 2 at {_player}
+    push {_fallingblock} in {_player}'s direction at speed 2
+    while {_fallingblock} is alive:
+        wait 1 tick
+        hurtNearby({_player}, {_fallingblock})
+
+function hurtNearby(player: player, block: entity):
+    loop living entities in radius 1.75 of {_block}:
+        if loop-entity is not blocking:
+            damage loop-entity by getStats({@damage}, loop-entity)
+        #in case of shield
+        else:
+            if loop-entity's tool is shield:
+                add 10 to loop-entity's tool's durability
+                if checkForBreak(loop-entity's tool) is true:
+                    set loop-entity's tool to air
+            else:
+                add 10 to loop-entity's off hand tool's durability
+                if checkForBreak(loop-entity's off hand tool) is true:
+                    set loop-entity's off hand tool to air
+
+function checkForBreak(i: item) :: boolean:
+    durability of {_i} is greater than {_i}'s max durability
+    return true
+
+#CLEANUP
+every minute:
+    loop all armor stands:
+        set {_spawnTime} to metadata "spawnTime" of loop-entity
+        kill loop-entity if difference between {_spawnTime} and now is greater than 15 seconds
+#CLICKING
+
+on tool change:
+    kill metadata "gravgunarmorstand" of player
+
+on load:
+	set metadata "gravgundelay" of player to now
+    
+on join:
+	set metadata "gravgundelay" of player to now
+
+on right click:
+    tag "gravitygun" of nbt compound of player's tool is set
+    cancel event
+    cancel event if event-block is jukebox
+    stop if difference between metadata "gravgundelay" of player and now is less than 0.2 seconds
+    if metadata "gravgunblock" of player is alive:
+        throwBlock(player)
+    else:
+        if event-entity is not tnt:
+            startHoldingBlock(player, event-block)
+        else:
+            startHoldingEntity(player, event-entity)
+    set metadata "gravgundelay" of player to now
+
+#on right click:
+#    tag "entitygun" of nbt compound of player's tool is set
+#    cancel event
+#    cancel event if event-block is jukebox
+#    stop if difference between metadata "gravgundelay" of player and now is less than 0.2 seconds
+#    if metadata "gravgunblock" of player is alive:
+#        throwBlock(player)
+#    else:
+#        if event-entity is not set:
+#            startHoldingBlock(player, event-block)
+#        else:
+#            startHoldingEntity(player, event-entity)
+#    set metadata "gravgundelay" of player to now
+
+on left click:
+    tag "gravitygun" of nbt compound of player's tool is set
+    cancel event
+    stop if "%regions at player%" contains "koth_arena in world world"
+    launchPlayer(player)
+
+command /givegravitygun <integer>:
+    permission: op
+    usage: &4Usage: &c/givegravitygun <maxbullets (normal = {@defaultShots})>
+    trigger:
+        set {_gravitygun} to unbreakable golden hoe of mending 1 named "&6&lGravity Gun" with lore "&7[R-CLICK] Pick up block%nl%&7[R-CLICK w/ block] Throw Block%nl%&7[L-CLICK] Launch Player%nl%&8""this is cool""" with all flags hidden
+        set tag "gravitygun" of nbt compound of {_gravitygun} to true
+        set tag "maxbullets" of nbt compound of {_gravitygun} to arg 1
+        set tag "gravbullets" of nbt compound of {_gravitygun} to arg 1
+        set tag "customitem" of nbt compound of {_gravitygun} to true
+        give {_gravitygun} to player

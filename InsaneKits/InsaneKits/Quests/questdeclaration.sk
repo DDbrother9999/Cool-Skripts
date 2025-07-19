@@ -1,0 +1,63 @@
+on load:
+	set {DailyQuestRewards} to "&b50 Milestone Experience"
+	set {DailyQuestReward} to 50
+	set {DailyQuests::*} to "Miner I","Miner II","Swordsman I","Swordsman II","Player I","Player II","Winner I","Winner II","Loser I","Loser II","Jumper I","Chatter I","Chatter II","Gammer I","Votter I","Builder I","Builder II","Enchanter I","Enchanter II","Potioneer I","Potioneer II"
+	set {QuestDesc::Daily::Miner I::*} to "&fMine 50 Ores",netherite pickaxe,50
+	set {QuestDesc::Daily::Miner II::*} to "&fMine 100 Ores",netherite pickaxe,100 
+	set {QuestDesc::Daily::Swordsman I::*} to "&fKill 5 Players",netherite sword,5
+	set {QuestDesc::Daily::Swordsman II::*} to "&fKill 10 Players",netherite sword,10
+	set {QuestDesc::Daily::Player I::*} to "&fPlay for 15 Minutes",clock,15
+	set {QuestDesc::Daily::Player II::*} to "&fPlay for 30 Minutes",clock,30
+	set {QuestDesc::Daily::Winner I::*} to "&fWin 1 Coinflip",sunflower,1
+	set {QuestDesc::Daily::Winner II::*} to "&fWin 3 Coinflip",sunflower,3
+	set {QuestDesc::Daily::Loser I::*} to "&fLose 1 Coinflip",sunflower,1
+	set {QuestDesc::Daily::Loser II::*} to "&fLose 3 Coinflip",sunflower,3
+	set {QuestDesc::Daily::Jumper I::*} to "&fJump 50 times",slime block,1
+	set {QuestDesc::Daily::Chatter I::*} to "&fSend 10 Chat Messages",ponder goat horn,10
+	set {QuestDesc::Daily::Chatter II::*} to "&fSend 20 Chat Messages",ponder goat horn,20
+	set {QuestDesc::Daily::Gammer I::*} to "&fWin 1 Chat Game",ponder goat horn,1
+	set {QuestDesc::Daily::Votter I::*} to "&fVote 4 Times",emerald block,4
+	set {QuestDesc::Daily::Builder I::*} to "&fPlace 50 Blocks",wooden axe,50
+	set {QuestDesc::Daily::Builder II::*} to "&fPlace 100 Blocks",wooden axe,100
+	set {QuestDesc::Daily::Enchanter I::*} to "&fEnchant 3 Items",enchanting table,3
+	set {QuestDesc::Daily::Enchanter II::*} to "&fEnchant 5 Items",enchanting table,5
+	set {QuestDesc::Daily::Potioneer I::*} to "&fUse 3 Potions",brewing stand,3
+	set {QuestDesc::Daily::Potioneer II::*} to "&fUse 5 Potions",brewing stand,5
+
+	set {WeeklyQuestRewards} to "&b100 Milestone Experience"
+	set {WeeklyQuestReward} to 100
+	set {WeeklyQuests::*} to "Miner III","Miner IV","Swordsman III","Swordsman IV","Player III","Player IV","Winner III","Winner IV","Loser III","Loser IV","Jumper II","Chatter III","Chatter IV","Gammer II","Quester I","Quester II","Votter II","Builder III","Builder IV","Enchanter III","Enchanter IV","Potioneer III","Potioneer IV","King I"
+	set {QuestDesc::Weekly::Miner III::*} to "&fMine 500 Ores",netherite pickaxe,500
+	set {QuestDesc::Weekly::Miner IV::*} to "&fMine 750 Ores",netherite pickaxe,1000
+	set {QuestDesc::Weekly::Swordsman III::*} to "&fKill 50 Players",netherite sword,50
+	set {QuestDesc::Weekly::Swordsman IV::*} to "&fKill 75 Players",netherite sword,75
+	set {QuestDesc::Weekly::Player III::*} to "&fPlay for 5 Hours",clock,7
+	set {QuestDesc::Weekly::Player IV::*} to "&fPlay for 7 Hours",clock,10
+	set {QuestDesc::Weekly::Winner III::*} to "&fWin 7 Coinflips",sunflower,7
+	set {QuestDesc::Weekly::Winner IV::*} to "&fWin 10 Coinflips",sunflower,10
+	set {QuestDesc::Weekly::Loser III::*} to "&fLose 7 Coinflips",sunflower,7
+	set {QuestDesc::Weekly::Loser IV::*} to "&fLose 10 Coinflips",sunflower,10
+	set {QuestDesc::Weekly::Jumper II::*} to "&fJump 500 times",slime block,500
+	set {QuestDesc::Weekly::Chatter III::*} to "&fSend 50 Chat Messsages",ponder goat horn,50
+	set {QuestDesc::Weekly::Chatter IV::*} to "&fSend 100 Chat Messsages",ponder goat horn,50
+	set {QuestDesc::Weekly::Gammer II::*} to "&fWin 5 Chat Games",ponder goat horn,5
+	set {QuestDesc::Weekly::Quester I::*} to "&fComplete 20 Quests",thing banner pattern,20
+	set {QuestDesc::Weekly::Quester II::*} to "&fComplete 25 Quests",thing banner pattern,25
+	set {QuestDesc::Weekly::Votter II::*} to "&fVote 20 Times",emerald block,20
+	set {QuestDesc::Weekly::Builder III::*} to "&fPlace 100 Blocks",wooden axe,100
+	set {QuestDesc::Weekly::Builder IV::*} to "&fPlace 250 Blocks",wooden axe,250
+	set {QuestDesc::Weekly::Enchanter III::*} to "&fEnchant 10 Items",enchanting table,10
+	set {QuestDesc::Weekly::Enchanter IV::*} to "&fEnchant 15 Items",enchanting table,15
+	set {QuestDesc::Weekly::Potioneer III::*} to "&fUse 15 Potions",brewing stand,15
+	set {QuestDesc::Weekly::Potioneer IV::*} to "&fUse 20 Potions",brewing stand,20
+	set {QuestDesc::Weekly::King I::*} to "&fCapture KOTH 1 Time",diamond sword,1
+
+	set {MonthlyQuestRewards} to "&b500 Milestone Experience"
+	set {MonthlyQuestReward} to 500
+	set {MonthlyQuests::*} to "Swordsman V","Miner V","Player V","Votter III","King II","Quester III"
+	set {QuestDesc::Monthly::Swordsman V::*} to "&fKill 500 Players",netherite sword,500
+	set {QuestDesc::Monthly::Miner V::*} to "&fMine 2500 Ores",netherite pickaxe,2500
+	set {QuestDesc::Monthly::Player V::*} to "&fPlay for 30 Hours",clock,30
+	set {QuestDesc::Monthly::Votter III::*} to "&fVote 100 Times",emerald block,100
+	set {QuestDesc::Monthly::King II::*} to "&fCapture KOTH 3 Times",diamond sword,3
+	set {QuestDesc::Monthly::Quester III::*} to "&fComplete 100 Quests",thing banner pattern,100

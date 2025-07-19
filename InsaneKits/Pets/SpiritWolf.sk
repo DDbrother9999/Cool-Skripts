@@ -1,0 +1,44 @@
+function SpiritWolfPet(p: text):
+	set {_p} to {_p} parsed as player
+	stop if checkPetCD({_p}'s tool, {_p}) is false
+	set {_level} to int tag "Pet;level" of nbt compound of {_p}'s tool
+	set {_maxWolves} to {_level}
+	set {_currentWolves} to metadata "Pet%int tag "Pet;id" of nbt compound of {_p}'s tool%;spawned" of {_p} ? 0
+	set {Pets::SpiritWolf::%{_p}'s uuid%::lastUsed} to unix timestamp of now
+	set {_data::*} to {Pets::SpiritWolf::Stats::%{_level}%} split at ";"
+	set {_b} to {_data::2}
+	replace all "%%" with "" in {_b}
+	loop {_maxWolves} - {_currentWolves} times:
+		summonSpiritWolf({_p}, {_b}, ({_p}'s tool))
+		add 1 to {_currentWolves}
+
+function summonSpiritWolf(p: player, b: number, t: item):
+	set metadata "Pet%int tag "Pet;id" of nbt compound of {_t}%;spawned" of {_p} to metadata "Pet%int tag "Pet;id" of nbt compound of {_t}%;spawned" of {_p} + 1
+	summon wolf at {_p}'s location
+	set {_l} to last spawned wolf
+	set display name of {_l} to "&b&l%{_p}%'s Spirit Wolf"
+	set metadata "SpiritWolf;Owner" of {_l} to {_p}
+	set metadata "SpiritWolf;Bleed" of {_l} to {_b}
+	wait 4 minutes
+	set metadata "Pet%int tag "Pet;id" of nbt compound of {_t}%;spawned" of {_p} to metadata "Pet%int tag "Pet;id" of nbt compound of {_t}%;spawned" of {_p} - 1
+	kill {_l}
+
+on target:
+	event-entity is wolf
+	target's name is metadata "SpiritWolf;Owner" of event-entity
+	cancel event
+
+on damage:
+	attacker is a wolf
+	if attacker's name is metadata "SpiritWolf;Owner" of victim:
+		cancel event
+	else:
+		chance of (metadata "SpiritWolf;Bleed" of attacker)%:
+			set victim's health to victim's health - 1
+			apply slowness 2 without any particles to victim for 2 seconds
+			show 100 red dust on attacker's location
+			send "&f&lSPIRIT WOLF &cYou're bleeding!" to victim
+			send "&f&lSPIRIT WOLF &cYou've caused %victim% to bleed!" to metadata "SpiritWolf;Owner" of victim parsed as player
+
+on death of wolf:
+	clear drops

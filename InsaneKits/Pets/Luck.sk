@@ -1,0 +1,8 @@
+function LuckPet(p: text):
+	set {_p} to {_p} parsed as player
+	stop if checkPetCD({_p}'s tool, {_p}) is false
+	set {_level} to int tag "Pet;level" of nbt compound of {_p}'s tool
+	set {_length} to {_level} * {Pets::Luck::baseLength}
+	set {Pets::Luck::%{_p}'s uuid%::lastUsed} to unix timestamp of now
+	giveBooster({_p}, {Pets::Luck::mult}, {_length})
+	send "&aYou gained a luck boost for %{_length}% seconds!" to {_p}

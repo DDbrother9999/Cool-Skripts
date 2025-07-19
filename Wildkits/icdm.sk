@@ -1,0 +1,122 @@
+options:
+    heart: ♥
+    ver: 1.0
+    
+import:
+	net.leonemc.core.Core
+	java.lang.System
+	org.bukkit.Bukkit
+   
+
+on damage:
+    if the victim is ("ender crystal" parsed as entity type):
+        set {J} to name of attacker
+        set {J2} to uuid of attacker
+
+function increaseKills(player: player):
+	set {_user} to Core.getInstance().getUserManager().get({_player})
+	set {_kills} to {_user}.getKills()
+	
+	{_user}.setKills({_kills} + 1)
+    
+function increaseDeaths(player: player):
+	set {_user} to Core.getInstance().getUserManager().get({_player})
+	set {_deaths} to {_user}.getDeaths()
+	
+	{_user}.setDeaths({_deaths} + 1)
+
+on death of player:
+    metadata "inDuel" of attacker is not set
+    metadata "inDuel" of victim is not set
+    set death message to ""
+    if attacker is a player:
+        if projectile is set:
+            if victim is player:
+                set the death message to "&7[&c☠&7] &c%victim.getDisplayName()% &7was sniped by &c%attacker.getDisplayName()%&7"
+                increaseKills(attacker)
+                stop
+                
+    if attacker is a ender crystal:
+        if victim is player:
+            set the death message to "&7[&c☠&7] &c%victim.getDisplayName()% &7was end-crystalled by &c%{J}%"
+            stop if name of victim is {J}
+            increaseKills(({J2} parsed as player))
+            set {_randomxp} to a random integer from 1 to 5
+            add {_randomxp} to {xp::%{J2}%}
+            send "&aYou received %{_randomxp}% xp from killing %victim.getDisplayName()%" to {J2} parsed as player
+            play sound "entity.experience_orb.pickup" at volume 1 at pitch 1 to {J2} parsed as player
+            checkForLevelUp(({J} parsed as player))
+            stop
+
+    if attacker is not a player:
+        if attacker is set:
+            if victim is player:
+                set the death message to "&7[&c☠&7] &c%victim.getDisplayName()% &7was killed by a &c%attacker.getDisplayName()%&7"
+                stop
+
+    if attacker is a player:
+        if attacker is set:
+            if victim is player:
+                set the death message to "&7[&c☠&7] &c%victim.getDisplayName()% &7was beaten to death by &c%attacker.getDisplayName()%&7"
+                increaseKills(attacker)
+                stop
+
+    if damage was caused by potion:
+        if victim is player:
+            set the death message to "&7[&c☠&7] &c%victim.getDisplayName()% &7was killed by &e&k--&7magic&e&k--&7."
+            stop
+
+    if damage was caused by fall:
+        if victim is player:
+            set the death message to "&7[&c☠&7] &c%victim.getDisplayName()% &7tried the leap of faith."
+            stop
+
+    if damage was caused by lava:
+        if victim is player:
+            set the death message to "&7[&c☠&7] &c%victim.getDisplayName()% &7thought swimming in lava was a good idea."
+            stop
+
+    if damage was caused by burning:
+        if victim is player:
+            set the death message to "&7[&c☠&7] &c%victim.getDisplayName()% &7just got Roasted."
+            stop
+
+    if damage was caused by drown:
+        if victim is player:
+            set the death message to "&7[&c☠&7] &c%victim.getDisplayName()% &7never learned how to swim."
+            stop
+
+    if damage was caused by starvation:
+        if victim is player:
+            set the death message to "&c☠ &8▏ &c%victim.getDisplayName()% &7was starved to death."
+            stop
+
+    if damage was caused by lightning:
+        if victim is player:
+            set the death message to "&7[&c☠&7] &c%victim.getDisplayName()% &7was struck by lightning."
+            stop
+
+    if damage was caused by block explosion:
+        if victim is player:
+            set the death message to "&7[&c☠&7] &c%victim.getDisplayName()% &7was blown to bits."
+            stop		
+
+
+on explosion prime:
+    if entity is primed tnt:
+        set {_a} to metadata value "attacker" of block at location
+        set metadata value "attacker" of entity to metadata value "attacker" of block at location
+
+on place of tnt:
+    set metadata value "attacker" of block to player
+
+on death of player:
+    increaseDeaths(victim)
+
+on death of player:
+    attacker is tnt
+    set {_a} to metadata value "attacker" of attacker
+    if {_a} is set:
+        stop if {_a} is name of victim
+        set death message to "&7[&c☠&7] &c%victim.getDisplayName()% &7was exploded by &c%{_a}%'s %attacker%"
+        increaseKills(attacker)

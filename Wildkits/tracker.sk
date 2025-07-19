@@ -1,0 +1,104 @@
+on load:
+	set {tracker} to glowing compass named "&e&lTracker" with lore "&7Sneak to choose target"
+	set {antitracker} to heart of the sea named "&cAnti-Tracker" with lore "&7Blocks people from tracking you if this is in your inventory"
+
+on sneak toggle:
+	player's tool is {tracker}
+	cancel event
+	set metadata tag "tracker" of player to chest inventory with 1 rows named "&eTracker"
+	set {_num} to 0
+	loop 9 times:
+		set slot {_num} of metadata tag "tracker" of player to gray stained glass pane named " "
+		add 1 to {_num}
+	set slot 0 of metadata tag "tracker" of player to iron sword named "&cHighest Killstreak"
+	set slot 1 of metadata tag "tracker" of player to glowing sunflower named "&bHighest Bounty"
+	set slot 2 of metadata tag "tracker" of player to bone named "&dCustom" with lore "&8Find and right-click the player you want to track"
+	open (metadata tag "tracker" of player) to player
+
+on right click:
+	event-entity is a player
+	{selecttracking::%player's uuid%} is true
+	delete {selecttracking::%player's uuid%}
+	send "&aYou are now tracking &e%display name of event-entity%" to player
+	set {tracking::%player's uuid%} to event-entity
+	compassTrack(player, event-entity)
+
+on inventory click:
+	if event-inventory = (metadata tag "tracker" of player):
+		cancel event
+		if index of event-slot is 0:
+			close player's inventory
+			set {_highest.name} to 0
+			set {_highest.kills} to 0
+			loop all players:
+				if loop-player is not player:
+					set {_vanished} to metadata "vanished" of loop-player
+					{_vanished} is not true:
+						add loop-player to {_pks::names::*}
+						set {_pks::kills::%loop-player%} to {killstreak::%loop-player's uuid%}
+			if size of {_pks::names::*} >= 1:
+				loop {_pks::names::*}:
+					set {_highest.name} to loop-value if {_pks::kills::%loop-value%} > {_highest.kills}
+					set {_highest.kills} to {_pks::kills::%loop-value%} if {_pks::kills::%loop-value%} > {_highest.kills}
+				if {_highest.name} is 0:
+					send "&cThere was nobody to track"
+					stop
+				send "&aYou are now tracking &e%name of {_highest.name}%"
+				set {tracking::%player's uuid%} to {_highest.name}
+				compassTrack(player, {_highest.name})
+			else:
+				send "&cThere is nobody with the highest killstreak."
+		else if index of event-slot is 1:
+			close player's inventory
+			set {_highest.name} to 0
+			set {_highest.bounty} to 0
+			loop all players:
+				if loop-player is not player:
+					set {_vanished} to metadata "vanished" of loop-player
+					{_vanished} is not true:
+						add loop-player to {_pks::names::*}
+						set {_pks::bounty::%loop-player%} to {bounty::%loop-player%}
+			if size of {_pks::names::*} >= 1:
+				loop {_pks::names::*}:
+					set {_highest.name} to loop-value if {_pks::bounty::%loop-value%} > {_highest.bounty}
+					set {_highest.bounty} to {_pks::bounty::%loop-value%} if {_pks::bounty::%loop-value%} > {_highest.bounty}
+				if {_highest.name} is 0:
+					send "&cThere was nobody to track"
+					stop
+				send "&aYou are now tracking &e%name of {_highest.name}%"
+				set {tracking::%player's uuid%} to {_highest.name}
+				compassTrack(player, {_highest.name})
+			else:
+				send "&cThere is nobody with the highest bounty."
+		else if index of event-slot is 2:
+			close player's inventory
+			set {selecttracking::%player's uuid%} to true
+			send "&aFind and right-click a player to start tracking them!"
+			wait 1 minute
+			send "&cYou took too long to find a target!" if {selecttracking::%player's uuid%} is set
+			delete {selecttracking::%player's uuid%} if {selecttracking::%player's uuid%} is set
+
+on disconnect:
+	delete {tracking::%player's uuid%}
+
+function compassTrack(player: player, target: player):
+	{_player} is online
+	set {_vanished} to metadata "vanished" of {_target}
+	if {_vanished} is true:
+		send "&cYour target is no longer online." to {_player}
+		stop
+	if {_target}'s inventory contains {antitracker}:
+		delete {tracking::%{_player}'s uuid%}
+		send "&cYour signal was cut off!" to {_player}
+		send "&c&lAnti-Tracker&r&e: &r%{_player}% tried to track you" to {_target}
+	if {_target} is online:
+		if {_target} is {tracking::%{_player}'s uuid%}:
+			{_player}.setCompassTarget({_target}.getLocation())
+			#send "debug: %{_target}%, %{_target}.getLocation()%" to {_player}
+			wait 5 ticks
+			compassTrack({_player}, {_target})
+		else:
+			stop
+	else:
+		send "&cYour target is no longer online." to {_player}
+		stop

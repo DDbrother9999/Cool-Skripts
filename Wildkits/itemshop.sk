@@ -1,0 +1,53 @@
+options:
+    itemshop menu [name]: "&8Clan Item Shop" # Make sure this inventory name is unique
+    itemshop menu [size]: 5
+    itemshop menu [border-item]: black stained glass pane named "&8Clan Item Shop" # To disable this set this to the same thing as the fill-item.
+    itemshop menu [fill-item]: gray stained glass pane named "&8Clan Item Shop" # To disable this simply set it to `air`
+    itemshop menu [back-slot]: 36
+    itemshop menu [back-item]: 1 of birch door named "&cReturn to Clan Interface."
+
+    message [not-enough-coins]: "&cYou do not have enough coins."
+
+# This script file will be how you add items to the clan item shop
+# All lines will be commented to make this as easy as possible
+
+function zclans_openitemshop(p: player, clan-id: text):
+    set {_name} to {zclans.clan-%{_clan-id}%::name}                              # Getting some useful variables
+    set {_coins} to {zclans.clan-%{_clan-id}%::coins}                            #
+    set {_leader} to {zclans.clan-%{_clan-id}%::leader} parsed as offline player #
+
+    set {_gui} to chest inventory with {@itemshop menu [size]} rows named {@itemshop menu [name]} # Create the GUI
+    set slot (all integers between 0 and 54) of {_gui} to {@itemshop menu [fill-item]}
+    set {_gui} to zclans_bordergui({_gui},  {@itemshop menu [size]}, {@itemshop menu [border-item]})
+    set slot {@itemshop menu [back-slot]} of {_gui} to 1 of {@itemshop menu [back-item]}
+    
+    # Adding an item to the main gui
+    #set slot 10 of {_gui} to 1 of diamond sword named "&6Test Item" with lore "" and "&7Cost: &e10000 Coins" and ""
+
+    open {_gui} to {_p} # open the GUI to the player
+
+on inventory click:
+    clicked inventory's name is {@itemshop menu [name]} # Making sure ur in the right inventory
+    cancel event
+    clicked inventory is player's current inventory
+    set {_uuid} to uuid of player
+    set {_clan-id} to {zclans.playerclans::%{_uuid}%}
+    {_clan-id} is set
+    set {_name} to {zclans.clan-%{_clan-id}%::name}                              # Getting some useful variables
+    set {_coins} to {zclans.clan-%{_clan-id}%::coins}                            #
+    set {_leader} to {zclans.clan-%{_clan-id}%::leader} parsed as offline player #
+
+    if index of clicked slot is {@itemshop menu [back-slot]}: # Makes back command work
+        zclans_openshopmenu(player)
+
+    # The important stuff
+    #else if index of clicked slot is 10:
+    #    if {_coins} is less than 10000: # Checks they have enough coins
+    #        send {@message [not-enough-coins]}
+    #        stop
+    #    subtract 10000 from {zclans.clan-%{_clan-id}%::coins} # Subtracts the coins
+
+        #Actions you want to take when they buy
+     #   send "&c - $10,000 Coins"
+     #   add 1 of diamond sword named "&6Test Item" to player's inventory
+     #   execute console command "bc hahahaha %player% purchased the test item."

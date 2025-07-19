@@ -1,0 +1,5 @@
+on weather change to rain or thunder:
+	cancel event
+    
+at 18:00:
+	set time to 7:00

@@ -1,0 +1,39 @@
+# Minecraft Skript for:
+# Name: Lava boots
+# Color: &#c53515&lL&#bf3c20&la&#b8432b&lv&#b24a36&la &#ac5141&lB&#a5574b&lo&#9f5e56&lo&#986561&lt&#926c6c&ls
+# Item: Leather boots
+# Ability: when wearing 0 lava damage is taken and the lava your in/standing on gets turned to magma in a 2x2 area.
+# This is enchantable
+
+function makeMagma(block: block):
+	set {_loc} to location of {_block}
+	set block at {_loc} to magma
+	wait 10 seconds
+	set block at {_loc} to air
+
+on load:
+	set {LavaBoots} to leather boots named "&x&c&5&3&5&1&5&lL&x&b&f&3&c&2&0&la&x&b&8&4&3&2&b&lv&x&b&2&4&a&3&6&la &x&a&c&5&1&4&1&lB&x&a&5&5&7&4&b&lo&x&9&f&5&e&5&6&lo&x&9&8&6&5&6&1&lt&x&9&2&6&c&6&c&ls" with lore "&r&7Removes lava damage%nl%&r&7and makes magma."
+	dye {LavaBoots} red
+
+on any movement:
+	"%region at player%" does not contain "spawn"
+	name of player's boots is "&x&c&5&3&5&1&5&lL&x&b&f&3&c&2&0&la&x&b&8&4&3&2&b&lv&x&b&2&4&a&3&6&la &x&a&c&5&1&4&1&lB&x&a&5&5&7&4&b&lo&x&9&f&5&e&5&6&lo&x&9&8&6&5&6&1&lt&x&9&2&6&c&6&c&ls"
+	# Loop around blocks near player, check if they're lava then convert to magma
+	loop blocks in radius 2 around player:
+		if loop-block is lava:
+			makeMagma(loop-block)
+
+on damage:
+	name of victim's boots is "&x&c&5&3&5&1&5&lL&x&b&f&3&c&2&0&la&x&b&8&4&3&2&b&lv&x&b&2&4&a&3&6&la &x&a&c&5&1&4&1&lB&x&a&5&5&7&4&b&lo&x&9&f&5&e&5&6&lo&x&9&8&6&5&6&1&lt&x&9&2&6&c&6&c&ls"
+	if damage cause is lava:
+		cancel event
+	else if damage cause is fire:
+		cancel event
+	else if damage cause is magma:
+		cancel event
+
+command /givelavaboots:
+	permission: op
+	trigger:
+		give player 1 of {LavaBoots}
+		send "&aYou have been given lava boots." to player

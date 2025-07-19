@@ -1,0 +1,37 @@
+command /playtime [<offlineplayer>]:
+    trigger:
+        if arg-1 is not set:
+            send "" to player
+            send "&aYour playtime is: &b%{hours::%player's uuid%} ? 0%h, %{minutes::%player's uuid%} ? 0%m" to player
+            send "" to player
+        else:
+            send "" to player
+            send "&e%arg-1%'s&a playtime is: &b%{hours::%arg-1's uuid%} ? 0%h, %{minutes::%arg-1's uuid%} ? 0%m" to player
+            send "" to player
+
+every 1 minute:
+    loop all players:
+        add 1 to {minutes::%loop-player's uuid%}
+        if {minutes::%loop-player's uuid%} is higher than 59:
+            remove 60 from {minutes::%loop-player's uuid%} 
+            add 1 to {hours::%loop-player's uuid%} 
+
+command /resetPlayTime <offlineplayer>:
+    permission: reset.playtime.* 
+    permission message: &cYou don't have permission!
+    trigger:
+        if arg-1 is not set:
+            send "&cIncorrect usage: /resetPlayTime <player>" to player
+        else:
+            delete {seconds::%arg-1%} 
+            delete {minutes::%arg-1%} 
+            delete {hours::%arg-1%} 
+            send "&8[&b&lWildKits&8] &cYour playtime has been reset!" to arg-1
+            loop all players:
+                if loop-player has permission "reset.playtime.*":
+                    send "&8[&c&lADMIN-NOTIFICATION&8] &e%player% &ahas resetted &c%arg-1%'s &aplaytime!" to loop-player
+
+
+	
+
+

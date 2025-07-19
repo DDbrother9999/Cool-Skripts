@@ -1,0 +1,78 @@
+on skript stop:
+	broadcast "&aSaving Backpacks"
+	set {_loop} to 0
+	set {_now} to now
+	loop {backpacksused} times:
+		add 1 to {_loop}
+		edit gui with id "backpack.%{_loop}%":
+			set {_loop2} to 0
+			loop 27 times:
+				set {backpack.%{_loop}%::%{_loop2}%} to slot {_loop2} of gui
+				add 1 to {_loop2}
+	broadcast "&aSuccessfully saved backpacks! [%difference between {_now} and now%]"
+
+on skript start:
+	broadcast "&aLoading Backpacks"
+	set {_loop} to 0
+	set {_now} to now
+	loop {backpacksused} times:
+		add 1 to {_loop}
+		create a gui with id "backpack.%{_loop}%" with virtual chest inventory with 3 rows named "Backpack"
+		edit last gui:
+			set the lock status of the edited gui to false
+			set {_loop2} to 0
+			loop 27 times:
+				format gui slot {_loop2} with {backpack.%{_loop}%::%{_loop2}%}
+				delete {backpack.%{_loop}%::%{_loop2}%}
+				add 1 to {_loop2}
+	broadcast "&aSuccessfully loaded backpacks! [%difference between {_now} and now%]"
+                    
+every 5 minutes:
+	set {_loop} to 0
+	set {_now} to now
+	loop {backpacksused} times:
+		add 1 to {_loop}
+		edit gui with id "backpack.%{_loop}%":
+			set {_loop2} to 0
+			loop 27 times:
+				set {backpack.%{_loop}%::%{_loop2}%} to slot {_loop2} of gui
+				add 1 to {_loop2}
+                    
+on right click with leather:
+	if "%nbt compound of player's tool%" contains "Backpack":
+		set {_UUID} to tag "UUID" of nbt compound of player's tool
+		if {_UUID} is "Unset":
+			if item amount of player's tool is not 1:
+				send "&a[Backpacks] Please unstack before using for the first time!"
+				stop
+			if {backpacksused} is not set:
+				set {backpacksused} to 0
+			add 1 to {backpacksused}
+			set tag "UUID" of nbt compound of player's tool to "%{backpacksused}%"
+			set {_UUID} to tag "UUID" of nbt compound of player's tool
+			create a gui with id "backpack.%{_UUID}%" with virtual chest inventory with 3 rows named "Backpack"
+			edit last gui:
+				set the lock status of the edited gui to false
+			open gui with id "backpack.%{_UUID}%" to player
+		else:
+			open gui with id "backpack.%{_UUID}%" to player
+        
+on inventory click:
+	if name of player's current inventory contains "Backpack":
+		if clicked slot is leather:
+			cancel event
+		else if "%event.getAction()%" is "swap with hotbar":
+			cancel event
+			
+on inventory click:
+	if name of player's current inventory contains "Backpack":
+		if clicked slot is any shulker box:
+			cancel event
+        
+command /givebackpack:
+	permission: op
+	trigger:
+		set {_item} to leather named "&aBackpack" with lore "&9Conveniently stores your items!"
+		set tag "UUID" of nbt compound of {_item} to "Unset"
+		set tag "Backpack" of nbt compound of {_item} to 1
+		give {_item} to player

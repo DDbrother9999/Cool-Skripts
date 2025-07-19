@@ -1,0 +1,112 @@
+function moveBP(p: player,n: number) :: number:
+	set {_lvl} to metadata value "viewingMilestone" of {_p}
+	set {_lvl} to {_lvl}+{_n}
+	return {_lvl}
+
+function checkForBPLevelUp(p:player) :: boolean:
+	if {BP::%{_p}'s uuid%::Exp} is higher than or equal to 100:
+		set {_lvl} to {BP::%{_p}'s uuid%::Level} ? 1
+		add 1 to {_lvl}
+		subtract 100 from {BP::%{_p}'s uuid%::Exp}
+		if {BP::%{_p}'s uuid%::Exp} is 0:
+			clear {BP::%{_p}'s uuid%::Exp}
+			delete {BP::%{_p}'s uuid%::Exp}
+		checkForBPLevelUp({_p})
+		return true
+	return false
+
+function claimBPReward(p: player, reward: integer):
+	if {BPRewards::%{_p}'s uuid%::*} is not set:
+		set {BPRewards::%{_p}'s uuid%::*} to {_reward}
+		give {BP::Reward::%{_reward}%} to {_p}
+		send "&a&lYou have claimed the level %{_reward}% BP Reward!" to {_p}
+		stop
+	if {BPRewards::%{_p}'s uuid%::*} contains {_reward}:
+		send "&c&lYou have already claimed this reward!" to {_p}
+		stop
+	if {BPRewards::%{_p}'s uuid%::*} doesn't contain {_reward}:
+		add {_reward} to {BPRewards::%{_p}'s uuid%::*}
+		give {BP::Reward::%{_reward}%} to {_p}
+		send "&a&lYou have claimed the level %{_reward}% BP Reward!" to {_p}
+		stop
+
+function claimAPReward(p: player, reward: integer):
+	if {_p} doesn't have permission "bp.ap":
+		send "&c&lBuy Aurora Pass from &e&l/gemshop!" to {_p}
+		stop
+	if {APRewards::%{_p}'s uuid%::*} is not set:
+		set {APRewards.%{_p}'s uuid%::*} to {_reward}
+		give {AP::Reward::%{_reward}%} to {_p}
+		send "&a&lYou have claimed the level %{_reward}% &d&lIP &a&lReward!" to {_p}
+		stop
+	if {APRewards::%{_p}'s uuid%::*} contains {_reward}:
+		send "&c&lYou have already claimed this reward!" to {_p}
+		stop
+	if {APRewards::%{_p}'s uuid%::*} doesn't contain {_reward}:
+		add {_reward} to {APRewards.%{_p}'s uuid%::*}
+		give {AP::Reward::%{_reward}%} to {_p}
+		send "&a&lYou have claimed the level %{_reward}% &d&lIP &a&lReward!" to {_p}
+		stop
+
+function claimAllBPReward(p: player):
+	set {_lvl} to {BP::%{_p}'s uuid%::Level}
+	set {_i} to 1
+	loop ({_lvl}-{_i}) times:
+		send "Checking %{_i}%" to {_p}
+		if {BPRewards::%{_p}'s uuid%::*} doesn't contain {_i}:
+			claimBPReward({_p},{_i})
+		add 1 to {_i}
+	if {_p} has permission "bp.ap":
+		loop ({_lvl}-{_i}) times:
+			send "Checking %{_i}%" to {_p}
+			if {APRewards::%{_p}'s uuid%::*} doesn't contain {_i}:
+				claimAPReward({_p},{_i})
+			add 1 to {_i}
+	else:
+		send "&c&lBuy &d&lInsane Pass &c&lfrom &e&l/buy!" to {_p}
+
+function BPGlassPane(p: player, lvl: number) :: item:
+	set {_n} to {BP::%{_p}'s uuid%::Level} ? 1
+	if {_n} is higher than {_lvl}:
+		set {_i} to lime stained glass pane named "&a&lCOMPLETED" with lore "&bLevel: %{_lvl}%"
+	if {_n} is less than {_lvl}:
+		set {_i} to red stained glass pane named "&c&lLOCKED" with lore "&bLevel: %{_lvl}%"
+	if {_n} is equal to {_lvl}:
+		if {BP::%{_p}'s uuid%::Exp} isn't set:
+			set {_i} to yellow stained glass pane named "&e&lIN PROGRESS" with lore "&bLevel: %{_n}%","&e&lPROGRESS: 0/100"
+		else:
+			set {_i} to yellow stained glass pane named "&e&lIN PROGRESS" with lore "&bLevel: %{_n}%","&e&lPROGRESS: %{BP::%{_p}'s uuid%::Exp}%/100"
+	return {_i}
+	
+
+function formatBPGui(p: player,lvl: number) :: object:
+	if {_lvl} is smaller than 5:
+		set {_lvl} to 5
+	if {_lvl} is larger than 96:
+		set {_lvl} to 96
+	set {_gui} to chest inventory with 5 rows named "&e&lMilestones"
+	set {_i} to 0
+	loop 9 times:
+		set {_n} to {_lvl}+{_i}-4
+		set slot (18+{_i}) of {_gui} to BPGlassPane({_p},{_n})
+		add 1 to {_i}
+	set {_i} to 0
+	loop 9 times:
+		set {_n} to {_lvl}+{_i}-4
+		set {_item} to {BP::Reward::%{_n}%}
+		add "%nl%&fLevel &e%{_n}% &fMilestone Reward!" to the lore of {_item}
+		set slot (27+{_i}) of {_gui} to {_item}
+		add 1 to {_i}
+	set {_i} to 0
+	loop 9 times:
+		set {_n} to {_lvl}+{_i}-4
+		set {_item} to {AP::Reward::%{_n}%}
+		add "%nl%&fLevel &e%{_n}% &d&lInsane Pass &fReward! &7(/gemshop)" to the lore of {_item}
+		set slot (9+{_i}) of {_gui} to {_item}
+		add 1 to {_i}
+	set slot 4 of {_gui} to nether star named "&e&lBattle Pass Info" with lore "%nl%&a&lComplete Quests, &afor Battle Pass EXP &7(/quests)","&e&lLevel UP, &eto unlock rewards","&3Purchase &d&lInsane Pass, &3for extra rewards! &7(/gemshop)" with all flags hidden
+	set slot 36 of {_gui} to arrow named "&cBack" with lore "&fLeft Click&7: 5 Back","&fRight Click&7: 10 Back","&f&nShift Left Click&7: Skip to the End"
+	set slot 40 of {_gui} to green concrete of mending 1 named "&a&lClaim All" with all flags hidden
+	set slot 44 of {_gui} to arrow named "&cFoward" with lore "&fLeft Click&7: 5 Forward","&fRight Click&7: 10 Forward","&f&nShift Left Click&7: Skip to the Start"
+	set metadata tag "viewingMilestone" of {_p} to {_lvl}
+	return {_gui}

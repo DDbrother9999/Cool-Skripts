@@ -1,0 +1,162 @@
+import:
+	net.leonemc.core.Core
+	net.leonemc.neon.spigot.Neon
+	java.lang.System
+	org.bukkit.Bukkit
+
+#FOR OFFLINE PLAYER (setcoins)
+
+function setcoinsofoffline(p: player, n: number):
+	set {_user} to {_p}'s uuid
+	{_user}.setETokens({_n})
+	{_user}.save()
+
+
+#Returns Coins (offline player)
+function getcoinsofoffline(p: player) :: number:
+	set {_user} to {_p}'s uuid
+	set {_coins} to {_user}.getETokens()
+	return {_coins}
+
+#Sets kills
+function setkills(p: player, n: number):
+	set {_user} to Core.getInstance().getUserManager().get({_p})
+	{_user}.setKills({_n})
+
+#Increases Kills
+function increaseKills(player: player):
+	set {_user} to Core.getInstance().getUserManager().get({_player})
+	set {_kills} to {_user}.getKills()
+	{_user}.setKills({_kills} + 1)
+
+#Returns Kills
+function getKills(p: player) :: number:
+	set {_user} to Core.getInstance().getUserManager().get({_p})
+	set {_kills} to {_user}.getKills()
+	return {_kills}
+    
+#Sets deaths
+function setDeaths(p: player, n: number):
+	set {_user} to Core.getInstance().getUserManager().get({_p})
+	{_user}.setDeaths({_n})
+
+#Increases Deaths
+function increaseDeaths(player: player):
+	set {_user} to Core.getInstance().getUserManager().get({_player})
+	set {_deaths} to {_user}.getDeaths()
+	{_user}.setDeaths({_deaths} + 1)
+
+#Returns Deaths
+function getDeaths(p: player) :: number:
+	set {_user} to Core.getInstance().getUserManager().get({_p})
+	set {_deaths} to {_user}.getDeaths()
+	return {_deaths}
+
+#Sets coins
+function setcoins(p: player, n: number):
+	set {_user} to Core.getInstance().getUserManager().get({_p})
+	{_user}.setETokens({_n})
+
+#Increases (Positive number 2nd arg) and Decreases (Neg number 2nd arg) coins
+function coins(p: player, n: number):
+	set {_user} to Core.getInstance().getUserManager().get({_p})
+	set {_coins} to {_user}.getETokens()
+	{_user}.setETokens({_coins} + {_n})
+
+function setlevel(p: player, level: number):
+	set {_user} to Core.getInstance().getUserManager().get({_p})	
+	{_user}.setLevel({_level})
+
+function getlevel(p: player) :: number:
+	set {_user} to Core.getInstance().getUserManager().get({_p})
+	set {_level} to {_user}.getLevel()
+	return {_level}
+
+function level(p: player) :: number:
+	set {_user} to Core.getInstance().getUserManager().get({_p})
+	set {_level} to {_user}.getLevel()
+	return {_level}
+
+
+#Returns Coins
+function getcoins(p: player) :: number:
+	set {_user} to Core.getInstance().getUserManager().get({_p})
+	set {_coins} to {_user}.getETokens()
+	return {_coins}
+
+#Increases (Positiver 2nd arg) and Decreases (Neg 2nd arg) coins
+function xp(p: player, n:number):
+	set {_user} to Core.getInstance().getUserManager().get({_p})
+	set {_xp} to {_user}.getXp()
+	{_user}.setXp({_xp} + {_n})
+
+#Set the xp value to a number
+function setxp(p: player, n: number):
+	set {_user} to Core.getInstance().getUserManager().get({_p})
+	{_user}.setXp({_n})
+
+#Returns the XP
+function getxp(p: player) :: number:
+	set {_user} to Core.getInstance().getUserManager().get({_p})
+	set {_xp} to {_user}.getXp()
+	return {_xp}
+
+#Increases (Positiver 2nd arg) and Decreases (Neg 2nd arg) prestige
+function prestige(p: player, n:number):
+	set {_user} to Core.getInstance().getUserManager().get({_p})
+	set {_pres} to {_user}.getPrestige()
+	{_user}.setPrestige({_pres} + {_n})
+
+#Set the prestige to a number
+function setprestige(p: player, n: number):
+	set {_user} to Core.getInstance().getUserManager().get({_p})
+	{_user}.setPrestige({_n})
+
+#Returns the Prestige
+function returnPrestige(p: player) :: number:
+	set {_user} to Core.getInstance().getUserManager().get({_p})
+	set {_prestige} to {_user}.getPrestige()
+	return {_prestige}
+
+#Sets the killstreak
+function setkillstreak(p: player, n: number):
+	set {_user} to Core.getInstance().getUserManager().get({_p})
+	{_user}.setKillstreak({_n})
+
+#Increases (Positiver 2nd arg) and Decreases (Neg 2nd arg) killstreak
+function killstreak(p: player, n:number):
+	set {_user} to Core.getInstance().getUserManager().get({_p})
+	set {_ks} to {_user}.getKillstreak()
+	{_user}.setKillstreak({_ks} + {_n})
+
+#Returns the Killstreak
+function returnKS(p: player) :: number:
+	set {_user} to Core.getInstance().getUserManager().get({_p})
+	set {_ks} to {_user}.getKillstreak()
+	return {_ks}
+
+
+function getGems(p: player) :: number:
+	set {_user} to Neon.getInstance().getUserManager().get({_p})
+	set {_gems} to {_user}.getTotalGemCount()
+	return {_gems}
+
+function setFreeGems(p: player, amount: number):
+	execute console command "/gems set %{_p}% %{_amount}% FREE"
+
+function setPaidGems(p: player, amount: number):
+	execute console command "/gems set %{_p}% %{_amount}% PURCHASED"
+
+function removeGems(p: player, amount: number, reason: text):
+	set {_user} to Neon.getInstance().getUserManager().get({_p})
+	set {_freeGems} to {_user}.getFreeGems()
+	if {_freeGems} is greater than 0:
+		set {_remaining} to {_amount} - {_freeGems}
+		if {_remaining} is less than 0:
+			execute console command "/gems remove %{_p}% %{_amount}% FREE %{_reason}%"
+		else:
+			execute console command "/gems set %{_p}% 0 FREE %{_reason}%"
+			execute console command "/gems remove %{_p}% %{_remaining}% PURCHASED %{_reason}%"
+	else:
+		execute console command "/gems remove %{_p}% %{_amount}% PURCHASED %{_reason}%"
+	

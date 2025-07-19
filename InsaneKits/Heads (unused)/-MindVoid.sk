@@ -1,0 +1,25 @@
+on sneak toggle:
+	player is sneaking
+	string tag "GameValues;head" of nbt compound of player's helmet is "MindVoid"
+	if {-midvoidhead::%player's uuid%} is not set:
+		set {_1} to true
+	else:
+		if difference between now and {-midvoidhead::%player's uuid%} is greater than 5 seconds:
+			set {_1} to true
+		else:
+			play sound "entity.villager.no" to player
+			send "&cEffect on Cooldown!"
+	if {_1} is true:
+		set player's helmet to updateHead(player's helmet)
+		set {_v} to vector between player's location and location of targeted block
+		push player {_v} with speed 2.5
+		set {-midvoidhead::%player's uuid%} to now
+		send "&aUsed your MindVoid Head Special Effect!"
+		play sound "entity.enderman.teleport" to player
+
+on damage:
+	string tag "GameValues;head" of nbt compound of attacker's helmet is "MindVoid"
+	if attacker is ignited:
+		set damage to damage*2
+	if attacker is in water:
+		set damage to damage*2

@@ -1,0 +1,79 @@
+on load:
+    delete {cooldown.pygen3sj::*}
+    delete {cooldown.pygen3ba::*}
+
+on jump:
+    player is in the region "boxs3" or "spawn"
+    tag "pygen3" of nbt compound of player's helmet is 1
+    if player is sneaking:
+        if {cooldown.pygen3sj::%player's uuid%} is not set:
+            lerp 25 of cloud at player ~ vector(0, 1, 0) with extra 0.5
+            lerp 25 of end_rod at player ~ vector(0, 1, 0) with extra 0.5
+            play sound "entity.generic.explode" with volume 3 with pitch 2 at player
+            push player upwards with speed 3
+            push player forwards with speed 3
+            set {cooldown.pygen3sj::%player's uuid%} to true
+            wait 5 seconds
+            delete {cooldown.pygen3sj::%player's uuid%}
+            send "&aLeap cooldown over!"
+        else:
+            send "&cYou're on cooldown!"
+
+on left click:
+    target player is set
+    player is in the region "boxs3"
+    tag "pygen3" of nbt compound of player's helmet is 1
+
+    if {cooldown.pygen3ba::%player's uuid%} is not set:
+
+        set {_target} to target player
+
+        if distance between player and {_target} <= 15:
+            set {cooldown.pygen3ba::%player's uuid%} to true
+            set {_a} to player's location
+            set {_b} to location of {_target}
+            set {_v} to vector from {_a} to {_b}
+            set {_count} to 0
+            play sound "entity.enderman.teleport" with volume 3 with pitch 1 at {_target}
+            loop (vector length of {_v} / 0.1) times:
+                make 0 of dust_color_transition using dustTransition(white, white, 3) at {_a} ~ {_v}
+                set vector length of {_v} to loop-number * 0.1
+                add 1 to {_count}
+                if {_count} is 10:
+                    set {_count} to 0
+                    lerp 1 of dust_color_transition using dustTransition(green, yellow, 3) at {_a} ~ {_v} with offset vector(0, 1, 0) with extra 1
+                    lerp 1 of firework at {_a} ~ {_v} with extra 1
+            teleport player to {_target}
+
+            wait 5 ticks
+
+            set {_y} to y coordinate of player
+            loop blocks in radius 10 around player:
+                if loop-block is air:
+                    if loop-block is in the region "boxs3":
+                        if y coordinate of loop-block is less than {_y} +1:
+                            set {_bloc::%loop-block%} to location of loop-block
+
+            set {_oloc} to location of player
+            set {_pitch} to player's pitch
+            set {_yaw} to player's yaw
+            loop 15 times:
+                play sound "block.conduit.activate" at pitch 1 at player
+                set {_bloc2} to random element out of {_bloc::*}
+                set pitch of {_bloc2} to {_pitch}
+                set yaw of {_bloc2} to {_yaw}
+                teleport player to {_bloc2}
+                make player damage {_target} by 7
+                lerp 50 of cloud at player ~ vector(0, 1, 0) with extra 0.5
+                lerp 50 of end_rod at player ~ vector(0, 1, 0) with extra 0.5
+                wait 2 ticks
+            teleport player to {_oloc}
+
+            wait 15 seconds
+            delete {cooldown.pygen3ba::%player's uuid%}
+            send "&aBarrage cooldown over!"
+        else:
+            send "&cThe player is too far away."
+    else:
+        send "&cYou're on cooldown!"
+    

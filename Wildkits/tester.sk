@@ -1,0 +1,227 @@
+# Test
+
+on join:
+	if {testers::%player's uuid%} is set:
+		set {testers::%player's uuid%} to player
+
+import:
+	net.leonemc.core.util.bukkit.CC
+
+command /tester [<text>] [<offlineplayer>]:
+	trigger:
+		if arg-1 is set:
+			if arg-1 is "list":
+				send {testers::*}
+			else if arg-1 is "add":
+				if player has permission "op":
+					set {testers::%arg-2's uuid%} to arg-2
+			else if arg-1 is "remove":
+				if player has permission "op":
+					set {testers::%arg-2's uuid%} to arg-2
+			else if arg-1 is "token":
+				if {testers::%player's uuid%} is set:
+					set metadata tag "testerGUI_Token" of player to chest inventory with 3 rows named "&6&lWildKits Test Menu"
+					set {_num} to 0
+					loop 27 times:
+						set slot {_num} of metadata tag "testerGUI_Token" of player to gray stained glass pane named " "
+						add 1 to {_num}
+					set slot 12 of metadata tag "testerGUI_Token" of player to glowing sunflower named "&a&lTest Token" with lore "&r&fGive yourself a test token."
+					set slot 14 of metadata tag "testerGUI_Token" of player to glowing sunflower named "&b&lDev Token" with lore "&r&fGive yourself a dev token."
+					open (metadata tag "testerGUI_Token" of player) to player
+			else if arg-1 is "mode":
+				if {testers::%player's uuid%} is set:
+					set metadata tag "testerGUI_Mode" of player to chest inventory with 1 rows named "&6&lWildKits Test Menu"
+					set {_num} to 0
+					loop 9 times:
+						set slot {_num} of metadata tag "testerGUI_Mode" of player to gray stained glass pane named " "
+						add 1 to {_num}
+					set slot 0 of metadata tag "testerGUI_Mode" of player to light gray concrete named "&r&7&lTesting Mode" with lore "&r&7&lOFF"
+					if {testmode::%player's uuid%} is true:
+						set slot 0 of metadata tag "testerGUI_Mode" of player to lime concrete named "&r&a&lTesting Mode" with lore "&r&a&lON"
+						set slot 1 of metadata tag "testerGUI_Mode" of player to iron sword named "&r&lPvP" with lore "&r&7&lOFF"
+						set slot 1 of metadata tag "testerGUI_Mode" of player to glowing iron sword named "&r&lPvP" with lore "&r&a&lON" if {testeroption.pvp::%player's uuid%} is not set
+						set slot 2 of metadata tag "testerGUI_Mode" of player to feather named "&r&lFlight" with lore "&r&7&lOFF"
+						set slot 2 of metadata tag "testerGUI_Mode" of player to glowing feather named "&r&lFlight" with lore "&r&a&lON" if {testeroption.flight::%player's uuid%} is set
+					open (metadata tag "testerGUI_Mode" of player) to player
+		else:
+			if {testers::%player's uuid%} is set:
+				set metadata tag "testerGUI" of player to chest inventory with 3 rows named "&6&lWildKits Test Menu"
+				set {_num} to 0
+				loop 27 times:
+					set slot {_num} of metadata tag "testerGUI" of player to gray stained glass pane named " "
+					add 1 to {_num}
+				set slot 10 of metadata tag "testerGUI" of player to glowing sunflower named "&b&lTokens" with lore "&r&fGive yourself tokens for testing."
+				set slot 13 of metadata tag "testerGUI" of player to iron pickaxe named "&a&lTest Mode" with lore "&r&fOpen test mode menu."
+				set slot 16 of metadata tag "testerGUI" of player to paper named "&c&lRules" with lore "&r&fDo not give players &a&lTest &r&for &b&lDev &r&ftokens unless%nl%&r&fauthorized by a developer.%nl%%nl%&r&fCaught giving dev tokens will result in a%nl%&ffull inventory and echest wipe.%nl%%nl%&r&fDo not use this menu to abuse."
+				open (metadata tag "testerGUI" of player) to player
+			else:
+				send "&cYou are not a tester."
+		
+on inventory click:
+	if event-inventory = (metadata tag "testerGUI" of player):
+		cancel event
+		if index of event-slot is 10:
+			execute player command "tester token"
+		if index of event-slot is 13:
+			execute player command "tester mode"
+	if event-inventory = (metadata tag "testerGUI_Token" of player):
+		cancel event
+		if index of event-slot is 12:
+			give player glowing sunflower named "&a&lTest Token" with lore "&fUsed by players and testers to use items%nl%&fthat aren't fully released to the public yet."
+		if index of event-slot is 14:
+			give player glowing sunflower named "&b&lDev Token" with lore "&fUsed by developers and testers to test%nl%&fitems that are not released to the public yet."
+	if event-inventory = (metadata tag "testerGUI_Mode" of player):
+		cancel event
+		if index of event-slot is 0:
+			if {testmode::%player's uuid%} is true:
+				delete {testmode::%player's uuid%}
+				execute console command "tab player %player% tagsuffix "
+				# Enable PvP
+				delete {testeroption.pvp::%player's uuid%}
+				# Disable Flight
+				delete {testeroption.flight::%player's uuid%}
+				set player's flight mode to false
+				#
+				execute player command "tester mode"
+			else:
+				set {testmode::%player's uuid%} to true
+				execute console command "tab player %player% tagsuffix "" &d&lTesting"""
+				execute player command "tester mode"
+		if index of event-slot is 1:
+			if {testmode::%player's uuid%} is true:
+				if {testeroption.pvp::%player's uuid%} is set:
+					delete {testeroption.pvp::%player's uuid%}
+					send "&aEnabled PvP"
+					execute player command "tester mode"
+				else:
+					set {testeroption.pvp::%player's uuid%} to false
+					send "&cDisabled PvP"
+					execute player command "tester mode"
+		if index of event-slot is 2:
+			if {testmode::%player's uuid%} is true:
+				if {testeroption.flight::%player's uuid%} is set:
+					delete {testeroption.flight::%player's uuid%}
+					send "&cDisabled Flight"
+					set player's flight mode to false
+					execute player command "tester mode"
+				else:
+					set {testeroption.flight::%player's uuid%} to true
+					send "&aEnabled Flight"
+					set player's flight mode to true
+					execute player command "tester mode"
+
+on damage:
+	if {testeroption.pvp::%victim's uuid%} is false:
+		if {testeroption.pvp::%attacker's uuid%} is not set:
+			cancel event
+			send "&cThis player is a &eWildKits Tester&c and they currently have the &ePvP &coption disabled." to attacker
+	if {testeroption.pvp::%attacker's uuid%} is false:
+		if {testeroption.pvp::%victim's uuid%} is not set:
+			cancel event
+			send "&cYou can only attack other testers when the &ePvP &coption is disabled." to attacker
+command /players:
+	trigger:
+		set metadata tag "PlayerList" of player to chest inventory with 6 rows named "Player List"
+		set {_num} to 0
+		delete {plist2.%player's uuid%::*}
+		#set {_pages} to 2 if online players is greater than 45
+		loop all players:
+			set {_vanished} to metadata "vanished" of loop-player
+			if {_num} is less than or equal to 44:
+				delete {_v}
+				set {_loc} to "Spawn" if loop-player's world is "world"
+				set {_loc} to "Arena" if loop-player is in the region "arena"
+				set {_loc} to "Plots" if loop-player's world is "plotworld"
+				set {_v} to " &b&l[V]" if {_vanished} is true
+				set {_v} to "" if {_vanished} is not true
+				set slot {_num} of metadata tag "PlayerList" of player to skull of loop-player named "%CC.translate(loop-player's prefix)%%loop-player%%{_v}%" with lore "&r&aStats:%nl%&r&eKills: &7%{kills::%loop-player's uuid%}%%nl%&r&eDeaths: &7%{deaths::%loop-player's uuid%}%%nl%&r&eKDR: &7%{KDR::%loop-player's uuid%}%%nl%&eBalance: &7%{eTokens::%loop-player's uuid%}%%nl%%nl%&r&aInfo:%nl%&r&eLocation: &7%{_loc}%"
+				if {_vanished} is true:
+					if player does not have permission "rank.staff":
+						set slot {_num} of metadata tag "PlayerList" of player to air
+					else:
+						add 1 to {_num}
+				else:
+					add 1 to {_num}
+			else:
+				set {plist2.%player's uuid%::%loop-player%} to loop-player
+				
+		#set slot 45 of metadata tag "PlayerList" of player to arrow named "&cBack"
+		set slot 53 of metadata tag "PlayerList" of player to arrow named "&aNext"
+		open (metadata tag "PlayerList" of player) to player
+
+command /pinfogui <offlineplayer>:
+	Usage: /players
+	trigger:
+		if arg-1 is online:
+			set {vplayer::%player's uuid%} to arg-1
+			set metadata tag "pinfo" of player to chest inventory with 3 rows named "&6&lPlayer: &e&l%arg-1%"
+			set {_num} to 0
+			loop 27 times:
+				set slot {_num} of metadata tag "pinfo" of player to gray stained glass pane named " "
+				add 1 to {_num}
+			set slot 10 of metadata tag "pinfo" of player to book and quill named "&6&lTrade" with lore "&r&fSend a trade request to %arg-1%."
+			set slot 13 of metadata tag "pinfo" of player to lime wool named "&a&lComing Soon" with lore "&r&fComing Soon"
+			set slot 16 of metadata tag "pinfo" of player to paper named "&c&lComing Soon" with lore "&r&fComing Soon"
+			set slot 18 of metadata tag "pinfo" of player to red stained glass pane named "&c&lBack"
+			open (metadata tag "pinfo" of player) to player
+		else:
+			send "&cThis player is no longer online."
+
+command /tv:
+	trigger:
+		set {_vanished} to metadata "vanished" of player
+		send "t: %{_vanished}%"
+
+on inventory click:
+	if event-inventory = (metadata tag "PlayerList" of player):
+		cancel event
+		if index of event-slot is 53:
+			set metadata tag "PlayerList2" of player to chest inventory with 6 rows named "Player List"
+			set {_num} to 0
+			#set {_pages} to 2 if online players is greater than 45
+			loop {plist2.%player's uuid%::*}:
+				set {_plr} to "%loop-value%" parsed as a player
+				set {_vanished} to metadata "vanished" of {_plr}
+				if {_plr} is online:
+					if {_num} is less than or equal to 44:
+						set {_loc} to "Spawn" if {_plr}'s world is "world"
+						set {_loc} to "Arena" if {_plr} is in the region "arena"
+						set {_loc} to "Plots" if {_plr}'s world is "plotworld"
+						set {_v} to " &b&l[V]" if {_vanished} is true
+						set {_v} to "" if {_vanished} is not true
+						set slot {_num} of metadata tag "PlayerList2" of player to skull of {_plr} named "%CC.translate({_plr}'s prefix)%%{_plr}%%{_v}%" with lore "&r&aStats:%nl%&r&eKills: &7%{kills::%{_plr}'s uuid%}%%nl%&r&eDeaths: &7%{deaths::%{_plr}'s uuid%}%%nl%&r&eKDR: &7%{KDR::%{_plr}'s uuid%}%%nl%&eBalance: &7%{eTokens::%{_plr}'s uuid%}%%nl%%nl%&r&aInfo:%nl%&r&eLocation: &7%{_loc}%"
+						if {_vanished} is true:
+							if player does not have permission "rank.staff":
+								set slot {_num} of metadata tag "PlayerList" of player to air
+							else:
+								add 1 to {_num}
+						else:
+							add 1 to {_num}
+					#else:
+						#set {plist3::%{_plr}%} to {_plr}
+			set slot 45 of metadata tag "PlayerList2" of player to arrow named "&cBack"
+			#set slot 53 of metadata tag "PlayerList2" of player to arrow named "&aNext"
+			open (metadata tag "PlayerList2" of player) to player
+		else:
+			set {_player} to name of event-slot
+			set {_player::*} to {_player} split at " "
+			set {_player} to uncolored {_player::2}
+			execute player command "pinfogui %{_player}%"
+	if event-inventory = (metadata tag "PlayerList2" of player):
+		cancel event
+		if index of event-slot is 45:
+			execute player command "players"
+		else:
+			set {_player} to name of event-slot
+			set {_player::*} to {_player} split at " "
+			set {_player} to uncolored {_player::2}
+			execute player command "pinfogui %{_player}%"
+	if event-inventory = (metadata tag "pinfo" of player):
+		cancel event
+		if index of event-slot is 10:
+			execute player command "trade %{vplayer::%player's uuid%}%"
+			delete {vplayer::%player's uuid%}
+			close player's inventory
+		if index of event-slot is 18:
+			execute player command "players"
+			delete {vplayer::%player's uuid%}

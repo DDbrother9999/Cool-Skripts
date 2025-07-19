@@ -1,0 +1,6 @@
+command /playtime [<offline player>]:
+    trigger:
+        set {_player} to player if arg 1 is not set
+        set {_player} to arg 1 if arg 1 is set
+        set {_time} to "%total_world_time statistic of {_player}% ticks" parsed as timespan
+        send "&6&l%{_player}%'s Playtime &8&l» &b%{_time}%"

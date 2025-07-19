@@ -1,0 +1,146 @@
+import:
+	net.leonemc.core.Core
+
+on place:
+	if "%event-block%" contain "shulker box":
+		if "%region at player%" contains "arena":
+			stop
+			send "&cProtection doesn't work in the Arena!"
+	if "%event-block%" contain " shulker box":
+		send "&aYour Shulker is Protected! (Protection will expire in 3 minutes)"
+		set {shulker.%location of event-block%} to uuid of event-player
+		wait 3 minutes
+		if {shulker.%location of event-block%} is uuid of event-player:
+			send "&cYour Shulker Box Protection has expired!"
+			delete {shulker.%location of event-block%}
+
+on place:
+	player is in the region "shulkerrooms"
+	event-block is not any shulker box
+	cancel event
+
+on break:
+	player is in the region "shulkerrooms"
+	event-block is not any shulker box
+	cancel event
+		
+ 
+on break:
+	if "%event-block%" contains "shulker box":
+		if player is op:
+			stop
+		if {shulker.%location of event-block%} exists:
+			if {shulker.%location of event-block%} is uuid of event-player:
+				send "&cYour Shulker is no longer Protected!"
+				delete {shulker.%location of event-block%}
+			else:
+				cancel event
+				send "&4Error: &cThis shulker box isn't yours!"
+		else:
+			send "&aProtection has expired on this Shulker"
+
+ 
+on rightclick:
+	if "%event-block%" contains "shulker box":
+		if player is op:
+			stop
+		if {shulker.%location of event-block%} exists:
+			if {shulker.%location of event-block%} is uuid of event-player:
+				stop
+			else:
+				cancel event
+				send "&4Error: &cThis shulker box isn't yours!"
+		else:
+			send "&aThis shulker box's protection is expired"
+			
+# I may have forgotten to do this in the plugin...
+on command:
+	set {_core} to Core.getInstance()
+	set {_roomManager} to {_core}.getRoomManager()
+
+	if {_roomManager}.isInRoom(player):
+		if command is "room" or "shulkerroom":
+			stop
+		
+		send "&cYou cannot use commands in a shulkerroom. Please use &e/room leave &cto exit!"
+		cancel event
+
+on quit:
+	set {_core} to Core.getInstance()
+	set {_roomManager} to {_core}.getRoomManager()
+
+	if {_roomManager}.isInRoom(player):
+		{_roomManager}.leave(player)
+
+on place:
+	if "%event-block%" contain "shulker box":
+		if "%region at player%" contains "arena":
+			stop
+			send "&cProtection doesn't work in the Arena!"
+	if "%event-block%" contain " shulker box":
+		send "&aYour Shulker is Protected! (Protection will expire in 3 minutes)"
+		set {shulker.%location of event-block%} to uuid of event-player
+		wait 3 minutes
+		if {shulker.%location of event-block%} is uuid of event-player:
+			send "&cYour Shulker Box Protection has expired!"
+			delete {shulker.%location of event-block%}
+		
+ 
+on break:
+	if "%event-block%" contains "shulker box":
+		if player is op:
+			stop
+		if {shulker.%location of event-block%} exists:
+			if {shulker.%location of event-block%} is uuid of event-player:
+				send "&cYour Shulker is no longer Protected!"
+				delete {shulker.%location of event-block%}
+			else:
+				cancel event
+				send "&4Error: &cThis shulker box isn't yours!"
+		else:
+			send "&aProtection has expired on this Shulker"
+
+ 
+on rightclick:
+	if "%event-block%" contains "shulker box":
+		if player is op:
+			stop
+		if {shulker.%location of event-block%} exists:
+			if {shulker.%location of event-block%} is uuid of event-player:
+				stop
+			else:
+				cancel event
+				send "&4Error: &cThis shulker box isn't yours!"
+		else:
+			send "&aThis shulker box's protection is expired"
+
+
+# I may have forgotten to do this in the plugin...
+on command:
+	set {_core} to Core.getInstance()
+	set {_roomManager} to {_core}.getRoomManager()
+
+	if player is in the region "arena":
+		if command is "room" or "shulkerroom":
+			send "&cYou can't use that command here."
+			cancel event
+
+	if {_roomManager}.isInRoom(player):
+		if command is "room" or "shulkerroom":
+			stop
+		
+		send "&cYou cannot use commands in a shulkerroom. Please use &e/room leave &cto exit!"
+		cancel event
+
+on quit:
+	set {_core} to Core.getInstance()
+	set {_roomManager} to {_core}.getRoomManager()
+
+	if {_roomManager}.isInRoom(player):
+		{_roomManager}.leave(player)
+
+# Sometimes it kicks people near u when u drop a shulker...
+on drop:
+	if event-item is any shulker box:
+		send "&cYou cannot drop shulkers! Please use &e/trade&c."
+		cancel event

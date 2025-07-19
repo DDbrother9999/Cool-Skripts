@@ -1,0 +1,18 @@
+on damage:
+    hasCEnchant(attacker's tool, "molten") is true
+
+    ignite victim for 3 seconds
+    set {enchantments::molten::onFire.%victim%} to 3
+
+on damage:
+    damage cause is burning
+    {enchantments::molten::onFire.%victim's uuid%} is set
+    set damage to damage*2
+
+every second:
+    loop all players where [{enchantments::molten::onFire.%input's uuid%} is set]:
+        remove 1 from {enchantments::molten::onFire.%loop-player's uuid%}
+        if {enchantments::molten::onFire.%loop-player's uuid%} is less than or equal to 0:
+            delete {enchantments::molten::onFire.%loop-player's uuid%}
+
+

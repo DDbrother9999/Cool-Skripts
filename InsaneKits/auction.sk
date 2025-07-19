@@ -1,0 +1,175 @@
+# Currently being worked on, DO NOT ADD!
+import:
+	net.leonemc.neon.spigot.Neon
+
+on skript start:
+	delete {auction}
+	delete {auction::*}
+
+on load:
+	delete {ahcd::*}
+
+function openShulker(i: item, p: player):
+	set {_nbt} to nbt compound of {_i}
+	set {_tags::*} to tag "BlockEntityTag;Items" of {_nbt}
+	if {_i}'s name is set:
+		set {_name} to {_i}'s name
+	else:
+		set {_name} to "Shulker Box"
+	create gui with virtual chest inventory with 4 rows with name {_name}
+	edit last gui:
+		format gui slot 1,2,3,5,6,7,8 with gray stained glass pane named ""
+		format gui slot 0 with red stained glass pane named "&cBack":
+			execute player command "/viewah"
+		format gui slot 4 with {_i}
+		set {_f} to 0
+		loop 27 times:
+			set {_tag} to tag "Slot" of {_tags::%{_f}+1%}
+			add 9 to {_tag}
+			format gui slot {_tag} with item from nbt {_tags::%{_f}+1%}
+			add 1 to {_f}
+	open last gui to {_p}
+
+
+command /liveauction <int> [<text>]: # make second argument required when out
+	usage: /liveauction [Minimum Bid] [Timed/Traditional] - Auctions the item in your hand
+	permission: wk.auction
+	permission message: &cYou must have a rank in order to host an auction.
+	trigger:
+		set {_neonUser} to Neon.getInstance().getUserManager().get(player)
+		if {_neonUser}.isMuted():
+			send "&cYou cannot host an auction whilst muted!"
+			stop
+		"%region at player%" contains "spawn" or "arena"
+		if {ahban::%player's uuid%} = 1 or 3:
+			send "&cYou have been banned from hosting auctions. If you believe this is a mistake, please open a ticket."
+			stop
+		if {ahcd::%player's uuid%} is set:
+			player does not have permission "op"
+			if {ahcd::%player's uuid%} is greater than or equal to 0 seconds after now:
+				send "&cYou can use auction again in &e%difference between now and {ahcd::%player's uuid%}%&c!"
+				stop
+		if {auction} is true:
+			send "&cThere is already an auction going on."
+			stop
+		player's tool is not air
+		if arg-1 > 100000:
+			send "&cStarting bid is too high."
+			stop
+		set {auction} to true
+		set {auction::min} to arg-1
+		set {auction::item} to player's tool
+		set {auction::gui} to chest inventory with 1 rows named "Auction"
+		set {_loop} to 0
+		loop 9 times:
+			set slot {_loop} of {auction::gui} to gray stained glass pane named "&r&lInfo" with lore "&r&fHost: &e%player%%nl%&r&fMinimum Bid: &e%arg-1%"
+			add 1 to {_loop}
+		set slot 4 of {auction::gui} to {auction::item}
+		set {_name} to name of player's tool
+		if {_name} is not set:
+			set {_name} to "%player's held item%" in uppercase
+		broadcast "&6&l&m======================="
+		broadcast formatted "&6&lAuction &8&l» &r&e%player% &ris auctioning off &d%colored {_name}%&r! <ttp:&eClick to view item.><cmd:/viewah>&e[View]<reset> <ttp:&bClick to place bid.><sgt:/bid >&b[Bid]<reset>"
+		broadcast "&6&l&m======================="
+		set {_n} to "%player's tool%"
+		log "Host: %player%, Item: %uncolored {_n}%, Min: %arg-1%" to "auction.log"
+		delete player's tool
+		set {auction::highest} to 0
+		set {ahcd::%player's uuid%} to 3 minutes from now
+		auction(player)
+		
+
+on inventory click:
+	name of event-inventory is "Auction"
+	event-slot is 4
+	event-slot is any shulker box
+	openShulker(event-slot, player)
+
+command /ahban <offlineplayer> <int>:
+	permission: op
+	usage: /ahban <player> <id> (0=Unban,1=Host,2=Bid,3=Both)
+	trigger:
+		if arg-2 is 0:
+			delete {ahban::%arg-1's uuid%}
+			send "&e%arg-1%&a Has been unbanned from auctions."
+		if arg-2 is 1:
+			set {ahban::%arg-1's uuid%} to 1
+			send "&e%arg-1%&c Has been banned from hosting auctions."
+		if arg-2 is 2:
+			set {ahban::%arg-1's uuid%} to 2
+			send "&e%arg-1%&c Has been banned from bidding in auctions."
+		if arg-2 is 3:
+			set {ahban::%arg-1's uuid%} to 3
+			send "&e%arg-1%&c Has been banned from hosting & bidding in auctions."
+
+command /viewah:
+	trigger:
+		open {auction::gui} to player
+
+command /bid <int>:
+	usage: /bid <ammount>
+	trigger:
+		if {ahban::%player's uuid%} = 2 or 3:
+			send "&cYou have been banned from bidding in auctions. If you believe this is a mistake, please open a ticket."
+			stop
+		{auction} is true
+		arg-1 > 0
+		if arg-1 >= {auction::min}:
+			if arg-1 > {auction::highest}:
+				if arg-1 <= player's balance:
+					set {auction::highest} to arg-1
+					set {auction::highestbidder} to player
+					broadcast formatted "&6&lAuction &8&l» &r&e%player% &rnow has the highest bid with &e%arg-1% &eeTokens&r! <ttp:&eClick to view item.><cmd:/viewah>&e[View]<reset> <ttp:&bClick to place bid.><sgt:/bid >&b[Bid]<reset>"
+				else:
+					send "&cYou do not have enough eTokens."				
+			else:
+				send "&cYour bid is lower than the highest bid."
+		else:
+			send "&cYour bid does not meet the minimum bid of &e%{auction::min}%&c."
+
+function auction(host: player):
+	wait 30 seconds
+	broadcast formatted "&6&lAuction &8&l» &c30 seconds left to bid! <ttp:&eClick to view item.><cmd:/viewah>&e[View]<reset> <ttp:&bClick to place bid.><sgt:/bid >&b[Bid]<reset>"
+	wait 10 seconds
+	broadcast formatted "&6&lAuction &8&l» &c10 seconds left to bid! <ttp:&eClick to view item.><cmd:/viewah>&e[View]<reset> <ttp:&bClick to place bid.><sgt:/bid >&b[Bid]<reset>"
+	wait 5 seconds
+	set {_sec} to 5
+	loop 5 times:
+		broadcast formatted "&6&lAuction &8&l» &c%{_sec}% seconds left to bid!"
+		remove 1 from {_sec}
+		wait 1 seconds
+	if {auction::highest} > 0:
+		set {_error::1} to "Host Offline" if {_host} is not online
+		set {_error::2} to "Missing Funds" if {auction::highest} > balance of {auction::highestbidder}
+		set {_error::3} to "Bidder Offline" if {auction::highestbidder} is not online
+		set {_error::4} to "Host/Bidder Banned" if {ahban::%uuid of {_host}%} or {ahban::%uuid of {auction::highestbidder}%} is set
+		set {_error::5} to "No Space" if inventory of {auction::highestbidder} doesn't have enough space for 1 of {auction::item}
+		set {_error::6} to "Invalid Region" if "%region at {_host}%" does not contain "spawn" or "arena"
+		set {_error::6} to "Invalid Region" if "%region at {auction::highestbidder}%" does not contain "spawn" or "arena"
+		if size of {_error::*} = 0:
+			broadcast "&6&lAuction &8&l» &r&e%{auction::highestbidder}% &rhas won the auction with a bid of &e%{auction::highest}% &eeTokens&r!"
+			add {auction::item} to {claim::%{auction::highestbidder}'s uuid%::*}
+			notifyPlayerofClaim({auction::highestbidder})
+			add {auction::highest} to balance of {_host}
+			remove {auction::highest} from balance of {auction::highestbidder}
+			log "Winner: %{auction::highestbidder}%, Item: %uncolored {auction::item}%" to "auction.log"
+			log "%{auction::highestbidder}% won an auction by %{_host}% for a bid of %{auction::highest}% eTokens" to "tokens/transactions.log"
+		else:
+			broadcast formatted "&6&lAuction &8&l» <ttp:&4May be due to one of the following:%nl%&4- Host or bidder went offline%nl%&4- Bidder no longer has the eTokens%nl%&4- Host or bidder went offline%nl%&4- Bidder did not have space in inventory%nl%&4- Host or bidder was banned before auction ended%nl%&4- Host or bidder was not in spawn or arena.>&r&cSomething went wrong.<reset>"
+			add {auction::item} to {claim::%{_host}'s uuid%::*}
+			notifyPlayerofClaim({_host})
+			set {_err} to ""
+			loop {_error::*}:
+				set {_err} to "%{_err}%%loop-value% "
+			log "[ERROR] Selected Winner: %{auction::highestbidder}%, Item: %uncolored {auction::item}%, Error: %{_err}%" to "auction.log"
+	else:
+		add {auction::item} to {claim::%{_host}'s uuid%::*}
+		notifyPlayerofClaim({_host})
+		broadcast "&6&lAuction &8&l» &r&cNo one bid in time!"
+		log "Winner: Nobody" to "auction.log"
+	delete {auction}
+	delete {auction::*}
+
+on inventory click:
+	if name of event-inventory is "Auction":
+		cancel event 

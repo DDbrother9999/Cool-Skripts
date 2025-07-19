@@ -1,0 +1,5 @@
+on command:
+    command is "room" or "core:room"
+    "%regions at player%" contains "boxs3 in world world" or "koth_arena in world world"
+    cancel event
+    send "&4ERROR: &cThis command does not work in the arena."

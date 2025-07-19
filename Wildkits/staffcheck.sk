@@ -1,0 +1,6 @@
+command /staffcheck <text>:
+	permission: op
+	trigger:
+		set {_p} to arg-1
+		execute player command "staffhist %{_p}%"
+		execute player command "co l u:%{_p}% a:session"

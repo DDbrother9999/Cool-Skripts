@@ -1,0 +1,30 @@
+on damage:
+    hasCEnchant(attacker's tool, "frostbite") is true
+    set {_level} to getCEnchantLevel(attacker's tool, "frostbite")
+
+    set {_slowness} to 10%*{_level}
+    set {_damageTime} to 2-(0.5*({_level}-1))
+    set victim's walking speed to victim's walking speed - {_slowness}
+    make 12 of block particle using packed ice at victim's eyes with offset vector(0.15, 0.3, 0.15)
+    play sound "entity.player.hurt_freeze" at victim if {enchantments::frostbite::beingDamaged.%victim's uuid%} is not set
+
+    set {enchantments::frostbite::beingDamaged.%victim's uuid%} to 5
+    set {enchantments::frostbite::timeInBetweenDamage.%victim's uuid%} to {_damageTime}
+
+on join:
+    set player's walking speed to 0.2
+
+every 0.5 seconds:
+    loop all players where [{enchantments::frostbite::beingDamaged.%input's uuid%} is set]:
+        remove 0.5 from {enchantments::frostbite::beingDamaged.%loop-player's uuid%}
+        set {_beingDamaged} to {enchantments::frostbite::beingDamaged.%loop-player's uuid%}
+        set {_timeBetweenDamage} to {enchantments::frostbite::timeInBetweenDamage.%loop-player's uuid%}
+        if mod({_beingDamaged}, {_timeBetweenDamage}) is 0:
+            damage loop-player by 1 heart
+            play sound "entity.player.hurt_freeze" at loop-player
+
+        if {_beingDamaged} is less than or equal to 0:
+            delete {enchantments::frostbite::beingDamaged.%loop-player's uuid%}
+            delete {enchantments::frostbite::timeInBetweenDamage.%loop-player's uuid%}
+            send action bar "<##D6ECEF>You are no longer frostbitten." to loop-player
+            set loop-player's walking speed to 0.2

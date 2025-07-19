@@ -1,0 +1,20 @@
+on damage:
+    projectile is set
+    hasCEnchant(attacker's tool, "anti-teleport") is true
+    set {_level} to getCEnchantLevel(attacker's tool, "anti-teleport")
+
+    chance of 10%*{_level}:
+        set {enchantments::antiteleport::noTeleport.%victim's uuid%} to 3
+        send action bar "&5You can't teleport! (3s)" to victim
+
+on right click with ender pearl:
+    {enchantments::antiteleport::noTeleport.%player's uuid%} is set
+    cancel event
+    send "&cYou can't use ender pearls right now!"
+
+every second:
+    loop all players where [{enchantments::antiteleport::noTeleport.%input's uuid%} is set]:
+        remove 1 from {enchantments::antiteleport::noTeleport.%loop-player's uuid%}
+        if {enchantments::antiteleport::noTeleport.%loop-player's uuid%} is less than or equal to 0:
+            delete {enchantments::antiteleport::noTeleport.%loop-player's uuid%}
+            send action bar "&9You can now teleport!" to loop-player

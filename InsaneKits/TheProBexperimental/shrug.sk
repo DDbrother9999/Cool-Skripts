@@ -1,0 +1,14 @@
+
+variables:
+    {-replacedText::*} = ":shrug:" and ":skull"
+    {-replacedWith::*} = "¯\_(ツ)_/¯" and "☠"
+
+on chat with priority lowest:
+	set message to checkMessageForEmoticons(message)
+    
+function checkMessageForEmoticons(message: text) :: text):
+    loop {-replacedText::*}:
+        replace all loop-value in {_message} with {-replacedWith::%loop-index%}
+    return {_message}
+    
+   

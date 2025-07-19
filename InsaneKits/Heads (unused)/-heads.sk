@@ -1,0 +1,65 @@
+import:
+	me.arcaniax.hdb.api.HeadDatabaseAPI
+
+on load:
+	set {HDBA} to new HeadDatabaseAPI()
+
+on load:
+	set {Heads::Decameter} to configureHead(32265,"Decameter","&x&B&9&5&7&F&B&lD&x&B&D&6&0&F&B&le&x&C&1&6&9&F&C&lc&x&C&4&7&2&F&C&la&x&C&8&7&B&F&C&lm&x&C&C&8&3&F&C&le&x&D&0&8&C&F&D&lt&x&D&3&9&5&F&D&le&x&D&7&9&E&F&D&lr","&bOn crouch, gain invisibility","&band bonus speed!",100)
+	set {Heads::MindVoid} to configureHead(8226,"MindVoid","&x&B&D&0&0&C&5&lM&x&B&3&0&0&B&C&li&x&A&9&0&0&B&3&ln&x&9&F&0&0&A&A&ld&x&9&6&0&0&A&1&lV&x&8&C&0&0&9&8&lo&x&8&2&0&0&8&F&li&x&7&8&0&0&8&6&ld","&bOn crouch, grapple to the targetted block","&band x2 dmg when on fire and in water!",100)
+	set {Heads::Dogged} to configureHead(48469,"Dogged","&x&0&7&7&E&F&D&lD&x&1&2&8&7&F&D&lo&x&1&D&9&1&F&D&lg&x&2&8&9&A&F&D&lg&x&3&3&A&3&F&D&le&x&3&E&A&C&F&D&ld&x&4&9&B&6&F&D&l&x&5&4&B&F&F&D&l&x&5&F&C&8&F&D&l_","&bOn right click, grapple","&bto the targetted player",100)
+
+command /givehead <text>:
+	permission: op
+	trigger:
+		give {Heads::%arg-1%} to player
+        
+command /updateheads:
+	permission: op
+	trigger:
+		set {Heads::Decameter} to configureHead(32265,"Decameter","&x&B&9&5&7&F&B&lD&x&B&D&6&0&F&B&le&x&C&1&6&9&F&C&lc&x&C&4&7&2&F&C&la&x&C&8&7&B&F&C&lm&x&C&C&8&3&F&C&le&x&D&0&8&C&F&D&lt&x&D&3&9&5&F&D&le&x&D&7&9&E&F&D&lr","&bOn crouch, gain invisibility","&band bonus speed!",100)
+		set {Heads::MindVoid} to configureHead(8226,"MindVoid","&x&B&D&0&0&C&5&lM&x&B&3&0&0&B&C&li&x&A&9&0&0&B&3&ln&x&9&F&0&0&A&A&ld&x&9&6&0&0&A&1&lV&x&8&C&0&0&9&8&lo&x&8&2&0&0&8&F&li&x&7&8&0&0&8&6&ld","&bOn crouch, grapple to the targetted block","&band x2 dmg when on fire and in water!",100)
+		set {Heads::Dogged} to configureHead(48469,"Dogged","&x&0&7&7&E&F&D&lD&x&1&2&8&7&F&D&lo&x&1&D&9&1&F&D&lg&x&2&8&9&A&F&D&lg&x&3&3&A&3&F&D&le&x&3&E&A&C&F&D&ld&x&4&9&B&6&F&D&l&x&5&4&B&F&F&D&l&x&5&F&C&8&F&D&l_","&bOn right click, grapple","&bto the targetted player",100)
+
+on tab complete of "/givehead":
+	set tab completions for position 1 to "Decameter","MindVoid","Dogged"
+
+function configureHead(id: integer,name: text, displayname: text, desc1: text, desc2: text, dura: integer) :: item:
+	set {_item} to {HDBA}.getItemHead("%{_id}%")
+	set {_item} to {_item} named "%{_displayname}%" with lore "","%{_desc1}%","%{_desc2}%","","&a&lDURABILITY: %{_dura}%/%{_dura}%"
+	set string tag "GameValues;head" of nbt compound of {_item} to "%{_name}%"
+	set int tag "GameValues;dura" of nbt compound of {_item} to {_dura}
+	set int tag "GameValues;remainingDura" of nbt compound of {_item} to {_dura}
+	return {_item}
+
+function updateHead(item: item) :: item:
+	set {_remainingDura} to int tag "GameValues;remainingDura" of nbt compound of {_item}
+	set {_dura} to int tag "GameValues;dura" of nbt compound of {_item}
+	subtract 1 from {_remainingDura}
+	set int tag "GameValues;remainingDura" of nbt compound of {_item} to {_remainingDura}
+	if {_remainingDura}/{_dura} is less than or equal to 1:
+		set line 5 of lore of {_item} to "&a&lDURABILITY: %{_remainingDura}%/%{_dura}%"
+	if {_remainingDura}/{_dura} is less than or equal to 0.66:
+		set line 5 of lore of {_item} to "&6&lDURABILITY: %{_remainingDura}%/%{_dura}%"
+	if {_remainingDura}/{_dura} is less than or equal to 0.33:
+		set line 5 of lore of {_item} to "&4&lDURABILITY: %{_remainingDura}%/%{_dura}%"
+	if {_remainingDura}/{_dura} is less than or equal to 0:
+		return air
+	return {_item}
+
+on region enter:
+	antihead(player)
+
+on armor change:
+	antihead(player)
+
+on region leave:
+	antihead(player)
+
+function antihead(p: player):
+	"%region at {_p}%" contains "koth"
+	slot 39 of {_p}'s inventory is player head
+	set {_i} to slot 39 of {_p}'s inventory
+	set slot 39 of {_p}'s inventory to air
+	give {_p} {_i}
+	send "&cYou can't wear player heads in KOTH!" to {_p}

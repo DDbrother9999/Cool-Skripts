@@ -1,0 +1,63 @@
+on leave:
+	delete {-zombieDrops::%player's uuid%::*}
+	delete {killedByCombat::%player's uuid%}
+	#debug("%{killedByCombat::%{_p}%}%")
+	set {zombieDeath::%{_p}%'s uuid} to false
+	player is in combat
+	summon zombie at player's location
+	set {_z} to last spawned zombie
+	set metadata tag "zombiePlayer" of {_z} to player's uuid
+	loop 45 times:
+		set {_n} to loop-value - 1
+		add slot {_n} of player's inventory to {-zombieDrops::%player's uuid%::*}
+	set display name of {_z} to "&e%player%'s Zombie"
+	set helmet of {_z} to player's helmet
+	set chestplate of {_z} to player's chestplate
+	set leggings of {_z} to player's leggings
+	set boots of {_z} to player's boots
+	set tool of {_z} to player's tool
+	set {combatZombie::%player's uuid%} to {_z}
+	set {zombieDeath::%player's uuid%} to false
+	#debug("%player%'s zombie was made %{zombieDeath::%player's uuid%}%")
+	set {_itemcount} to 0
+	loop {-zombieDrops::%player's uuid%::*}:
+		add 1 to {_itemcount}
+		#debug("%loop-value% %{_itemcount}%")
+	set {combatDeath::%player's uuid%} to true
+
+on death of zombie:
+	clear the drops
+	set {_p} to metadata tag "zombiePlayer" of victim
+	#debug("Killed by combat: %{killedByCombat::%{_p}%}%")
+	if {killedByCombat::%{_p}%} is false:
+		#debug("Player did not die")
+		delete {killedByCombat::%{_p}%}
+		stop
+	#debug("Player uuid is %metadata tag "zombiePlayer" of victim%")
+	#debug("Zombie died and player is %{_p}%")
+	wait 1 tick
+	set {_itemcount} to 0
+	loop {-zombieDrops::%{_p}%::*}:
+		add 1 to {_itemcount}
+		drop loop-value
+		#debug("Dropped %loop-value% %{_itemcount}%")
+	delete {-zombieDrops::%{_p}%::*}
+	set {zombieDeath::%{_p}%} to true
+	#debug("%{zombieDeath::%{_p}%}%")
+
+on join with priority lowest:
+	#debug("%player% joined and {zombieDeath::%player's uuid%} is %{zombieDeath::%player's uuid%}%")
+	if {zombieDeath::%player's uuid%} is true:
+		teleport player to {setspawn}
+		send "&aYou logged out in the arena! Someone killed your &eZombie!"
+		delete {zombieDeath::%player's uuid%}
+		remove all totems of undying from player's inventory
+		kill player
+		clear the player's inventory
+		set {killedByCombat::%player's uuid%} to false
+	else if {zombieDeath::%player's uuid%} is set:
+		set {_itemcount} to 0
+		delete {zombieDeath::%player's uuid%}
+		delete {-zombieDrops::%{_p}%::*}
+		set {killedByCombat::%player's uuid%} to false
+		kill {combatZombie::%player's uuid%}

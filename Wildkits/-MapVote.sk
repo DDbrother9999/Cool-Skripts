@@ -1,0 +1,130 @@
+options:
+   Map1: &6Desert!           
+   Map2: &aPlains!
+   Map3: &fUpcoming Map! 
+   World: world
+
+command /vote [<text>]:
+	trigger: 
+		set {_gui} to a new chest inventory with 3 row with name "&6&lMap Voting"
+		set slots (integers between 0 and 26) of {_gui} to black glass pane named " "
+		set slot 11 of {_gui} to sand named "{@Map1}" with lore "&9A desert with a mysterous temple!","&9What could be hidden inside?","&7Credit: DDbrother and Lucnoxity"
+		set slot 13 of {_gui} to grass block named "{@Map2}" with lore "&9Just a plains with a river!","&7Credit: Blossom"
+		set slot 15 of {_gui} to sand named "{@Map3}" with lore "&9Coming Soon..."
+		open {_gui} to player
+        
+function vote(p: player, map: number, name: text):
+	if {voted1::*} or {voted2::*} or {voted3::*} does not contain {_p}:
+		add 1 to {map%{_map}%.votes}
+		add {_p} to {voted%{_map}%::*}
+		send "&aYou have voted for the map: %{_name}%" to {_p}
+		stop
+	else:
+		if {voted1::*} contains {_p}:
+			remove {_p} from {voted1::*}
+			add -1 to {map1.votes}
+			add 1 to {map%{_map}%.votes}
+			add {_p} to {voted%{_map}%::*}
+			send "&aYou have changed your vote to: %{_name}%" to {_p}
+			stop
+		if {voted2::*} contains {_p}:
+			remove {_p} from {voted2::*}
+			add -1 to {map2.votes}
+			add 1 to {map%{_map}%.votes}
+			add {_p} to {voted%{_map}%::*}
+			send "&aYou have changed your vote to: %{_name}%" to {_p}
+			stop
+		if {voted3::*} contains {_p}:
+			remove {_p} from {voted3::*}
+			add -1 to {map3.votes}
+			add 1 to {map%{_map}%.votes}
+			add {_p} to {voted%{_map}%::*}
+			send "&aYou have changed your vote to: %{_name}%" to {_p}
+			stop
+
+on inventory click:
+	if name of event-inventory is "&6&lMap Voting":
+		cancel event
+        
+on inventory click:
+	if name of event-inventory is "&6&lMap Voting":       
+		if index of event-slot is 11:
+			vote(player,1,"{@Map1}")
+		if index of event-slot is 13:
+			vote(player,2,"{@Map2}")
+		#if index of event-slot is 15:
+			#vote(player,3,"{@Map3}")
+
+every 20 minutes:
+	if {changemap} is true:
+		checkvote(1,"{@Map1}")
+		checkvote(2,"{@Map2}")
+		#checkvote(3,"{@Map3}")
+		send "{@Map1} Votes: %{map1.votes}%" to all players
+		send "{@Map2} Votes: %{map2.votes}%" to all players
+		#send "{@Map3} Votes: %{map3.votes}%" to all players
+		send "" to all players
+		broadcast ""
+		broadcast "&c&lMap is Resetting..."
+		broadcast ""
+		loop all players:
+			if loop-player is in the region "afk":
+				stop
+			else:
+				teleport loop-player to {spawn}
+		if {map.current} is 1:
+			send "&a{@Map1} has won!" to all players
+			execute console command "scl load Map1 world -331 61 -59"
+			execute console command "mrl reset mine -s"
+			execute console command "scl load glass world -251 160 20"
+			wait 10 seconds
+			execute console command "scl load air world -262 161 18"
+		if {map.current} is 2:
+			send "&a{@Map2} has won!" to all players
+			execute console command "scl load Map3 world -331 61 -59"
+			execute console command "mrl reset mine -s"
+			execute console command "scl load glass world -251 160 20"
+			wait 10 seconds
+			execute console command "scl load air world -262 161 18"
+		#if {map.current} is 3:
+			#send "&a{@Map3} has won!" to all players
+			#execute console command "scl load Map1 world -331 148 -59"
+			#execute console command "mrl reset mine -s"
+		execute console command "lagg clear"
+		execute console command "scl load glass world -251 160 20"
+		wait 10 seconds
+		execute console command "scl load air world -262 161 18"
+		set {map1.votes} to 0
+		set {map2.votes} to 0
+		set {map3.votes} to 0
+		clear {voted1::*}
+		clear {voted2::*}
+		clear {voted3::*}
+	else:
+		send "Map Switching is disabled" to all players
+		
+        
+function checkvote(map: number, name: text):
+	if {map%{_map}%.votes} is bigger than or equal to {map1.votes} and {map2.votes} and {map3.votes}:
+		set {map.current} to {_map}
+		stop
+	else:
+		stop
+
+command /checkvotes:
+	trigger:
+		send "{@Map1} Votes: %{map1.votes}%" to player
+		send "{@Map2} Votes: %{map2.votes}%" to player
+		#send "{@Map3} Votes: %{map3.votes}%" to player
+command /enableswitching:
+	permission: enable.switching
+	trigger:
+		set {changemap} to true
+		send "Enable Map Switching" to player
+command /disableswitching:
+	permission: disable.switching
+	trigger:
+		set {changemap} to false
+		send "Disabled Map Switching" to player
+        
+#Written by DDbrother for Wildkits

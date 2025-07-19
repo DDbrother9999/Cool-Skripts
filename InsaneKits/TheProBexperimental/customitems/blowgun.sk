@@ -1,0 +1,105 @@
+#Made by TheProB for InsaneKits
+
+#blowgun
+
+on load:
+    set {ci.dart} to stick of mending 0 named "&6&lDart" with lore "&7Use in a blowgun." with all flags hidden
+    set {ci.blowgun} to spyglass of mending 0 named "&f&lBlowgun" with lore "&7Shoots darts with negative effects.%nl%&8&8Aim... hold steady.. Shoot!" with all flags hidden
+    set tag "blowgun" of nbt compound of {ci.blowgun} to "true"
+    set tag "customitem" of nbt compound of {ci.blowgun} to true
+    set tag "customitem" of nbt compound of {ci.dart} to true
+    #Potion list
+    add "minecraft:long_slowness" and "minecraft:long_weakness" and "minecraft:long_slow_falling" and "minecraft:long_poison" and "minecraft:strong_slowness" and "minecraft:strong_poison" and "minecraft:slowness" and "minecraft:weakness" and "minecraft:poison" and "minecraft:slow_falling" to {ci.negativepotions::*}
+    #Potion:"minecraft:strong_turtle_master"
+    
+
+on join:
+    set metadata "blowguncd" of player to now
+
+command /giveblowgun:
+    permission: op
+    trigger:
+        give 1 of {ci.blowgun} to player
+
+command /givedart:
+    permission: op
+    trigger:
+        give 1 of {ci.dart} to player
+
+on left click with spyglass:
+    tag "blowgun" of nbt compound of player's tool is set
+    cancel event
+    if amount of {ci.dart} in player's inventory is 0:
+        send action bar "&6Blowguns require darts!" to player
+        stop
+    set metadata "ci.clicked" of player to true
+    wait 2 ticks
+    clear metadata "ci.clicked" of player
+    startArrowGame(player) if metadata "inArrowGame" of {_p} is not set
+
+on shoot:
+    projectile is arrow
+    wait 1 tick
+    metadata "effectarrow" of shooter is set
+    set {_metadata} to metadata "effectarrow" of shooter
+    set string tag "Potion" of nbt compound of projectile to {_metadata}
+    set byte tag "pickup" of nbt compound of projectile to 2
+    delete metadata "effectarrow" of shooter
+
+function startArrowGame(p: player):
+    difference between metadata "blowguncd" of {_p} and now is greater than 1 second
+    send action bar "&aClick at the right time to get the highest velocity!" to {_p}
+    wait 2 ticks
+    loop 251 times:
+        if metadata "ci.clicked" of {_p} is true:
+            if amount of {ci.dart} in {_p}'s inventory is 0:
+                stop loop
+                stop
+            remove 1 of {ci.dart} from {_p}'s inventory
+            set metadata "power" of {_p} to {_loop}
+            clear metadata "inArrowGame" of {_p}
+            set {_power} to 1 if {_loop} is 1 or 2 or 10 or 11
+            set {_power} to 2 if {_loop} is 3 or 4 or 8 or 9
+            set {_power} to 3 if {_loop} is 5 or 7
+            set {_power} to 6 if {_loop} is 6
+            set metadata "effectarrow" of {_p} to {ci.negativepotions::%random integer between 1 and size of {ci.negativepotions::*}%}
+            shoot arrow from {_p} at speed {_power}
+            set metadata "blowguncd" of {_p} to now
+            stop loop
+        wait 1 tick
+        add 2 to {_loop}
+        if {_loop} is greater than 11:
+            set {_loop} to {_loop}-11
+        set {_text} to ""
+        set {_loop2} to 0
+        if {_loop} is 6:
+            loop 11 times:
+                add 1 to {_loop2}
+                if {_loop2} is {_loop}:
+                    set {_text} to "%{_text}%&c█"
+                else:
+                    set {_text} to "%{_text}%&8█"
+        else if {_loop} is 5 or 7:
+            loop 11 times:
+                add 1 to {_loop2}
+                if {_loop2} is {_loop}:
+                    set {_text} to "%{_text}%&a█"
+                else:
+                    set {_text} to "%{_text}%&8█"
+        else if {_loop} is 3 or 4 or 8 or 9:
+            loop 11 times:
+                add 1 to {_loop2}
+                if {_loop2} is {_loop}:
+                    set {_text} to "%{_text}%&e█"
+                else:
+                    set {_text} to "%{_text}%&8█"
+        else:
+            loop 11 times:
+                add 1 to {_loop2}
+                if {_loop2} is {_loop}:
+                    set {_text} to "%{_text}%&6█"
+                else:
+                    set {_text} to "%{_text}%&8█"
+        clear metadata "inArrowGame" of {_p}
+        play sound "entity.experience_orb.pickup" with volume 0.2 and pitch 2 to {_p}
+        send action bar {_text} to {_p}

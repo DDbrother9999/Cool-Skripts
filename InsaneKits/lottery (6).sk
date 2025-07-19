@@ -1,0 +1,154 @@
+command /lottery [<number>] [<text>]:
+	usage: /lottery <tickets>
+	trigger:
+		if arg-1 is not set:
+			set {_p} to player
+			set {_i} to 0
+			set {_n} to 0
+			loop {lottery::*}:
+				set {_n} to {_n}+1
+				if loop-value is {_p}:
+					set {_i} to {_i}+1
+			if {_n} is not 0:
+				set {_c} to {_i}/{_n}*100
+			if {_n} is 0:
+				set {_c} to 0
+			set {_prize} to {_n}*95
+			set {_gui} to a new chest inventory with 3 rows with name "&6&lLottery"
+			set slots (integers between 0 and 26) of {_gui} to black glass pane named " " 
+			set slot 11 of {_gui} to nametag named "&6Bid" with lore "&cEach ticket is worth 100 tokens","&a&lUse /lottery [Number of Tickets] to buy tickets!"
+			set slot 15 of {_gui} to anvil named "&6&lLottery" with lore "&cPrize Pool: %{_prize}% &7(5%% Tax Rate)","&aYour current tickets: %{_i}%","&cYour chances of winning: %{_c}%%%"
+			open {_gui} to player
+		if arg-1 is set:
+			if {lottery} is false:
+				send "&c&lA lottery isn't currently active"
+				stop
+			if arg-1 <=0:
+				send "&c&lYou can not buy a negative amount of tickets!"
+				stop
+			set {_n} to arg-1
+			set {_p} to {_n}*100
+			set {_gui} to a new chest inventory with 3 rows with name "&6&lBuy Tickets"
+			set slots (integers between 0 and 26) of {_gui} to black glass pane named " " 
+			set slot 11 of {_gui} to green concrete named "&aConfirm" with lore "&aUse %{_p}% Tokens to Buy %{_n}% Tickets!"
+			set {Tickets::%player's uuid%} to {_n}
+			set slot 15 of {_gui} to red concrete named "&c&lExit" with lore "&cExit"
+			open {_gui} to player
+			if arg-2 is "confirm":
+				if getcoins(player) >= {_p}:
+					coins(player,0-{_p})
+					loop {_n} times:							
+						add "%player%" to {lottery::*}
+					delete {Tickets::%player's uuid%}
+					send "&a&lBought %{_n}% tickets for %{_p}% tokens!"
+				else if getcoins(player) <= {_p}:
+					send "&c&lYou do not have %{_p}% tokens!"
+				
+			
+on inventory click:
+	if name of event-inventory is "&6&lLottery":
+		cancel event
+	if name of event-inventory is "&6&lBuy Tickets":
+		cancel event 
+		set {_n} to {Tickets::%player's uuid%}
+		if index of event-slot is 11:
+			execute player command "lottery %{_n}% confirm"
+			execute player command "lottery"
+		if index of event-slot is 15:
+			execute player command "lottery"
+
+on load:
+	delete {Tickets::*}
+	delete {lottery::*}
+
+every 6 hours:
+	set {lottery} to true
+	loop all players:
+		send "&6[Lottery] &cHas now started! Use /lottery for more information! &aDrawing in 5 minutes" to loop-player
+	wait 60 seconds
+	loop all players:
+		send "&6[Lottery] &cLottery is active. The current prize pool is %getprize()% tokens! &aDrawing in 4 minutes" to loop-player
+	wait 60 seconds
+	loop all players:
+		send "&6[Lottery] &cLottery is active. The current prize pool is %getprize()% tokens! &aDrawing in 3 minutes" to loop-player
+	wait 60 seconds
+	loop all players:
+		send "&6[Lottery] &cLottery is active. The current prize pool is %getprize()% tokens! &aDrawing in 2 minutes" to loop-player
+	wait 60 seconds
+	loop all players:
+		send "&6[Lottery] &cLottery is active. The current prize pool is %getprize()% tokens! &aDrawing in 1 minute" to loop-player
+	wait 30 seconds
+	loop all players:
+		send "&6[Lottery] &cLottery is active. The current prize pool is %getprize()% tokens! &aDrawing in 30 seconds" to loop-player
+	wait 10 seconds
+	loop all players:
+		send "&6[Lottery] &cLottery is active. The current prize pool is %getprize()% tokens! &aDrawing in 10 seconds" to loop-player
+	wait 5 seconds
+	loop all players:
+		send "&6[Lottery] &cLottery is active. The current prize pool is %getprize()% tokens! &aDrawing in 5 seconds" to loop-player
+	wait 1 second
+	loop all players:
+		send "&6[Lottery] &cLottery is active. The current prize pool is %getprize()% tokens! &aDrawing in 4 seconds" to loop-player
+	wait 1 second
+	loop all players:
+		send "&6[Lottery] &cLottery is active. The current prize pool is %getprize()% tokens! &aDrawing in 3 seconds" to loop-player
+	wait 1 second
+	loop all players:
+		send "&6[Lottery] &cLottery is active. The current prize pool is %getprize()% tokens! &aDrawing in 2 seconds" to loop-player
+	wait 1 second
+	loop all players:
+		send "&6[Lottery] &cLottery is active. The current prize pool is %getprize()% tokens! &aDrawing in 1 seconds" to loop-player
+	set {_p} to random element out of {lottery::*}
+	set {_i} to 0
+	set {_n} to 0
+	loop {lottery::*}:
+		set {_n} to {_n}+1
+		if loop-value is {_p}:
+			set {_i} to {_i}+1
+	if {_n} is not 0:
+		set {_c} to {_i}/{_n}*100
+	if {_n} is 0:
+		set {_c} to 0
+	set {_prize} to {_n}*95
+	loop all players:
+		send "&6[Lottery] &c%{_p}% won! They bought %{_i}% tickets and had a %{_c}%%% chance of winning!" to loop-player
+	delete {Tickets::*}
+	delete {lottery::*}
+	set {lottery} to false
+	
+command /startlottery:
+	permission: op
+	trigger:
+		set {lottery} to true
+		loop all players:
+			send "&6[Lottery] &cHas now started! Use /lottery for more information!" to loop-player
+
+command /endlottery:
+	permission: op
+	trigger:
+		set {_p} to random element out of {lottery::*}
+		set {_i} to 0
+		set {_n} to 0
+		loop {lottery::*}:
+			set {_n} to {_n}+1
+			if loop-value is {_p}:
+				set {_i} to {_i}+1
+		if {_n} is not 0:
+			set {_c} to {_i}/{_n}*100
+		if {_n} is 0:
+			set {_c} to 0
+		set {_prize} to {_n}*95
+		loop all players:
+			send "&6[Lottery] &c%{_p}% won! They bought %{_i}% tickets and had a %{_c}%%% chance of winning!" to loop-player
+		delete {Tickets::*}
+		delete {lottery::*}
+		set {lottery} to false
+
+function getprize() :: integer:
+	set {_n} to 0
+	loop {lottery::*}:
+		set {_n} to {_n}+1
+	set {_prize} to {_n}*95
+	return {_prize}
+
+	

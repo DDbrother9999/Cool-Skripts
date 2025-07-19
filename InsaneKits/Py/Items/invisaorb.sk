@@ -1,0 +1,29 @@
+on place:
+    if tag "invisaorb" of nbt compound of player's tool is 1:
+        cancel event
+
+on click:
+    if tag "invisaorb" of nbt compound of player's tool is 1:
+        player's y coordinate <= 110
+        player is in region "boxs4" parsed as region
+        loop players in radius 5 of player:
+            add loop-player to {_players::*}
+        loop blocks in radius 6 of player:
+            if loop-block is in region "boxs4" parsed as region:
+                set loop-block to white stained glass
+                add loop-block's location to {_blocks::*}
+        loop blocks in radius 5 of player:
+            if loop-block is in region "boxs4" parsed as region:
+                set loop-block to air
+        loop {_players::*}:
+            set {_p} to loop-value
+            loop {_players::*}:
+                hide {_p} from loop-value-2
+        wait 3 seconds
+        loop {_blocks::*}:
+            set block at loop-value to air
+        loop {_players::*}:
+            set {_p} to loop-value
+            loop {_players::*}:
+                reveal {_p} to loop-value-2
+        

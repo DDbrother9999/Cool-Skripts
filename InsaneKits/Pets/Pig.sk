@@ -1,0 +1,3 @@
+function PigPet(p: text):
+	set {_p} to {_p} parsed as player
+	make {_p} execute command "/piggybank"

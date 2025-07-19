@@ -1,0 +1,24 @@
+import:
+    org.bukkit.Bukkit
+
+command /buildmode <offlineplayer> [<text>]:
+    permission: crm.buildmode
+    aliases: build
+    usage: &cUsage: /buildmode <name> [time]
+    trigger:
+        if arg-2 is set:
+            Bukkit.broadcast("§9[Staff] §f%player's name% &7granted §c%arg-1% §7build permissions for the duration of §a%arg-2%§7.", "rank.staff")
+            Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "lp user %arg-1's name% parent addtemp build %arg-2%")
+            send "&aSuccessfully gave them build permissions for %arg-2%!"
+        else:
+            Bukkit.broadcast("§9[Staff] §f%player's name% &7granted §c%arg-1% §7build permissions for the duration of §a3h§7.", "rank.staff")
+            Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "lp user %arg-1's name% parent addtemp build 3h")
+            send "&aSuccessfully gave them build permissions for 3h!"
+
+command /removebuild <offlineplayer>:
+    permission: crm.buildmode
+    usage: &cUsage: /removebuild <name>
+    trigger:
+        Bukkit.broadcast("§9[Staff] §f%player's name% &7removed build permissions from §c%arg-1%§7.", "rank.staff")
+        Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "lp user %arg-1's name% parent removetemp build")
+        send "&aRemoved their build perms!"

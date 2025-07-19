@@ -1,0 +1,846 @@
+options:
+# ###################################################################
+
+# Zabrid's Clans
+# Customer(s): Jean-Claude La Croix Sainbaire#7597
+# Author(s): {zabrid}#3433
+# Date 5/27/22
+
+# ###################################################################
+
+    # Add aliases to the /clans command. The main command
+    # is /clans so you don't need to make an alias for that
+    aliases: /clan, /c
+    tab-completions-commands: "/clans" and "/c" and "/clan"
+
+    # How many people should be allowed in a clan?
+    # This is including the leader*
+    # This can be upgraded in the perks shop, which is configurable below.
+    clan member limit: 5
+
+    # How many characters you want the max clan name to be.
+    maximum clan name length: 12
+
+    # The characters that are allowed in a clan's name
+    allowed chars in clan name: "a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z", "0", "1", "2", "3", "4", "5", "6", "7", "8", "9" and "10"
+
+    # Disallowed words inside of a clan's name.
+    disallowed words in clan name: "nig" or "nigger" or "moles" or "m0les"
+
+    # Upgrade Configurations
+    upgrades outline item: 1 of gray stained glass pane named "&8Clan Upgrades"
+    upgrades fill item: air
+
+    # Placeholderapi when there's no clan
+    placeholder-noclan: "No Clan"
+
+    # Clan Leaderboard
+    clan leaderboard [header]: "" and "&eTop 10 Richest Clans" and ""
+    clan leaderboard [footer]: ""
+    clan leaderboard [position]: "&e##%{_position}% &6%{_clan}%&8 - &b%{_coins}% Coins"
+
+    # Clan Chest
+    clan chest [name]: "&8Clan Chest" # Make sure this name is different from any other guis in this script
+
+    # Clan Interface
+    clan interface [name]: "&8Clan Interface" # Make sure this name is different from any other guis in this script
+    clan interface [size]: 5 #rows
+    clan interface [border-item]: black stained glass pane named "&8Clan Interface" # To disable this set this to the same thing as the fill-item.
+    clan interface [fill-item]: gray stained glass pane named "&8Clan Interface" # To disable this simply set it to `air`
+    clan interface [members-slot]: 13
+    clan interface [members-offline-list]: "&6 - &c%{_player}%"
+    clan interface [members-online-list]: "&6 - &a%{_player}%"
+    clan interface [members-item]: 1 of {_p}'s skull named "&6Clan Members" with lore "" and "&7Clan Name: &b%{_name}%" and "&7Clan Size: &b%{_size}%" and "&7Max Members: &b%{_max}%" and "" and "&eLeader:" and "&6 - &f%{_leader}%" and "" and "&eMembers &8(&7%{_online}%/%{_size}%&8)&e:" and {_members::*} and ""
+    clan interface [shop-slot]: 20
+    clan interface [shop-item]: 1 of sunflower named "&6Clan Shop" with lore "" and "&7Clan Name: &b%{_name}%" and "&7Clan Balance: &e%{_coins}% Coins" and "" and "&bClick to open the clan shop."
+    clan interface [quests-slot]: 24
+    clan interface [quests-item]: 1 of minecart with chest named "&6Clan Quests" with lore "" and "&7Clan Name: &b%{_name}%" and "" and "&7Time Since Weekly Reset: &b%{_weekly}%" and "&7Time Since Daily Reset: &b%{_daily}%" and "" and "&bClick to open the clan quests."
+    clan interface [chest-slot]: 30
+    clan interface [chest-item]: 1 of ender chest named "&6Clan Virtual Storage" with lore "" and "&7Your clan's virtual chest storage." and "" and "&bClick to open your clan's virtual storage."
+    clan interface [ff-slot]: 32
+    clan interface [ff-item]: 1 of diamond sword with all flags hidden named "&6Clan Friendly Fire" with lore "" and "&7Enable/disable your clan being able to hit eachother." and "" and "&7Toggle: &b%{_toggle}%" and "" and "&bClick to open your clan's virtual storage."
+
+    # Clan Shop
+    clan shop [name]: "&8Clan Shop" # Make sure this name is different from any other guis in this script
+    clan shop [size]: 3
+    clan shop [border-item]: black stained glass pane named "&8Clan Shop" # To disable this set this to the same thing as the fill-item.
+    clan shop [fill-item]: gray stained glass pane named "&8Clan shop" # To disable this simply set it to `air`
+    clan shop [back-button-slot]: 26
+    clan shop [back-button-item]: 1 of birch door named "&cReturn to Clan Interface."
+    clan shop [perks-shop-slot]: 12
+    clan shop [perks-shop-item]: 1 of end portal frame named "&6Clan Perks" with lore "&7Purchase perks for you clan!" and "" and "&bClick to open the clan perks shop."
+    clan shop [item-shop-slot]: 14
+    clan shop [item-shop-item]: 1 of crafting table named "&6Clan Item Shop" with lore "&7Purchase items with your clan coins!" and "" and "&bClick to open the clan item shop."
+
+    # Clan Show Message
+    clan show [message]: "" and "&6&lName: &e%{_name}%" and "" and "&eCoins: &b%{_coins}%" and "&eTotal Members: &b%{_size}%" and "" and "&eOnline Players: &a%{_online}%" and "&eOffline Players: &c%{_offline}%" and ""
+
+    # Clan Perk Shop
+    clan perk shop [name]: "&8Clan Perk Shop" # Make sure this name is different from any other guis in this script
+    clan perk shop [size]: 3
+    clan perk shop [border-item]: black stained glass pane named "&8Clan Perk Shop" # To disable this set this to the same thing as the fill-item.
+    clan perk shop [fill-item]: gray stained glass pane named "&8Clan Perk shop" # To disable this simply set it to `air`
+    clan perk shop [back-button-slot]: 26
+    clan perk shop [back-button-item]: 1 of birch door named "&cReturn to Clan Shop."
+    clan perk shop [chest-upgrade-max-level]: 6 # This is because there are 6 rows in a chest, you can change this if you want
+    clan perk shop [chest-upgrade-base-price]: 1500
+    clan perk shop [chest-upgrade-multiplier]: ( {_baseprice} * ( {_level} * 1.5 ) ) # the calculation used to get the price of the upgrade
+    clan perk shop [chest-upgrade-slot]: 11
+    clan perk shop [chest-upgrade-item]: 1 of ender chest named "&6Clan Virtual Chest" with lore "&7Upgrade your clan's virtual chest storage." and "" and "&7Current Level: &b%{_level}%/6" and "&7Rows Unlocked: &b%{_level}% Rows" and "&7Cost: &e%{_cost}% Coins" and "" and "&bClick to purchase this upgrade."
+    clan perk shop [member-upgrade-max-level]: 2 # This is because there are 6 rows in a chest, you can change this if you want
+    clan perk shop [member-upgrade-base-price]: 5000
+    clan perk shop [member-upgrade-multiplier]: ( {_baseprice} * ( {_level} * 2 ) ) # the calculation used to get the price of the upgrade
+    clan perk shop [member-upgrade-slot]: 13
+    clan perk shop [member-upgrade-item]: 1 of player head named "&6Clan Member Limit" with lore "&7Upgrade how many people can be in your clan." and "" and "&7Current Level: &b%{_level}%/2" and "&7Extra Players: &a+%{_level}% Players" and "&7Cost: &e%{_cost}% Coins" and "" and "&bClick to purchase this upgrade."
+    clan perk shop [ff-upgrade-base-price]: 5000
+    clan perk shop [ff-upgrade-slot]: 15
+    clan perk shop [ff-upgrade-item]: 1 of diamond sword with all flags hidden named "&cDisable Friendly Fire" with lore "&7Disable members of your clan hitting eachother." and "" and "&7Current Level: &b%{_level}%/1" and "&7Cost: &e%{_cost}% Coins" and "" and "&bClick to purchase this upgrade."
+
+    # Message Configurations
+    # Because this script is premium I made every message a normal player can see configurable (:
+    message [insufficient-permissions]: "&cYou do not have sufficient permissions to use this."
+    message [help-message]: "&8&m------------&e Clans Help &8&m------------" and "&e/clans &7Open the clan interface." and "&e/clans create <name> &7Create a clan." and "&e/clans rename <name> &7Rename your clan." and "&e/clans invite <player> &7Invite a player to your clan." and "&e/clans leave &7Leave your current clan." and "&e/clans setleader <player>&7 Give a player leader of your clan." and "&e/clans who/show <player/clan> &7View all the information about a clan." and "&e/clans shop &7Purchase items and perks for your clan." and "&e/clans quests/missions &7Complete missions as a clan for rewards." and "&e/clans leaderboard/top&7 View the 5 richest clans." and "&e/clans chat &7Toggle your clan chat on/off." and "&e/clans chest&7 Open the clan chest."
+    message [no-clan-name-specified-in-creation]: "&cPlease specify the name of the clan you wish to create."
+    message [cannot-create-clan-while-in-clan]: "&cYou cannot create a clan while you're already in one."
+    message [clan-with-name-already-exists]: "&cA clan with that name already exists."
+    message [clan-name-cannot-contain-illegal-char]: "&cA clan's name cannot contain illegal characters. You can only use characters A-Z and 0-9"
+    message [clan-name-too-long]: "&cThe clan name you specified is too long, you can only have up to 12 characters."
+    message [clan-name-illegal-words]: "&cThe clan name you specified has words disallowed by the server admins."
+    message [clan-created-broadcast]: "&a&l(!)&a %player%&f has created a new clan named &a&n%{_name}%&f."
+    message [you-are-not-in-a-clan]: "&cYou cannot do this, as you're not in a clan."
+    message [leader-cannot-leave-clan]: "&cAs you're the leader you cannot leave the clan. You must either disband or give someone else leadership."
+    message [you-have-left-clan]: "&c&l(!)&c You&f have left the &c&n%{_name}%&f clan!"
+    message [member-has-left-your-clan]: "&c&l(!)&c %player%&f has left your clan!"
+    message [you-must-be-leader]: "&cYou must be leader in order to do this."
+    message [clan-disbaned]: "&c&l(!)&c %player%&f has disbanded the clan named &c&l%{_name}%&f!"
+    message [clan-rename]: "&a&l(!)&a %player%&f has renamed their clan from &a""%{_oldname}%"" &8-> &a""%{_newname}%""&f."
+    message [offline-invalid-player-specified]: "&cThe player you specified is invalid because they're not online."
+    message [you-cannot-invite-someone-already-in-clan]: "&cYou cannot invite a player who is already in a clan."
+    message [leader-invited-someone]: "&a&l(!)&a %player%&f has invited &a%{_p}%&f to your clan."
+    message [recieved-invite]: "" and "&a&l(!)&f You have been invited to &a%{_name}%&f by %player%." and "" and "<cmd:/clans join %{_name}%>&a&l[ACCEPT] <reset>&c&l[DECLINE]" and ""
+    message [clan-invite-expired]: "&cThe clan invite to %{_p}%&c has expired."
+    message [clan-invite-from-expired]: "&cYour clan invite to %{_name}%&c has expired."
+    message [already-pending-invite]: "&cYou already have a pending invite for %{_p}%."
+    message [must-specify-clan-to-join]: "&cPlease specify the name of the clan you wish to join."
+    message [no-clan-with-name-exists]: "&cNo clan with the name you specified exists."
+    message [no-pending-invites-from-clan]: "&cThe clan you're trying to join has not invited you."
+    message [cannot-join-clan-while-in-clan]: "&cYou're already in a clan, you cannot join another."
+    message [successfully-joined-clan]: "&a&l(!)&f You have successfully joined the &a&l%{_name}%&f clan!"
+    message [member-joined-your-clan]: "&a&l(!)&a %player%&f has joined your clan!"
+    message [you-must-specify-player-to-invite]: "&cYou must specify a player to invite to your clan."
+    message [already-have-pending-invite]: "&cYour clan already has a pending invite to %{_p}%."
+    message [not-enough-coins]: "&cYour clan does not have enough coins to purchase this."
+    message [this-perk-is-at-max-level]: "&cYour clan has already maxed out this perk."
+    message [player-purchased-upgrade]: "&a&l(!)&a %player%&f purchased the &a%{_upgradeName}%&f perk. It is now level &a%{_level} + 1%&f."
+    message [clan-has-not-unlocked-this-perk]: "&cYour clan has not unlocked this perk."
+    message [clan-full]: "&cThe clan you're trying to join is full."
+    message [leader-has-toggled-friendly-fire]: "&fYour clan leader &b%player%&f, has &b%{_toggle}%&f Friendly Fire."
+    message [friendly-fire-on]: "&cYour clan has friendly fire enabled, so you cannot hit %victim%."
+    message [kicked-player-not-in-your-clan]: "&cThe player you're trying to kick is not in your clan."
+    message [you-have-been-kicked]: "&c&l(!)&c You have been kicked from %{_name}%!"
+    message [leader-has-kicked-member]: "&c&l(!)&c %player%&f has kicked &c%{_p}%&f from your clan."
+    message [you-cannot-leader-someone-outside-your-clan]: "&cYou cannot give leader to someone who isn't in your clan."
+    message [transfered-leader]: "&a&l(!)&a %player%&f has transfered leadership to &b%{_p}%&f."
+    message [you-must-specify-a-clan-or-player]: "&cYou must specify a player or clan name."
+    message [no-player-or-clan-by-that-name]: "&cThere are no players or clans who go by that name."
+    message [player-is-not-in-a-clan]: "&c%{_p}% is not in any clan."
+    message [you-have-enabled-clan-chat]: "&aYou have enabled clan chat."
+    message [you-have-disabled-clan-chat]: "&cYou have disabled clan chat."
+    message [clan-chat]: "&2&l[CLAN CHAT] &8(&7%{_role}%&8) &e%player%&8: &b%message%"
+    message [unknown-argument]: "&fThe argument you specified &3""%arg 1%""&f is unknown." and "&fIf you need help use &e/clans help&f."
+
+# ###################################################################
+
+# Zabrid's Clans
+# Source Code
+
+# Feel free to change anything below this point.
+# Although, beware you might break something!
+
+# ###################################################################
+
+# Functions
+function zclans_genrandomstring(length: integer) :: text:
+    add "a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z", "0", "1", "2", "3", "4", "5", "6", "7", "8", "9" and "10" to {_list::*}
+    set {_return} to ""
+    loop {_length} times:
+        set {_return} to "%{_return}%%random element of {_list::*}%"
+    return {_return}
+function zclans_bordergui(gui: inventory, rows: number, borderItem: item) :: inventory:
+    set slot (numbers from 0 to 8) of {_gui} to {_borderItem}
+    loop ({_rows} - 2) times:
+        set slot (((loop-value) * 9), and ((loop-value) * 9) + 8) of {_gui} to {_borderItem}
+    set slot (numbers from ({_rows} - 1) * 9 to (({_rows} - 1) * 9) + 8) of {_gui} to {_borderItem}
+    return {_gui}
+function zclans_checkclanstring(text: text) :: boolean:
+    replace all "a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z", "0", "1", "2", "3", "4", "5", "6", "7", "8", "9" and "10" in {_text} with ""
+    if {_text} is not "":
+        return false
+    return true
+function zclans_setglowing(i: item) :: item:
+    enchant {_i} with unbreaking 1
+    return {_i}
+
+# Command Stuff
+command /clans [<text>] [<text>] [<text>] [<text>] [<text>]:
+    aliases: {@aliases}
+    trigger:
+        if arg 1 is not set:
+            set {_clan-id} to {zclans.playerclans::%uuid of player%}
+            if {_clan-id} is not set:
+                send formatted {@message [help-message]}
+                stop
+            zclans_openclanmenu(player)
+        else if arg 1 is "chat" or "c":
+            set {_clan-id} to {zclans.playerclans::%uuid of player%}
+            if {_clan-id} is not set:
+                send {@message [you-are-not-in-a-clan]}
+                stop
+            if {zclans.clan-%{_clan-id}%-chat::*} contains uuid of player:
+                remove uuid of player from {zclans.clan-%{_clan-id}%-chat::*}
+                send {@message [you-have-disabled-clan-chat]}
+            else:
+                add uuid of player to {zclans.clan-%{_clan-id}%-chat::*}
+                send {@message [you-have-enabled-clan-chat]}
+        else if arg 1 is "show" or "who":
+            if arg 2 is not set:
+                send {@message [you-must-specify-a-clan-or-player]}
+                stop
+            loop {zclans.clanlist::*}:
+                if {zclans.clan-%loop-value%::name} is arg 2:
+                    set {_clan-id} to loop-value
+                    stop 1 loop
+            if {_clan-id} is not set:
+                set {_p} to arg 2 parsed as offline player
+                if {_p} has played before:
+                    set {_clan-id} to {zclans.playerclans::%uuid of {_p}%}
+                    if {_clan-id} is not set:
+                        set {_clan-id} to "no clan found"
+                else:
+                    send {@message [no-player-or-clan-by-that-name]}
+                    stop
+            if {_clan-id} is not "no clan found":
+                set {_name} to {zclans.clan-%{_clan-id}%::name}
+                set {_size} to size of {zclans.clan-%{_clan-id}%-players::*}
+                loop {zclans.clan-%{_clan-id}%-players::*}:
+                    if loop-value parsed as offline player is online:
+                        add "%loop-value parsed as offline player%" to {_online::*}
+                    else:
+                        add "%loop-value parsed as offline player%" to {_offline::*}
+                set {_online} to "%{_online::*} ? "Nobody..."%"
+                set {_offline} to "%{_offline::*} ? "Nobody..."%"
+                set {_coins} to {zclans.clan-%{_clan-id}%::coins}
+                send {@clan show [message]}
+            else:
+                send {@message [player-is-not-in-a-clan]}
+        else if arg 1 is "admin":
+            if player has permission "clans.admin":
+                set {_allow} to true
+            if sender is console:
+                set {_allow} to true
+            if {_allow} is not set:
+                send {@message [insufficient-permissions]}
+                stop
+            if arg 2 is not set:
+                send ""
+                send "&cZabrid's Clans Admin Panel"
+                send ""
+                send "&c/clans admin coins add [<clan-name>] [<amount>] &8- &7Add Coins."
+                send "&c/clans admin coins remove [<clan-name>] [<amount>] &8- &7Remove coins."
+                send "&c/clans resetquesttimers &8- &7Reset all quest timers along with all quests."
+                send ""
+            else if arg 2 is "coins" or "coin":
+                if arg 3 is not set:
+                    send "&cYou must specify an action."
+                    send "&c/clans coins add [<clan-name>] [<amount>]"
+                    send "&c/clans coins remove [<clan-name>] [<amount>]"
+                    stop
+                if arg 4 is not set:
+                    send "&cYou must specify a clan to take action."
+                    send "&c/clans coins %arg 3% [<clan-name>] [<amount>]"
+                    stop
+                if arg 5 is not set:
+                    send "&cPlease specify an amount."
+                    send "&c/clans coins %arg 3% %arg 4% [<amount>]"
+                    stop
+                set {_amt} to arg 5 parsed as integer
+                if {_amt} is not an integer:
+                    send "&cYou must specify an integer for an amount."
+                    send "&c/clans coins %arg 3% %arg 4% [<amount>]"
+                    stop
+                loop {zclans.clanlist::*}:
+                    if {zclans.clan-%loop-value%::name} is arg 4:
+                        set {_clan-id} to loop-value
+                        stop 1 loop
+                if {_clan-id} is not set:
+                    send {@message [no-clan-with-name-exists]}
+                    stop
+                if arg 3 is "take":
+                    subtract {_amt} from {zclans.clan-%{_clan-id}%::coins}
+                    send "&aYou successfully subtracted %{_amt}% from %arg 4%."
+                    send "&7 Their new clan balance is &e%{zclans.clan-%{_clan-id}%::coins}% Coins&7."
+                else if arg 3 is "add":
+                    add {_amt} to {zclans.clan-%{_clan-id}%::coins}
+                    send "&aYou successfully added %{_amt}% to %arg 4%."
+                    send "&7 Their new clan balance is &e%{zclans.clan-%{_clan-id}%::coins}% Coins&7."
+                else:
+                    send "&cYou can only `add` or `take` from a coin balance."
+            else if arg 2 is "resetquesttimers":
+                set {zclans.questtimer.weekly} to now
+                set {zclans.questtimer.daily} to now
+                loop {zclans.clanlist::*}:
+                    delete {zclans.clan-%loop-value%-weeklyquests::*}
+                    delete {zclans.clan-%loop-value%-dailyquests::*}
+                send "&aYou have reset all Daily & Weekly quests."
+        else if arg 1 is "help":
+            send formatted {@message [help-message]}
+        else if arg 1 is "create":
+            if arg 2 is not set:
+                send {@message [no-clan-name-specified-in-creation]}
+                stop
+            if {zclans.playerclans::%uuid of player%} is set:
+                send {@message [cannot-create-clan-while-in-clan]}
+                stop
+            if zclans_checkclanstring(arg 2) is false:
+                send {@message [clan-name-cannot-contain-illegal-char]}
+                stop
+            if length of arg 2 is greater than {@maximum clan name length}:
+                send {@message [clan-name-too-long]}
+                stop
+            if arg 2 contains {@disallowed words in clan name}:
+                send {@message [clan-name-illegal-words]}
+                stop
+            set {_name} to arg 2
+            loop {zclans.clanlist::*}:
+                if {zclans.clan-%loop-value%::name} is {_name}:
+                    send {@message [clan-with-name-already-exists]}
+                    stop
+            while {_check} is not set: 
+                set {_clan-id} to zclans_genrandomstring(50)
+                set {_count} to 0
+                if {zclans.clan-%{_clan-id}%::name} is not set:
+                    add 1 to {_count}
+                    if {_count} is greater than 49:
+                        stop
+                    set {_check} to true
+                wait 1 tick
+            add {_clan-id} to {zclans.clanlist::*}
+            set {zclans.clan-%{_clan-id}%::name} to {_name}
+            set {zclans.clan-%{_clan-id}%::leader} to player's uuid
+            set {zclans.clan-%{_clan-id}%::coins} to 0
+            set {zclans.clan-%{_clan-id}%::created} to now
+            add player's uuid to {zclans.clan-%{_clan-id}%-players::*}
+            set {zclans.playerclans::%uuid of player%} to {_clan-id}
+			
+            broadcast {@message [clan-created-broadcast]}
+        else if arg 1 is "leave":
+            set {_clan-id} to {zclans.playerclans::%uuid of player%}
+            if {_clan-id} is not set:
+                send {@message [you-are-not-in-a-clan]}
+                stop
+            if {zclans.clan-%{_clan-id}%::leader} is player's uuid:
+                send {@message [leader-cannot-leave-clan]}
+                stop
+            remove player's uuid from {zclans.clan-%{_clan-id}%-players::*} 
+            delete {zclans.playerclans::%uuid of player%}
+            set {_name} to {zclans.clan-%{_clan-id}%::name}
+            send {@message [you-have-left-clan]}
+            loop {zclans.clan-%{_clan-id}%-players::*}:
+                set {_p} to loop-value parsed as offline player
+                send {@message [member-has-left-your-clan]} to {_p}
+        else if arg 1 is "disband":
+            set {_clan-id} to {zclans.playerclans::%uuid of player%}
+            if {_clan-id} is not set:
+                send {@message [you-are-not-in-a-clan]}
+                stop
+            if {zclans.clan-%{_clan-id}%::leader} is not player's uuid:
+                send {@message [you-must-be-leader]}
+                stop
+            set {_name} to {zclans.clan-%{_clan-id}%::name}
+            delete {zclans.clan-%{_clan-id}%::*}
+            loop {zclans.clan-%{_clan-id}%-players::*}:
+                add loop-value parsed as offline player to {_p::*}
+                delete {zclans.playerclans::%loop-value%}
+            delete {zclans.clan-%{_clan-id}%-players::*}
+            delete {zclans.clan-%{_clan-id}%-chest::*}
+            delete {zclans.clan-%{_clan-id}%-dailyquests::*}
+            delete {zclans.clan-%{_clan-id}%-weekyquests::*}
+            broadcast {@message [clan-disbaned]}
+        else if arg 1 is "rename":
+            set {_clan-id} to {zclans.playerclans::%uuid of player%}
+            set {_name} to {zclans.clan-%{_clan-id}%::name}
+            if {_clan-id} is not set:
+                send {@message [you-are-not-in-a-clan]}
+                stop
+            if {zclans.clan-%{_clan-id}%::leader} is not player's uuid:
+                send {@message [you-must-be-leader]}
+                stop
+            if zclans_checkclanstring(arg 2) is false:
+                send {@message [clan-name-cannot-contain-illegal-char]}
+                stop
+            if length of arg 2 is greater than {@maximum clan name length}:
+                send {@message [clan-name-too-long]}
+                stop
+            if arg 2 contains {@disallowed words in clan name}:
+                send {@message [clan-name-illegal-words]}
+                stop
+            if arg 2 is {_name}:
+                send "&cYou cannot rename your clan to the same thing."
+                stop
+            set {_oldname} to {zclans.clan-%{_clan-id}%::name}
+            set {zclans.clan-%{_clan-id}%::name} to arg 2
+            set {_newname} to arg 2
+            broadcast {@message [clan-rename]}
+        else if arg 1 is "chest":
+            set {_uuid} to uuid of player
+            set {_clan-id} to {zclans.playerclans::%{_uuid}%}
+            if {_clan-id} is not set:
+                send {@message [you-are-not-in-a-clan]}
+                stop
+            if {zclans.clan-%{_clan-id}%::upgrade.chest} is not set:
+                send {@message [clan-has-not-unlocked-this-perk]}
+                stop
+            if {zclans.clan-%{_clan-id}%::chest.opened} is set:
+                send "&cSomeone is currently viewing your clan chest."
+                stop
+            set {zclans.clan-%{_clan-id}%::chest.opened} to player's uuid
+            set {_gui} to chest inventory with {zclans.clan-%{_clan-id}%::upgrade.chest} rows named {@clan chest [name]}
+            set {_slot} to -1
+            loop {zclans.clan-%{_clan-id}%-chest::*}:
+                add 1 to {_slot}
+                set slot {_slot} of {_gui} to loop-value
+            open {_gui} to player
+        else if arg 1 is "invite" or "inv":
+            set {_p} to arg 2 parsed as offline player
+            set {_clan-id} to {zclans.playerclans::%uuid of player%}
+            set {_clan-id2} to {zclans.playerclans::%uuid of {_p}%}
+            if {zclans.invites.%uuid of {_p}%::*} contains {_clan-id}:
+                send {@message [already-pending-invite]}
+                stop
+            if {_clan-id} is not set:
+                send {@message [you-are-not-in-a-clan]}
+                stop
+            if {zclans.clan-%{_clan-id}%::leader} is not player's uuid:
+                send {@message [you-must-be-leader]}
+                stop
+            if arg 2 is not set:
+                send {@message [you-must-specify-player-to-invite]}
+                stop
+            if all players does not contain {_p}:
+                send {@message [offline-invalid-player-specified]}
+                stop
+            if {_clan-id2} is set:
+                send {@message [you-cannot-invite-someone-already-in-clan]}
+                stop
+            if {zclans.invites.%uuid of {_p}%::*} contains {_clan-id}:
+                send {@message [already-have-pending-invite]}
+                stop
+            set {_name} to {zclans.clan-%{_clan-id}%::name}
+            send formatted {@message [recieved-invite]} to {_p}
+            loop {zclans.clan-%{_clan-id}%-players::*}:
+                set {_loop-player} to loop-value parsed as offline player
+                send {@message [leader-invited-someone]} to {_loop-player}
+            add {_clan-id} to {zclans.invites.%uuid of {_p}%::*}
+            wait 30 seconds
+            send {@message [clan-invite-expired]}
+            send {@message [clan-invite-from-expired]} to {_p}
+            delete {zclans.invites.%uuid of {_p}%::*}
+        else if arg 1 is "top" or "leaderboard":
+            loop {zclans.clanlist::*}:
+                set {_clans::%loop-value%} to {zclans.clan-%loop-value%::coins}
+            loop {_clans::*}:
+                add 1 to {_size}
+                if {_low.to.high.list::%loop-value%} is not set:
+                    set {_low.to.high.list::%loop-value%} to loop-index
+                else:
+                    set {_n} to 0
+                    loop {_size} times:
+                        set {_n} to {_n}+1
+                        {_low.to.high.list::%loop-value-1%.%{_n}%} is not set
+                        set {_low.to.high.list::%loop-value-1%.%{_n}%} to loop-index
+                        stop loop
+            set {_n} to size of {_low.to.high.list::*}
+            loop {_low.to.high.list::*}:
+                set {_high.to.low.list::%{_n}%} to loop-value
+                set {_n} to {_n}-1
+            set {_position} to 0
+            send {@clan leaderboard [header]}
+            loop {_high.to.low.list::*}:
+                add 1 to {_position}
+                {_position} is less than 11
+                set {_coins} to {zclans.clan-%loop-value%::coins}
+                set {_clan} to {zclans.clan-%loop-value%::name}
+                send {@clan leaderboard [position]}
+            send {@clan leaderboard [footer]}
+        else if arg 1 is "join":
+            set {_name} to arg 2
+            if {zclans.playerclans::%uuid of player%} is set:
+                send {@message [cannot-join-clan-while-in-clan]}
+                stop
+            if arg 2 is not set:
+                send {@message [must-specify-clan-to-join]}
+                stop
+            loop {zclans.clanlist::*}:
+                if {zclans.clan-%loop-value%::name} is arg 2:
+                    set {_clan-id} to loop-value
+                    stop 1 loop
+            if {_clan-id} is not set:
+                send {@message [no-clan-with-name-exists]}
+                stop
+            if {zclans.invites.%uuid of player%::*} does not contain {_clan-id}:
+                send {@message [no-pending-invites-from-clan]}
+                stop
+            if size of {zclans.clan-%{_clan-id}%-players::*} is greater than or equal to {@clan member limit} + ( {zclans.clan-%{_clan-id}%::upgrade.members} ? 0):
+                send {@message [clan-full]}
+                stop
+            delete {zclans.invites.%uuid of player%::*}
+            set {zclans.playerclans::%uuid of player%} to {_clan-id}
+            send {@message [successfully-joined-clan]}
+            loop {zclans.clan-%{_clan-id}%-players::*}:
+                set {_loop-player} to loop-value parsed as offline player
+                send {@message [member-joined-your-clan]} to {_loop-player}
+            add player's uuid to {zclans.clan-%{_clan-id}%-players::*}
+        else if arg 1 is "kick":
+            set {_clan-id} to {zclans.playerclans::%uuid of player%}
+            if {_clan-id} is not set:
+                send {@message [you-are-not-in-a-clan]}
+                stop
+            if {zclans.clan-%{_clan-id}%::leader} is not player's uuid:
+                send {@message [you-must-be-leader]}
+                stop
+            if arg 2 is not set:
+                send "&cPlease specify a player to kick."
+                stop
+            set {_p} to arg 2 parsed as offline player
+            set {_uuid} to uuid of {_p}
+            if {_p} is player:
+                send "&cYou cannot kick yourself from your own clan."
+                stop
+            if {zclans.playerclans::%{_uuid}%} is not {_clan-id}:
+                send {@message [kicked-player-not-in-your-clan]}
+                stop
+            delete {zclans.playerclans::%{_uuid}%}
+            set {_name} to {zclans.clan-%{_clan-id}%::name}
+            remove {_uuid} from {zclans.clan-%{_clan-id}%-players::*}
+            send {@message [you-have-been-kicked]} to {_p}
+            loop {zclans.clan-%{_clan-id}%-players::*}:
+                set {_loop-p} to loop-value parsed as offline player
+                send {@message [leader-has-kicked-member]} to {_loop-p}
+        else if arg 1 is "setleader":
+            set {_clan-id} to {zclans.playerclans::%uuid of player%}
+            if {_clan-id} is not set:
+                send {@message [you-are-not-in-a-clan]}
+                stop
+            if {zclans.clan-%{_clan-id}%::leader} is not player's uuid:
+                send {@message [you-must-be-leader]}
+                stop
+            if arg 2 is not set:
+                send "&cPlease specify a player to give leader to."
+                stop
+            set {_p} to arg 2 parsed as offline player
+            set {_uuid} to uuid of {_p}
+            if {_p} is player:
+                send "&cYou cannot promote yourself to leader."
+                stop
+            if {zclans.playerclans::%{_uuid}%} is not {_clan-id}:
+                send {@message [you-cannot-leader-someone-outside-your-clan]}
+                stop
+            set {zclans.clan-%{_clan-id}%::leader} to {_uuid}
+            loop {zclans.clan-%{_clan-id}%-players::*}:
+                set {_loop-p} to loop-value parsed as offline player
+                send {@message [transfered-leader]} to {_loop-p}
+        else if arg 1 is "shop":
+            zclans_openshopmenu(player)
+        else if arg 1 is "mission" or "quest" or "missions" or "quests":
+            zclans_openquestsmenu(player)
+        else:
+            send {@message [unknown-argument]}
+# Events 
+on join:
+    delete {zclans.invites.%uuid of player%::*}
+on disconnect:
+    delete {zclans.invites.%uuid of player%::*}
+on chat:
+    set {_clan-id} to {zclans.playerclans::%uuid of player%}
+    {_clan-id} is set
+    {zclans.clan-%{_clan-id}%-chat::*} contains uuid of player
+    cancel event
+    if {zclans.clan-%{_clan-id}%::leader} is player's uuid:
+        set {_role} to "Leader"
+    else:
+        set {_role} to "Member"
+    loop {zclans.clan-%{_clan-id}%-players::*}:
+        set {_loop-p} to loop-value parsed as offline player
+        send {@message [clan-chat]} to {_loop-p}
+on damage of player:
+    attacker is a player
+    set {_auuid} to uuid of attacker
+    set {_aclan-id} to {zclans.playerclans::%{_auuid}%}
+    set {_vuuid} to uuid of victim
+    set {_vclan-id} to {zclans.playerclans::%{_vuuid}%}
+    {zclans.playerclans::%{_vuuid}%} is {zclans.playerclans::%{_auuid}%}
+    {zclans.clan-%{_vclan-id}%::toggle.ff} is set
+    cancel event
+    send {@message [friendly-fire-on]} to attacker
+on inventory close:
+    if name of player's current inventory is {@clan chest [name]}:
+        set {_gui} to player's current inventory
+        set {_clan-id} to {zclans.playerclans::%uuid of player%}
+        if {_clan-id} is not set:
+            send {@message [you-are-not-in-a-clan]}
+            stop
+        delete {zclans.clan-%{_clan-id}%-chest::*}
+        set {_slot} to -1
+        loop 56 times:
+            add 1 to {_slot}
+            if slot {_slot} of {_gui} is not air:
+                add slot {_slot} of {_gui} to {zclans.clan-%{_clan-id}%-chest::*}
+        delete {zclans.clan-%{_clan-id}%::chest.opened}
+on load:
+    loop {zclans.clanlist::*}:
+        if {zclans.clan-%loop-value%::chest.opened} is set:
+            delete {zclans.clan-%loop-value%::chest.opened}
+# Clan Interface Menu
+function zclans_openclanmenu(p: player):
+    set {_uuid} to uuid of {_p}
+    set {_clan-id} to {zclans.playerclans::%{_uuid}%}
+    if {_clan-id} is not set:
+        send {@message [you-are-not-in-a-clan]} to {_p}
+        stop
+    set {_name} to {zclans.clan-%{_clan-id}%::name}
+    set {_coins} to {zclans.clan-%{_clan-id}%::coins}
+    set {_leader} to {zclans.clan-%{_clan-id}%::leader} parsed as offline player
+    set {_gui} to chest inventory with {@clan interface [size]} rows named {@clan interface [name]}
+    set slot (all integers between 0 and 54) of {_gui} to {@clan interface [fill-item]}
+    set {_gui} to zclans_bordergui({_gui},  {@clan interface [size]}, {@clan interface [border-item]})
+    # Members Item
+    set {_size} to size of {zclans.clan-%{_clan-id}%-players::*}
+    set {_online} to 0
+    set {_max} to {@clan member limit} + ( {zclans.clan-%{_clan-id}%::upgrade.members} ? 0)
+    loop {zclans.clan-%{_clan-id}%-players::*}:
+        set {_player} to loop-value parsed as offline player
+        if {_player} is not online:
+            add {@clan interface [members-offline-list]} to {_members::*}
+        else:
+            add 1 to {_online}
+            add {@clan interface [members-online-list]} to {_members::*}
+    set slot {@clan interface [members-slot]} of {_gui} to {@clan interface [members-item]}
+    # Coins Shop Item
+    set slot {@clan interface [shop-slot]} of {_gui} to {@clan interface [shop-item]}
+    # Quests Item
+    set {_weekly} to time since {zclans.questtimer.weekly}
+    set {_daily} to time since {zclans.questtimer.daily}
+    set slot {@clan interface [quests-slot]} of {_gui} to {@clan interface [quests-item]}
+    # Chest Item
+    set slot {@clan interface [chest-slot]} of {_gui} to {@clan interface [chest-item]}
+    # Friendly Fire Item
+    if {zclans.clan-%{_clan-id}%::toggle.ff} is set:
+        set {_toggle} to "Disabled"
+    else:
+        set {_toggle} to "Enabled"
+    set slot {@clan interface [ff-slot]} of {_gui} to {@clan interface [ff-item]}
+    open {_gui} to {_p}
+on inventory click:
+    name of player's current inventory is {@clan interface [name]}
+    cancel event
+    clicked inventory is player's current inventory
+    if index of clicked slot is {@clan interface [shop-slot]}:
+        zclans_openshopmenu(player)
+    if index of clicked slot is {@clan interface [chest-slot]}:
+        set {_uuid} to uuid of player
+        set {_clan-id} to {zclans.playerclans::%{_uuid}%}
+        if {_clan-id} is not set:
+            send {@message [you-are-not-in-a-clan]}
+            stop
+        if {zclans.clan-%{_clan-id}%::upgrade.chest} is not set:
+            send {@message [clan-has-not-unlocked-this-perk]}
+            stop
+        if {zclans.clan-%{_clan-id}%::chest.opened} is set:
+            send "&cSomeone is currently viewing your clan chest."
+            stop
+        set {zclans.clan-%{_clan-id}%::chest.opened} to player's uuid
+        set {_gui} to chest inventory with {zclans.clan-%{_clan-id}%::upgrade.chest} rows named {@clan chest [name]}
+        set {_slot} to -1
+        loop {zclans.clan-%{_clan-id}%-chest::*}:
+            add 1 to {_slot}
+            set slot {_slot} of {_gui} to loop-value
+        open {_gui} to player
+    else if index of clicked slot is {@clan interface [ff-slot]}:
+        set {_uuid} to uuid of player
+        set {_clan-id} to {zclans.playerclans::%{_uuid}%}
+        if {zclans.clan-%{_clan-id}%::leader} is not player's uuid:
+            send {@message [you-must-be-leader]}
+            stop
+        if {zclans.clan-%{_clan-id}%::upgrade.ff} is not set:
+            send {@message [clan-has-not-unlocked-this-perk]}
+            stop
+        if {zclans.clan-%{_clan-id}%::toggle.ff} is set:
+            set {_toggle} to "Enabled"
+            delete {zclans.clan-%{_clan-id}%::toggle.ff}
+        else:
+            set {_toggle} to "Disabled"
+            set {zclans.clan-%{_clan-id}%::toggle.ff} to 1
+        loop {zclans.clan-%{_clan-id}%-players::*}:
+            set {_loop-player} to loop-value parsed as offline player
+            send {@message [leader-has-toggled-friendly-fire]} to {_loop-player}
+        zclans_openclanmenu(player)
+    else if index of clicked slot is {@clan interface [quests-slot]}:
+        zclans_openquestsmenu(player)
+# Clan Shop Main Menu
+function zclans_openshopmenu(p: player):
+    set {_uuid} to uuid of {_p}
+    set {_clan-id} to {zclans.playerclans::%{_uuid}%}
+    if {_clan-id} is not set:
+        send {@message [you-are-not-in-a-clan]} to {_p}
+        stop
+    set {_name} to {zclans.clan-%{_clan-id}%::name}
+    set {_coins} to {zclans.clan-%{_clan-id}%::coins}
+    set {_leader} to {zclans.clan-%{_clan-id}%::leader} parsed as offline player
+    set {_gui} to chest inventory with {@clan shop [size]} rows named {@clan shop [name]}
+    set slot (all integers between 0 and 54) of {_gui} to {@clan shop [fill-item]}
+    set {_gui} to zclans_bordergui({_gui},  {@clan shop [size]}, {@clan shop [border-item]})
+    set slot {@clan shop [perks-shop-slot]} of {_gui} to {@clan shop [perks-shop-item]}
+    set slot {@clan shop [item-shop-slot]} of {_gui} to {@clan shop [item-shop-item]}
+    set slot {@clan shop [back-button-slot]} of {_gui} to {@clan shop [back-button-item]}
+    open {_gui} to {_p}
+on inventory click:
+    name of player's current inventory is {@clan shop [name]}
+    cancel event
+    clicked inventory is player's current inventory
+    if index of clicked slot is {@clan shop [back-button-slot]}:
+        zclans_openclanmenu(player)
+    else if index of clicked slot is {@clan shop [perks-shop-slot]}:
+        zclans_openperkshopmenu(player)
+    else if index of clicked slot is {@clan shop [item-shop-slot]}:
+        set {_uuid} to uuid of player
+        set {_clan-id} to {zclans.playerclans::%{_uuid}%}
+        if {_clan-id} is not set:
+            send {@message [you-are-not-in-a-clan]} to {_p}
+            stop
+        zclans_openitemshop(player, {_clan-id})
+
+# Clan Perk Shop
+function zclans_openperkshopmenu(p: player):
+    set {_uuid} to uuid of {_p}
+    set {_clan-id} to {zclans.playerclans::%{_uuid}%}
+    if {_clan-id} is not set:
+        send {@message [you-are-not-in-a-clan]} to {_p}
+        stop
+    set {_name} to {zclans.clan-%{_clan-id}%::name}
+    set {_coins} to {zclans.clan-%{_clan-id}%::coins}
+    set {_leader} to {zclans.clan-%{_clan-id}%::leader} parsed as offline player
+    set {_gui} to chest inventory with {@clan perk shop [size]} rows named {@clan perk shop [name]}
+    set slot (all integers between 0 and 54) of {_gui} to {@clan perk shop [fill-item]}
+    set {_gui} to zclans_bordergui({_gui},  {@clan perk shop [size]}, {@clan perk shop [border-item]})
+    set slot {@clan perk shop [back-button-slot]} of {_gui} to {@clan perk shop [back-button-item]}
+    set {_level} to {zclans.clan-%{_clan-id}%::upgrade.chest} ? 0
+    set {_baseprice} to {@clan perk shop [chest-upgrade-base-price]}
+    if {_level} is 0:
+        set {_price} to {@clan perk shop [chest-upgrade-base-price]}
+    else:
+        set {_price} to {@clan perk shop [chest-upgrade-multiplier]}
+    set {_cost} to {_price}
+    set slot {@clan perk shop [chest-upgrade-slot]} of {_gui} to {@clan perk shop [chest-upgrade-item]}
+    set {_level} to {zclans.clan-%{_clan-id}%::upgrade.members} ? 0
+    set {_baseprice} to {@clan perk shop [member-upgrade-base-price]}
+    if {_level} is 0:
+        set {_price} to {@clan perk shop [member-upgrade-base-price]}
+    else:
+        set {_price} to {@clan perk shop [member-upgrade-multiplier]}
+    set {_cost} to {_price}
+    set slot {@clan perk shop [member-upgrade-slot]} of {_gui} to {@clan perk shop [member-upgrade-item]}
+    set {_level} to {zclans.clan-%{_clan-id}%::upgrade.ff} ? 0
+    set {_price} to {@clan perk shop [ff-upgrade-base-price]}
+    set slot {@clan perk shop [ff-upgrade-slot]} of {_gui} to {@clan perk shop [ff-upgrade-item]}
+    open {_gui} to {_p}
+on inventory click:
+    name of player's current inventory is {@clan perk shop [name]}
+    cancel event
+    clicked inventory is player's current inventory
+    set {_clan-id} to {zclans.playerclans::%uuid of player%}
+    if {_clan-id} is not set:
+        send {@message [you-are-not-in-a-clan]} to {_p}
+        close player's inventory
+        stop
+    if index of clicked slot is {@clan perk shop [back-button-slot]}:
+        zclans_openshopmenu(player)
+    if index of clicked slot is {@clan perk shop [chest-upgrade-slot]}:
+        if {zclans.clan-%{_clan-id}%::leader} is not player's uuid:
+            send {@message [you-must-be-leader]}
+            stop
+        set {_level} to {zclans.clan-%{_clan-id}%::upgrade.chest} ? 0
+        set {_baseprice} to {@clan perk shop [chest-upgrade-base-price]}
+        if {_level} is greater than or equal to {@clan perk shop [chest-upgrade-max-level]}:
+            send {@message [this-perk-is-at-max-level]}
+            stop
+        if {_level} is 0:
+            set {_price} to {@clan perk shop [chest-upgrade-base-price]}
+        else:
+            set {_price} to {@clan perk shop [chest-upgrade-multiplier]}
+        if {zclans.clan-%{_clan-id}%::coins} is less than {_price}:
+            send {@message [not-enough-coins]}
+            stop
+        subtract {_price} from {zclans.clan-%{_clan-id}%::coins}
+        set {zclans.clan-%{_clan-id}%::upgrade.chest} to {_level} + 1
+        set {_upgradeName} to "Virtual Clan Storage"
+        loop {zclans.clan-%{_clan-id}%-players::*}:
+            set {_p} to loop-value parsed as offline player
+            send {@message [player-purchased-upgrade]} to {_p}
+        zclans_openperkshopmenu(player)
+    if index of clicked slot is {@clan perk shop [member-upgrade-slot]}:
+        if {zclans.clan-%{_clan-id}%::leader} is not player's uuid:
+            send {@message [you-must-be-leader]}
+            stop
+        set {_level} to {zclans.clan-%{_clan-id}%::upgrade.members} ? 0
+        set {_baseprice} to {@clan perk shop [member-upgrade-base-price]}
+        if {_level} is greater than or equal to {@clan perk shop [member-upgrade-max-level]}:
+            send {@message [this-perk-is-at-max-level]}
+            stop
+        if {_level} is 0:
+            set {_price} to {@clan perk shop [member-upgrade-base-price]}
+        else:
+            set {_price} to {@clan perk shop [member-upgrade-multiplier]}
+        if {zclans.clan-%{_clan-id}%::coins} is less than {_price}:
+            send {@message [not-enough-coins]}
+            stop
+        subtract {_price} from {zclans.clan-%{_clan-id}%::coins}
+        set {zclans.clan-%{_clan-id}%::upgrade.members} to {_level} + 1
+        set {_upgradeName} to "Extra Clan Members"
+        loop {zclans.clan-%{_clan-id}%-players::*}:
+            set {_p} to loop-value parsed as offline player
+            send {@message [player-purchased-upgrade]} to {_p}
+        zclans_openperkshopmenu(player)
+    if index of clicked slot is {@clan perk shop [ff-upgrade-slot]}:
+        if {zclans.clan-%{_clan-id}%::leader} is not player's uuid:
+            send {@message [you-must-be-leader]}
+            stop
+        set {_level} to {zclans.clan-%{_clan-id}%::upgrade.ff} ? 0
+        set {_baseprice} to {@clan perk shop [ff-upgrade-base-price]}
+        if {_level} is greater than or equal to 1:
+            send {@message [this-perk-is-at-max-level]}
+            stop
+        set {_price} to {@clan perk shop [member-upgrade-base-price]}
+        if {zclans.clan-%{_clan-id}%::coins} is less than {_price}:
+            send {@message [not-enough-coins]}
+            stop
+        subtract {_price} from {zclans.clan-%{_clan-id}%::coins}
+        set {zclans.clan-%{_clan-id}%::upgrade.ff} to {_level} + 1
+        set {_upgradeName} to "Friendly Fire Toggle"
+        loop {zclans.clan-%{_clan-id}%-players::*}:
+            set {_p} to loop-value parsed as offline player
+            send {@message [player-purchased-upgrade]} to {_p}
+        zclans_openperkshopmenu(player)
+on tab complete of {@tab-completions-commands}:
+    if player has permission "clans.admin":
+        add "admin" to {_tabs::*}
+    add "help", "create", "rename", "invite", "leave", "who", "show", "shop", "quest", "quests", "mission", "missions", "leaderboard", "top", "chat", "chest" and "c" to {_tabs::*}
+    set tab completions for position 1 to {_tabs::*}
+on placeholderapi placeholder request for the prefix "zclans":
+    if the identifier is "clan":
+        set {_clan-id} to {zclans.playerclans::%uuid of player%}
+        if {_clan-id} is not set:
+            set the result to {@placeholder-noclan}
+        else:
+            set the result to {zclans.clan-%{_clan-id}%::name}
+			
+

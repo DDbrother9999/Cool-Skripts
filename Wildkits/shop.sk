@@ -1,0 +1,105 @@
+on disconnect:
+    delete {wkshop.pcate::%player%}
+
+on stop:
+    delete {wkshop.pcate::*}
+    delete {wkshop.title::*}
+
+on load:
+    set {wkshop.title::explosives} to "&c&lExplosives"
+    set {wkshop.title::coins} to "&e&lCoins"
+    set {wkshop.title::misc} to "&3&lMisc"
+    set {wkshop.title::potions} to "&5&lPotions"
+    set {wkshop.title::food} to "&6&lFood"
+    set {wkshop.title::ranked} to "&b&lRanked"
+    set {wkshop.title::tester} to "&a&lTester"
+
+command /shop [<text>]:
+    permission: op
+    trigger:
+        if arg-1 is not set:
+            set {_gui} to a new chest inventory with 1 rows with name "&6&lShop"
+            set slots (integers between 0 and 8) of {_gui} to black glass pane named " "
+            set slot 1 of {_gui} to tnt named "&cExplosives" with lore "&fClick to view &eExplosives &fcategory!"
+            set slot 2 of {_gui} to glowing sunflower named "&eCoins" with lore "&fClick to view &eCoins &fcategory!"
+            set slot 3 of {_gui} to totem of undying named "&3Misc" with lore "&fClick to view &eMisc &fcategory!"
+            set slot 4 of {_gui} to glass bottle named "&5Potions" with lore "&fClick to view &ePotions &fcategory!"
+            set slot 5 of {_gui} to steak named "&6Food" with lore "&fClick to view &eFood &fcategory!"
+            set slot 6 of {_gui} to end crystal named "&bRanked" with lore "&fClick to view &eRanked &fcategory!"
+            set slot 7 of {_gui} to glowing compass named "&aTester" with lore "&fClick to view &eTester &fcategory!"
+            open {_gui} to player
+        else:
+            set {_category} to arg-1
+            set {_num} to 10
+            set {_gui} to a new chest inventory with 6 rows with name "&6&lShop &8| %{wkshop.title::%{_category}%}%"
+            set slots (integers between 0 and 8) of {_gui} to black glass pane named " "
+            set slots (integers between 46 and 53) of {_gui} to black glass pane named " "
+            set slot 45 of {_gui} to red glass pane named "&cBack"
+            loop {wkshop::%{_category}%::*}:
+                add 2 to {_num} if {_num} is 17, 26, or 35
+                #if lore of loop-value is set:
+                    #set {_lore} to "%lore of loop-value%%nl%%nl%"
+                #else:
+                    #set {_lore} to ""
+                set {_price} to {wkshop.price::%{_category}%::%loop-value%}
+                #
+                # I need a way to display price without using the item name or lore
+                #
+                set slot {_num} of {_gui} to loop-value #with lore "%{_lore}%&7Price: &e%{_price}%"
+                add 1 to {_num}
+            set slot 9, 17, 18, 26, 27, 35, 36, and 44 of {_gui} to black glass pane named " "
+            open {_gui} to player
+            set {wkshop.pcate::%player%} to {_category}
+
+command /adminshop <text> <text> [<integer>]: # [add/remove] [category] [price] (Uses Item in hand)
+    permission: op
+    usage: &c/adminshop <add/remove> <category> [price]
+    trigger:
+        if arg-1 is "add":
+            stop if player's tool is air
+            set {_item} to player's tool
+            set {_category} to arg-2
+            set {_price} to arg-3
+            set {wkshop::%{_category}%::%{_item}%} to {_item}
+            set {wkshop.price::%{_category}%::%{_item}%} to {_price} 
+            send "&aAdded item"
+        else if arg-1 is "remove":
+            stop if player's tool is air
+            set {_item} to player's tool
+            set {_category} to arg-2
+            delete {wkshop.price::%{_category}%::%{_item}%}
+            delete {wkshop::%{_category}%::%{_item}%}
+            send "&cRemoved item"
+
+# Update later to make it less spaghetti code and easier to change/add/remove items
+
+on inventory click:
+    if name of event-inventory contains "&6&lShop":
+        cancel event
+        execute player command "shop" if index of event-slot is 45
+        if name of event-inventory is "&6&lShop":
+            if index of event-slot is 1:
+                execute player command "shop explosives"
+            if index of event-slot is 2:
+                execute player command "bank"
+            if index of event-slot is 3:
+                execute player command "shop misc"
+            if index of event-slot is 4:
+                execute player command "shop potions"
+            if index of event-slot is 5:
+                execute player command "shop food"
+            if index of event-slot is 6:
+                execute player command "shop ranked"
+            if index of event-slot is 7:
+                execute player command "shop tester"
+        else:
+            set {_category} to {wkshop.pcate::%player%}
+            set {_item} to event-slot
+            set {_price} to {wkshop.price::%{_category}%::%{_item}%}
+            if {eTokens::%player's uuid%} >= {_price}:
+                send "&aSuccessfully bought item."
+                give player {_item}
+                remove {_price} from {eTokens::%player's uuid%}
+                log "%player% bought an item from the store for %{price}% (%{eTokens::%player's uuid%}%)" to "tokens/transactions.log"
+            #send "%event-slot%, %{wkshop.pcate::%player%}%" to player
+            

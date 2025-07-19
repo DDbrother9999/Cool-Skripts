@@ -1,0 +1,8 @@
+command /store:
+  aliases: shop
+  trigger:
+    send ""
+    send "<link:https://shop.leonemc.net/><tooltip:&aClick me>&ehttps://shop.leonemc.net/"
+    send ""
+    play sound "block.note_block.pling" at volume 1 at pitch 2 to player
+	

@@ -1,0 +1,73 @@
+on load:
+	clear {slimedelay::*}
+
+function getStats(d: number, p: entity) :: number:
+	set {_a} to generic armor total attribute value of {_p}
+	set {_at} to generic armor toughness total attribute value of {_p}
+	#if {_p} has resistance:
+	#	set {_ag::*} to {_p}'s active potion effects
+	#	set {_ag::*} to "%{_ag::*}%" split at " "
+	#	loop {_ag::*}:
+	#		if loop-value contains "resistance":
+	#			set {_dhsd} to "%loop-index%" parsed as integer+3
+	#			send loop-index to {_p}
+	#		if loop-index parsed as integer is {_dhsd}:
+	#			set {_rl} to "%loop-value%" parsed as integer
+	#			stop loop
+	set {_g} to {_d}*(1-min(20, max({_a}/5, {_a}-{_d} / (2+{_at}/4)))/25)
+	if {_rl} is set:
+		set {_g} to {_g}*(1-({_rl}*0.2))
+	set {_protection} to 0
+	if {_p}'s helmet slot is enchanted with protection:
+		add {_p}'s helmet slot's level of protection to {_protection}
+	if {_p}'s chestplate slot is enchanted with protection:
+		add {_p}'s chestplate slot's level of protection to {_protection}
+	if {_p}'s leggings slot is enchanted with protection:
+		add {_p}'s leggings slot's level of protection to {_protection}
+	if {_p}'s boots slot is enchanted with protection:
+		add {_p}'s boots slot's level of protection to {_protection}
+	if {_protection} is greater than 0:
+		set {_g} to {_g}*(1-(min(20, {_protection})/25))
+	return {_g}
+
+function explodeSlimeball(l: location, i: item):
+	set {slimeExplosionsafe} to 1
+	create a safe explosion of power 2 at {_l}
+	delete {slimeExplosionsafe}
+	broadcast {slimeExplosionsafe}
+	set {_e::*} to {_i}'s name split at "|"
+	loop all entities in radius 4 of {_l}:
+		set {_player} to 2nd element of {_e::*} parsed as player
+		set {slimedamaged.%loop-entity%} to {_player}
+		damage loop-entity by getStats(3, loop-entity)
+		apply slowness to loop-entity for 7 seconds
+		delete {slimedamaged.%loop-entity%}
+		
+on damage:
+	if damage cause is block explosion:
+		if {slimeExplosionsafe} is 1:
+			cancel event
+			
+on right click with slimeball:
+	if {slimedelay::*} does not contain player:
+		make player swing their hand
+		cancel event
+		add player to {slimedelay::*}
+		drop slimeball named "&cSlime Grenade|&c%player%|&c%random integer between 1 and 1000000%" in front of player's eyes
+		remove 1 slimeball from player's inventory
+		play sound "entity.snowball.throw" at pitch 0.5 to player
+		set {_slime} to last dropped item
+		push {_slime} in player's direction at speed 1
+		wait 2 seconds
+		explodeSlimeball({_slime}'s location, {_slime})
+		kill {_slime}
+		wait 5 seconds
+		remove player from {slimedelay::*}
+	else:
+		cancel event
+		send action bar "&9Please wait to use this item again!" to player
+		play sound "entity.villager.trade" to player
+	
+on pickup:
+	if event-item's name contains "&cSlime Grenade":
+		cancel event

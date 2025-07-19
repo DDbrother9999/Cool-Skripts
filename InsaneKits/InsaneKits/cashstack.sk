@@ -1,0 +1,48 @@
+command /setcashstackitem:
+	permission: op
+	trigger:
+		set {CashStack} to player's tool
+		send {CashStack} to player
+
+command /givecashstack <text>:
+	permission: op
+	trigger:
+		{Stacks::*} contains arg-1
+		give {%arg-1%CashStack} to player
+
+on tab complete of "/givecashstack":
+	set tab completions of position 1 to {Stacks::*}
+
+function formatCashStack(type: text,min: number,max: number) :: item:
+	set {_item} to {CashStack} named "&e&l%{_type}% Token Stack" with lore "","&7Contains a random ammount of tokens!","","&f&lMIN: &6$&e%addCommastoNumber({_min})%","&f&lMAX: &6$&e%addCommastoNumber({_max})%","","&f&nRight click to open!"
+	return {_item}
+
+on load:
+	wait 5 ticks
+	set {Stacks::*} to "Mini","Small","Medium","Large","Mega","Ultra"
+	set {MiniCashStack} to formatCashStack("Mini",1,5)
+	set {SmallCashStack} to formatCashStack("Small",5,10)
+	set {MediumCashStack} to formatCashStack("Medium",10,25)
+	set {LargeCashStack} to formatCashStack("Large",25,50)
+	set {MegaCashStack} to formatCashStack("Mega",50,100)
+	set {UltraCashStack} to formatCashStack("Ultra",100,250)
+
+on right click:
+	2nd line of lore of player's tool is "&7Contains a random ammount of tokens!"
+	set {_min} to the 4th line of lore of the player's tool
+	set {_min} to uncolored {_min}
+	replace "MIN: $" with "" in {_min}
+	set {_max} to the 5th line of lore of the player's tool
+	set {_max} to uncolored {_max}
+	replace "MAX: $" with "" in {_max}
+	set {_i} to 1
+	loop 10 times:
+		set {_random} to random integer between ({_min} parsed as number) and ({_max} parsed as number)
+		if {_i} is 10:
+			send title "&a&l$%{_random}%" with subtitle "&fYou've recieved &a$%{_random}%" for 1 second
+			play sound "ENTITY_EXPERIENCE_ORB_PICKUP" at volume 10 at pitch 5 to player
+		else:
+			send title "&a&l$%{_random}%" with subtitle "Rolling...." for 4 ticks
+			play sound "ENTITY_EXPERIENCE_ORB_PICKUP" at volume 10 at pitch 0 to player
+		add 1 to {_i}
+		wait 5 ticks

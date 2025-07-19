@@ -1,0 +1,2 @@
+on chat with priority lowest:
+	addprogressquest(player,"Daily","Chatter II")

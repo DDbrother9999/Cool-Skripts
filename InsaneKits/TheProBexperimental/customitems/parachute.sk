@@ -1,0 +1,21 @@
+on load:
+    set {parachute} to feather of mending 0 named "&b&lParachute" with lore "&7When item is held, player gets slow falling.%nl%&8Weeeee! I'm flying!" with all flags hidden
+    set tag "parachute" of nbt compound of {parachute} to true
+    set tag "customitem" of nbt compound of {parachute} to true
+    give {parachute} to player
+
+on player's held item change:
+    remove slow falling from player if metadata "loop" of player is set
+    delete metadata "loop" of player
+    tag "parachute" of nbt compound of player's tool is set
+    set {_tool} to player's tool
+    while {_tool} is player's tool:
+        apply potion of slow falling of tier 1 without any particles to the player for 1000 years replacing the existing effect
+        set metadata "loop" of player to true
+        wait 5 ticks
+    remove slow falling from player
+    
+command /giveparachute:
+    permission: customitem.give 
+    trigger:
+        give {parachute} to player

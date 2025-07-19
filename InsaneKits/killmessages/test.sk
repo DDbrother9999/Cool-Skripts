@@ -1,0 +1,34 @@
+#on damage:
+#    broadcast "%damage cause%"
+#    
+#on death:
+#    broadcast "%damage cause%"
+#    
+#command /testdeathmessages <player>:
+#    permission: op
+#    trigger:
+#        set {_loop} to 1
+#        loop 13 times:
+#            send "attacker: %grabDeathMessageA(arg 1, {_loop})%, no attacker: %grabDeathMessageNA(arg 1, {_loop})%"
+#            add 1 to {_loop}
+#            
+#command /morphonto <integer> <integer> <integer>:
+#    permission: op
+#    trigger:
+#        set {_text} to {categories::Default::deathmessages::%arg 1%}
+#        if arg 3 is 1:
+#        
+#            set {categories::Default::deathmessages::%arg 2%.withAttacker} to {_text}
+#        else:
+#            set {categories::Default::deathmessages::%arg 2%.withoutAttacker} to {_text}
+#            
+#        send "&cDone"
+#command /senddeathmessage <integer>:
+#    permission: op
+#    trigger:
+#        send {categories::Default::deathmessages::%arg 1%}
+
+command /getvariable <string>:
+	permission: op
+	trigger:
+		send "variable: %{%arg-1%}%"

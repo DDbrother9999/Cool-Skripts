@@ -1,0 +1,211 @@
+# PMS - PremadeSchematics by TheProB
+# Requires WorldGuard and FastAsyncWorldEdit
+# Needs Skript-Reflect and Skript installed to work.
+# Utilizes Fawe Skript API by ANDREI1923
+
+options:
+    prefix: "&7[&3PMS&7]"
+
+import:
+    com.sk89q.worldedit.bukkit.WorldEditPlugin
+    com.sk89q.worldedit.bukkit.BukkitAdapter
+    com.sk89q.worldedit.regions.Region
+
+
+
+command /pms [<text>] [<text>] [<text>]:
+    permission: premadeschematics.command
+    permission message: &cNo permission.
+    trigger:
+        if arg 1 is "help":
+            if arg 2 is not set or arg 2 is "creation":
+                send "&8|&7=-------&bPMS&7------=&8|"
+                send "&8Any position/schematic-related thing uses your worldedit wand!"
+                send "&8| &7-= &bSchematic Creation/Removal &7=- &8|"
+                send "&8| &7- &b/pms create <schematicName>"
+                send "&8| &7- &b/pms setSchematic <schematicName>"
+                send "&8| &7- &b/pms resetSchematic <schematicName>"
+                send "&8| &7- &b/pms delete <schematicName>"
+                send "&8For info on creating regions, click here -> <command:/pms help regions>&a[RC]"
+                send "&8|&7=-------&bPMS&7------=&8|"
+            else if arg 2 is "regions":
+                send "&8|&7=-------&bPMS&7------=&8|"
+                send "&8<regionName> has a few extra options. %%newNum%% or %%newUUID%% stop the regions from overlapping."
+                send "&8| &7-= &bRegion Creation/Removal&7 =- &8|"
+                send "&8| &7/pms schem <schematicName> createRegion <regionName>"
+                send "&8| &7/pms schem <schematicName> setRegionFlag <regionName> <regionFlag> <true/false>"
+                send "&8| &7/pms schem <schematicName> deleteRegion <regionName>"
+                send "&8| &7For info on spawning schematics, click here -> <command:/pms help spawning>&a[SP]"
+                send "&8| &7=-------&bPMS&7------=&8|"
+            else if arg 2 is "spawning":
+                send "&8|&7=-------&bPMS&7------=&8|"
+                send "&8| &7-= &bSchematic Spawning &7=- &8|"
+                send "&8| &7- &b/pms spawnSchematic [x] [y] [z]"
+                send "&8| &7For extra commands, click here -> <command:/pms help extra>&a[OTHER]"
+                send "&8|&7=-------&bPMS&7------=&8|"
+            else if arg 2 is "other":
+                send "&8|&7=-------&bPMS&7------=&8|"
+                send "&8|&7 -= &bOther Commands &7=- &8|"
+                send "&8|&7=-------&bPMS&7------=&8|"
+
+        if arg 1 is "create":
+            send createSchematicHandler(arg 2)
+        else if arg 2 is "delete":
+            send deleteSchematicHandler(arg 2)
+        else if arg 2 is ""
+
+function createSchematicHandler(schemName: text) :: text:
+    if {_schemName} is set:
+        if {_schemName} is not alphanumeric:
+            return "&cMust be alphanumeric!"
+        else if {_schemName} contains " ":
+            return "&cCannot have spaces in the name!"
+        else if getSchemList() contains {_schemName}:
+            return "&cSchematic already exists!"
+        createSchem({_schemName})
+        return "&aSchematic created."
+    else:
+        return "&cMust supply a name!"
+
+function deleteSchematicHandler(schemName: text) :: text:
+    if {_schemName} is set:
+        if {_schemName} is not alphanumeric:
+            return "&cMust be alphanumeric!"
+        else if {_schemName} contains " ":
+            return "&cCannot have spaces in the name!"
+        else if getSchemList() does not contain {_schemName}:
+            return "&cSchematic does not exist!"
+        else:
+            removeSchem({_schemName})
+            return "&aSchematic successfully removed."
+    else:
+        return "&cMust supply a name!"      
+
+
+function getSchemList() :: texts:
+    return {pms.schematics::*}
+
+function createSchem(schemName: text):
+    add {_schemName} to {pms.schematics::*}
+
+function removeSchem(schemName: text):
+    remove {_schemName} from {pms.schematics::*}
+
+
+
+#Utils
+function getPlayerWESelection(player: player) :: object:
+    set {_wePlugin} to getWorldEditInstance()
+    set {_selection} to {_wePlugin}.getSession({_player}).getSelection(BukkitAdapter.adapt({_player}'s world))
+    return {_selection}
+
+function getWorldEditInstance() :: object:
+    set {_wePlugin} to WorldEditPlugin.getInstance()
+    return {_wePlugin}
+
+function getPlayerPos1(player: player) :: object:
+    return getMinimumPoint(getPlayerWESelection({_player}))
+
+function getPlayerPos2(player: player) :: object:
+    return getMaximumPoint(getPlayerWESelection({_player}))
+
+function getRegionLength(region: object) :: integer:
+    return {_region}.getLength()
+
+function getRegionHeight(region: object) :: integer:
+    return {_region}.getHeight()
+
+function getRegionWidth(region: object) :: integer:
+    return {_region}.getWidth()
+
+function getBoundingBox(region: object) :: object:
+    return {_region}.getBoundingBox()
+
+function getMinimumPoint(region: object) :: object:
+    return {_region}.getMinimumPoint()
+
+function getMaximumPoint(region: object) :: object:
+    return {_region}.getMaximumPoint()
+
+function getBlockVector3X(bv: object) :: integer:
+    return {_bv}.getX()
+
+function getBlockVector3Y(bv: object) :: integer:
+    return {_bv}.getY()
+
+function getBlockVector3Z(bv: object) :: integer:
+     return {_bv}.getZ()
+        
+
+
+# Fawe [Skript API]
+# By ANDREI1923
+
+import:
+    java.io.File
+    java.io.FileInputStream   
+    java.io.FileOutputStream     
+    org.bukkit.Bukkit   
+    com.sk89q.worldedit.WorldEdit     
+    com.sk89q.worldedit.bukkit.BukkitWorld
+    com.sk89q.worldedit.regions.CuboidRegion    
+    com.sk89q.worldedit.function.pattern.BlockPattern    
+    com.sk89q.worldedit.function.operation.Operations     
+    com.sk89q.worldedit.extent.clipboard.BlockArrayClipboard
+    com.sk89q.worldedit.function.operation.ForwardExtentCopy
+
+on load:
+    delete {-worldeditAPI::*}
+    set {-worldeditAPI::BaseBlock6} to class "com.sk89q.worldedit.blocks.BaseBlock" 
+    set {-worldeditAPI::BukkitUtil} to class "com.sk89q.worldedit.bukkit.BukkitUtil" 
+    set {-worldeditAPI::BlockVector3} to class "com.sk89q.worldedit.math.BlockVector3"   
+    set {-worldeditAPI::BaseBlock7} to class "com.sk89q.worldedit.world.block.BaseBlock"  
+    set {-worldeditAPI::Schematic} to class "com.boydti.fawe.object.schematic.Schematic"   
+    set {-worldeditAPI::BukkitAdapter} to class "com.sk89q.worldedit.bukkit.BukkitAdapter"  
+    set {-worldeditAPI::ClipboardFormat} to class "com.sk89q.worldedit.extent.clipboard.io.ClipboardFormat"    
+    set {-worldeditAPI::ClipboardFormats} to class "com.sk89q.worldedit.extent.clipboard.io.ClipboardFormats"    
+    set {-worldeditAPI::BuiltInClipboardFormat} to class "com.sk89q.worldedit.extent.clipboard.io.BuiltInClipboardFormat"  
+
+effect replace blocks (within|between) %location% and %location% with %item%:
+    trigger:
+        set {_w} to new BukkitWorld(expr-2.getWorld())   
+        set {_region} to new CuboidRegion({_w}, worldeditAPI(expr-1) and worldeditAPI(expr-2))     
+        set {_editSession} to WorldEdit.getInstance().getEditSessionFactory().getEditSession({_w} and -1)           
+        if {-worldeditAPI::BlockVector3} is not set:     
+            set {_baseBlock} to new BlockPattern(new {-worldeditAPI::BaseBlock6}((random item of expr-3).getTypeId()))
+        else:
+            set {_baseBlock} to new BlockPattern(new {-worldeditAPI::BaseBlock7}({-worldeditAPI::BukkitAdapter}.asBlockState(random item of expr-3)))
+        await {_editSession}.setBlocks({_region} and {_baseBlock})            
+        {_editSession}.flushQueue()
+
+effect paste schematic %string% at %location%:
+    trigger:
+        if {-worldeditAPI::Schematics::%expr-1%} is not set:
+            set {_file} to new File(expr-1)
+            if {-worldeditAPI::BlockVector3} is not set:
+                set {-worldeditAPI::Schematics::%expr-1%} to {-worldeditAPI::ClipboardFormat}.findByFile({_file}).load({_file})
+            else:
+                set {-worldeditAPI::Schematics::%expr-1%} to {-worldeditAPI::ClipboardFormats}.findByFile({_file}).load({_file})
+        await {-worldeditAPI::Schematics::%expr-1%}.paste(new BukkitWorld(expr-2.getWorld()), worldeditAPI(expr-2), false, true and null)  
+
+effect save schematic %string% from %location% and %location%:
+    trigger:
+        set {_file} to new File(expr-1)    
+        set {_region} to new CuboidRegion(new BukkitWorld(expr-2.getWorld()), worldeditAPI(expr-2) and worldeditAPI(expr-3))       
+        if {-worldeditAPI::BlockVector3} is not set:
+            set {_schematic} to new {-worldeditAPI::Schematic}({_region})
+            {_schematic}.getClipboard().setOrigin(worldeditAPI(expr-2))
+            await {_schematic}.save({_file} and {-worldeditAPI::ClipboardFormat}.SCHEMATIC)
+            stop      
+        set {_clipboard} to new BlockArrayClipboard({_region})
+        set {_editSession} to WorldEdit.getInstance().getEditSessionFactory().getEditSession({_region}.getWorld() and -1)
+        set {_forwardExtentCopy} to new ForwardExtentCopy({_editSession}, {_region}, {_clipboard} and {_region}.getMinimumPoint())
+        {_forwardExtentCopy}.setCopyingEntities(false)
+        {_clipboard}.setOrigin(worldeditAPI(expr-2))
+        await Operations.complete({_forwardExtentCopy})
+        set {_writer} to {-worldeditAPI::BuiltInClipboardFormat}.SPONGE_SCHEMATIC.getWriter(new FileOutputStream({_file}))
+        {_writer}.write({_clipboard})
+        {_writer}.close()
+
+
+

@@ -1,0 +1,38 @@
+options:
+	cooldown: 30
+
+on load:
+	set {Cloak} to 1 of kelp named "&x&2&f&4&a&6&e&lC&x&5&d&7&7&9&1&ll&x&8&c&a&4&b&4&lo&x&b&a&d&0&d&6&la&x&e&8&f&d&f&9&lk" with lore "&r&7While holding and crouching, makes you invisible.", "&r&7Lasts for 6 seconds."
+	set int tag "Clock;lastused" of nbt compound of {Cloak} to 0
+
+every 5 ticks:
+	loop all players:
+		if loop-value is sneaking:
+			if name of loop-player's tool is "&x&2&f&4&a&6&e&lC&x&5&d&7&7&9&1&ll&x&8&c&a&4&b&4&lo&x&b&a&d&0&d&6&la&x&e&8&f&d&f&9&lk":
+				if metadata "Clock;invis" of loop-player is greater than 0:
+					if metadata "Clock;invis" of loop-player is greater than 24:
+						set metadata "Clock;invis" of loop-player to 0
+						debug("Making player visible")
+						set {_p} to loop-player
+						remove potion of invisibility from {_p}
+					else:
+						set {_p} to loop-player
+						apply potion of invisibility to {_p} for 6 ticks
+						set metadata "Clock;invis" of {_p} to metadata "Clock;invis" of {_p} + 1
+					stop
+				else:
+					set {_cd} to int tag "Clock;lastused" of nbt compound of {Cloak}
+					if {_cd} + {@cooldown} is less than unix timestamp of now:
+						set int tag "Clock;lastused" of nbt compound of {Cloak} to unix timestamp of now
+						set {_p} to loop-player
+						apply potion of invisibility to {_p} for 6 ticks
+						set metadata "Clock;invis" of {_p} to metadata "Clock;invis" of {_p} + 1
+					stop
+
+		set metadata "Clock;invis" of loop-player to 0
+
+command /givecloak:
+	permission: op
+	trigger:
+		give {Cloak} to player
+		send "&aYou have been given a Cloak."

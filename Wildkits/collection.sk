@@ -1,0 +1,74 @@
+import:
+	net.leonemc.core.Core
+	net.leonemc.core.util.bukkit.CC
+command /collection [<text>] [<offlineplayer>]:
+	trigger:
+		if arg-1 is "view":
+			arg-2 is set
+			set {_num} to 0
+			set metadata tag "other_Collection" of player to chest inventory with 2 rows named "%arg-2%'s Collection"
+			loop {collection::%arg-2's uuid%::*}:
+				if loop-value is air:
+					set slot {_num} of metadata tag "other_Collection" of player to light gray glass pane named "&7Empty"
+				else:
+					set slot {_num} of metadata tag "other_Collection" of player to loop-value
+				add 1 to {_num}
+			open (metadata tag "other_Collection" of player) to player
+		else:
+			{testers::%player's uuid%} is set
+			set metadata tag "player_Collection" of player to chest inventory with 2 rows named "Your Collection"
+			set {_num} to 0
+			loop {collection::%player's uuid%::*}:
+				set slot {_num} of metadata tag "player_Collection" of player to loop-value
+				add 1 to {_num}
+			open (metadata tag "player_Collection" of player) to player
+
+on inventory close:
+	if event-inventory = (metadata tag "player_Collection" of player):
+		set {_num} to 0
+		loop 18 times:
+			set {collection::%player's uuid%::%{_num}%} to slot {_num} of metadata tag "player_Collection" of player
+			add 1 to {_num}
+
+on inventory click:
+	if event-inventory = (metadata tag "other_Collection" of player):
+		cancel event
+
+#on chat:
+#	if message contains "collection":
+#		set {_player} to player
+#		set {_user} to Core.getInstance().getUserManager().get({_player})
+#		set {_color} to CC.translate({_user}.getChatColor().getColor())
+#		send "user: %{_user}% color: %{_color}%" to console
+#		set {_msg} to message
+#		replace all "[collection]" in {_msg} with formatted "<cmd:/collection view %player%>&r[&e%player%&e's Collection&r]<reset>%{_color}%"
+#		set message to formatted {_msg}
+#		send formatted "<cmd:/collection view %player%>click<reset>"
+
+on load:
+	delete {selling::*}
+	delete {sellingitem::*}
+
+#command /sell <player> <integer>:
+#	usage: /sell <player> <price>
+#	trigger:
+#		set {sellingitem::%player's uuid%} to player's tool
+#		set {selling::%player's uuid%} to chest inventory with 1 rows named "Selling Item"
+#		set {_num} to 0
+#		loop 9 times:
+#			set slot {_num} of {selling::%player's uuid%} to gray stained glass pane named " "
+#			add 1 to {_num}
+#		set slot 4 of {selling::%player's uuid%} to {sellingitem::%player's uuid%}
+#		if arg-1 and arg-2 is set:
+#			send formatted "&a%player%&7 has sent you a sale request, <cmd:/viewsale %player%>&eclick here<reset> &7to view it." to arg-1
+			
+#command /viewsale [<player>]:
+#	usage: &cError
+#	trigger:
+#		arg-1 is set
+#		open {selling::%arg-1's uuid%} to player
+
+
+#on inventory click:
+#	if name of player's inventory is "Selling Item":
+#		cancel event

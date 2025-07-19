@@ -1,0 +1,14 @@
+command /help:
+	trigger:
+		send "&lWildKits Help Page"
+		send ""
+		send "Q: What is Wildkits?"
+		send "A: WildKits is a fun randomkit PvP server. The Objective is to jump down into the pit and fight other players. You can use /upgrade to upgrade the kits that you spawn with & many other things"
+		send ""
+		send "Useful Commands:"
+		send "&c/setbounty &7- &fTo set a bounty on another player"
+		send "&c/bank &7- &fTo bank your Tokens"
+		send "&c/level &7- &fTo claim leveling rewards"
+		send "&c/topbounty &7- &fTo check the top 10 bountied players"
+		send "&c/xpbank &7- &fTo deposit and withdraw xp"
+		

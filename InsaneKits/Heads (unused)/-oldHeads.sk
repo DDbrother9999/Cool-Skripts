@@ -1,0 +1,197 @@
+on armor change:
+    
+    if player's helmet is skull of "Proyo9" parsed as offlineplayer:
+        if "%region at player%" is not "spawn in world world":
+            set {effecthead::%player's uuid%} to true
+    else if tag "stargen2" of nbt compound of player's helmet is set:
+        send "aaaaaaaa" to console
+    else if player's helmet is skull of "vLyKxN_" parsed as offlineplayer:
+        tag "minxlygen2" of nbt compound of player's helmet is not set
+        effectHead(player,"speed",3)
+    else if tag "minxlygen2" of nbt compound of player's helmet is 1:
+        effectHead(player, "slowfall+jumpboost", 1)
+    else if player's helmet is skull of "DDbrother" parsed as offlineplayer:
+        effectHead(player,"speed",3)
+    else if tag "calihead" of nbt compound of player's helmet is set:
+        effectHead(player,"regeneration",1)
+    else if tag "decahead" of nbt compound of player's helmet is set:
+        effectHead(player, "resistance", 1)
+    else if tag "mindvoidhead" of nbt compound of player's helmet is set:
+        effectHead(player, "resistance", 2)
+    else:
+        if {effecthead::%player's uuid%} = true:
+            delete {effecthead::%player's uuid%}
+            remove speed from player's active potion effects
+            remove jump from player's active potion effects
+            remove strength from player's active potion effects
+            remove resistance from player's active potion effects
+            remove slow falling from player's active potion effects
+            remove jump boost from player's active potion effects
+
+on sneak toggle:
+    tag "prohead" of nbt compound of player's helmet is set
+    kill player
+
+on sneak toggle:
+    "%regions at player%" does not contain "spawn in world world"
+    player is sneaking
+    tag "herohead" of nbt compound of player's helmet is set
+    if difference between now and metadata "herocd" of player is less than 15 seconds:
+        metadata "herocd" of player is set
+        send action bar "This ability cannot be used right now! Please wait a short while to use it." to player
+        stop
+    set metadata "herocd" of player to now
+    push player upwards at speed 1.5
+    wait 1 seconds
+    block below player is air
+    push player down at speed 1.5
+    while block 0.1 blocks below player is air:
+        wait 1 tick
+    create fake explosion at player
+    loop all players in radius 3 of player where [input is not player]:
+        make player damage loop-player by 6
+
+on shoot:
+    "%regions at shooter%" does not contain "spawn in world world"
+    projectile is enderpearl
+    tag "sushishead" of nbt compound of shooter's helmet is set
+    make shooter ride projectile
+
+on sneak toggle:
+    "%regions at player%" does not contain "spawn in world world"
+    player is sneaking 
+    tag "dugisthead" of nbt compound of player's helmet is set
+    if difference between now and metadata "dugistcd" of player is less than 5 seconds:
+        metadata "dugistcd" of player is set
+        send action bar "This ability cannot be used right now! Please wait a short while to use it." to player
+        stop
+    distance between player and target player is less than 25
+    set metadata "dugistcd" of player to now
+    teleport player to target player
+    play sound "entity.enderman.teleport" at player
+
+
+on disconnect:
+    if {effecthead::%player's uuid%} = true:
+        delete {effecthead::%player's uuid%}
+        remove speed from player's active potion effects
+        remove jump from player's active potion effects
+        remove strength from player's active potion effects
+        remove resistance from player's active potion effects
+
+function effectHead(p: player, e: string, l: integer):
+    {_e} = "speed":
+        {effecthead::%{_p}'s uuid%} is not true
+        set {effecthead::%{_p}'s uuid%} to true
+        while {effecthead::%{_p}'s uuid%} = true:
+            apply speed {_l} without particles to {_p} for 1 seconds
+            wait 1 seconds
+    {_e} = "slowfall+jumpboost":
+        {effecthead::%{_p}'s uuid%} is not true
+        set {effecthead::%{_p}'s uuid%} to true
+        while {effecthead::%{_p}'s uuid%} = true:
+            apply slow falling {_l} without particles to {_p} for 1 seconds
+            apply jump boost {_l} without particles to {_p} for 1 seconds
+            wait 1 seconds
+    {_e} = "speed+jump":
+        {effecthead::%{_p}'s uuid%} is not true
+        set {effecthead::%{_p}'s uuid%} to true
+        while {effecthead::%{_p}'s uuid%} = true:
+            apply speed {_l} without particles to {_p} for 1 seconds
+            apply jump {_l} without particles to {_p} for 1 seconds
+            wait 1 seconds
+    {_e} = "strength+resistance":
+        {effecthead::%{_p}'s uuid%} is not true
+        set {effecthead::%{_p}'s uuid%} to true
+        while {effecthead::%{_p}'s uuid%} = true:
+            apply strength {_l} without particles to {_p} for 1 seconds
+            apply resistance {_l} without particles to {_p} for 1 seconds
+            wait 1 seconds
+    {_e} = "regeneration":
+        {effecthead::%{_p}'s uuid%} is not true
+        set {effecthead::%{_p}'s uuid%} to true
+        while {effecthead::%{_p}'s uuid%} = true:
+            apply regeneration {_l} without particles to {_p} for 1 seconds
+            wait 1 second
+    {_e} = "resistance":
+        {effecthead::%{_p}'s uuid%} is not true
+        set {effecthead::%{_p}'s uuid%} to true
+        while {effecthead::%{_p}'s uuid%} = true:
+            apply resistance {_l} without particles to {_p} for 1 seconds
+            wait 1 second
+    {_e} = "health+regeneration":
+        {effecthead::%{_p}'s uuid%} is not true
+        set {effecthead::%{_p}'s uuid%} to true
+        while {effecthead::%{_p}'s uuid%} = true:
+            apply regeneration {_l} without particles to {_p} for 1 seconds
+            apply health boost {_l} without particles to {_p} for 1 seconds
+            wait 1 second
+
+on damage:
+    damage cause is fire
+    tag "stargen2" of nbt compound of victim's helmet is set
+    cancel event
+# UNIT HEAD
+
+on damage:
+    "%regions at victim%" does not contain "spawn in world world"
+    tag "duurianhead" of nbt compound of victim's helmet is set
+    set damage to damage*0.65 #15%
+    
+    if line 3 of victim's helmet's lore contains "&b&oDuurian Clause":
+        set line 3 of victim's helmet's lore to "&b&oDuurian Clause (15%% Damage Reduction)"
+    play sound "ENTITY.SHULKER.CLOSE" with volume 0.5 at victim
+on damage:
+    "%regions at victim%" does not contain "spawn in world world"
+    tag "unithead" of nbt compound of attacker's helmet is set
+    ignite victim for 10 seconds
+
+on right click on player:
+    "%regions at player%" does not contain "spawn in world world"
+    tag "piehead" of nbt compound of player's helmet is set
+    if difference between metadata "pieheadcd" of player and now is less than 1.5 seconds:
+        send "&aOn cooldown!" to player
+        play sound "entity.villager.no" to player
+        stop
+    send "&cYou have been healed by %player%" to event-entity
+    heal event-entity by 1 heart
+    set metadata "pieheadcd" of player to now
+
+on right click:
+    "%regions at player%" does not contain "spawn in world world"
+    tag "unitheadgen2" of nbt compound of player's helmet is set
+    if difference between metadata "unitheadgen2cd" of player and now is less than 4.5 seconds:
+        send "&aOn cooldown!" to player
+        play sound "entity.villager.no" to player
+        stop
+    apply slowness of tier 2 to event-entity for 2 seconds
+    ignite event-entity for 4 seconds
+    set metadata "unitheadgen2cd" of player to now
+
+on sneak toggle:
+    "%regions at player%" does not contain "spawn in world world"
+    player is sneaking
+    tag "ghosthead" of nbt compound of player's helmet is set
+    set {_yaw} to yaw of player
+    set {_pitch} to pitch of player
+    if difference between metadata "ghostheadcd" of player and now is less than 1.5 seconds:
+        send "&aOn cooldown!" to player
+        play sound "entity.villager.no" to player
+        stop    
+    set {_loop} to 4
+    loop 4 times:
+        set {_block} to block {_loop} blocks to the right of player
+        if {_block} is air:
+            "%regions at {_block}%" contains "boxs3 in world world"
+            set {_teleported} to true
+            set {_loc} to location of {_block}
+            set yaw of {_loc} to {_yaw}
+            set pitch of {_loc} to {_pitch}
+            teleport player to {_loc}
+            play sound "entity.enderman.teleport" to player
+            stop loop
+        add 1 to {_loop}
+    if {_teleported} is not true:
+        send "&cCould not find a spot to teleport to!"
+        stop
+    set metadata "ghostheadcd" of player to now

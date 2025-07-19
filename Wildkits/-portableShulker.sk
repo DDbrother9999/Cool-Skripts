@@ -1,0 +1,50 @@
+# Made by TheProB for WildKits
+
+on join:
+	remove player from {shulkerinv::*}
+
+on right click with any shulker box:
+	{shulkerinv::*} does not contain player's uuid
+	player is sneaking
+	cancel event
+	set {shulker.%player's uuid%} to player's tool
+	set {_nbt} to nbt compound of player's tool
+	set {_tags::*} to tag "BlockEntityTag;Items" of {_nbt}
+	if player's tool's name is set:
+		set {_name} to player's tool's name
+	else:
+		set {_name} to "Shulker Box"
+	open chest inventory with 3 rows named {_name} to player
+	set {_f} to 0
+	add player's uuid to {shulkerinv::*}
+	loop 27 times:
+		set {_tag} to tag "Slot" of {_tags::%{_f}+1%}
+		set slot {_tag} of player's current inventory to item from nbt {_tags::%{_f}+1%}
+		add 1 to {_f}
+		
+on inventory close:
+	if {shulkerinv::*} contains player's uuid:
+		if player's tool is not {shulker.%player's uuid%}:
+			send "&aAn error occured"
+			stop
+		remove player's uuid from {shulkerinv::*}
+		set {_f} to 0
+		loop 27 times:
+			if slot {_f} of event-inventory is any shulker box:
+				give slot {_f} of event-inventory to player
+				set slot {_f} of event-inventory to air
+			set {_item} to full nbt compound of slot {_f} of event-inventory
+			set tag "Slot" of {_item} to {_f}
+			set {_g::%{_f}%} to {_item}
+			add 1 to {_f}
+		
+		set tag "BlockEntityTag;Items" of nbt compound of player's tool to {_g::*}
+
+on inventory click:
+	if {shulkerinv::*} contains player's uuid:
+		if clicked slot is any shulker box:
+			cancel event
+		else if "%event.getAction()%" is "swap with hotbar":
+			cancel event
+
+			

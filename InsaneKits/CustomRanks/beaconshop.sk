@@ -1,0 +1,99 @@
+import:
+    net.leonemc.core.Core
+    org.bukkit.event.player.PlayerInteractEvent
+
+on all PlayerInteractEvent:
+    set {_player} to event.getPlayer()
+    "%event.getAction()%" is "RIGHT_CLICK_BLOCK"
+    event.getClickedBlock() is a beacon
+    "%region at {_player}%" contains "pmine"
+    cancel event
+    set {_gui} to chest inventory with 1 rows named "&bBeacon Shop"
+    set {_loop} to 0
+    loop 9 times:
+        set slot {_loop} of {_gui} to gray stained glass pane named " "
+        add 1 to {_loop}
+    if {_player} has permission "custom.use":
+        set {_price} to getKitPrice({_player})
+        if {_price} >= 1:
+            set slot 4 of {_gui} to lime shulker box named "&aCustom Kit" with lore "&r&fPrice: &e%{_price}% &6Compressed Tokens&r&f."
+        else:
+            set slot 4 of {_gui} to light gray shulker box named "&aCustom Kit" with lore "&r&fYou can create a kit with &e/customkit edit&r&f."
+    else:
+        set slot 4 of {_gui} to gray shulker box named "&aCustom Kit" with lore "&r&fYou can purchase Custom Rank at &eshop.leonemc.net&r&f!"
+    set slot 2 of {_gui} to 3 diamonds named "&bDiamonds" with lore "&r&fConvert 3 &bDiamonds &r&fto 1 &6Token."
+    set slot 6 of {_gui} to 4 emeralds named "&aEmeralds" with lore "&r&fConvert 4 &aEmeralds &r&fto 1 &6Token."
+    open {_gui} to {_player}
+
+on inventory click:
+    name of player's inventory is "&bBeacon Shop"
+    cancel event
+    if index of event-slot is 2:
+        if "%click type%" contains "shift":
+            player's inventory contains 3 diamonds
+            set {_y} to true
+            while {_y}:
+                set {_d} to amount of diamonds in player's inventory
+                if {_d} >= 3:
+                    if inventory of player has enough space for 1 of {globaltoken}:
+                        give player {globaltoken}
+                        remove 3 diamonds from player's inventory
+                        wait 1 tick
+                    else:
+                        set {_y} to false
+                else:
+                    set {_y} to false
+        else:
+            player's inventory contains 3 diamonds
+            if inventory of player has enough space for 1 of {globaltoken}:
+                give player {globaltoken}
+                remove 3 diamonds from player's inventory
+            else:
+                send "&cNot enough room!"
+    if index of event-slot is 6:
+        if "%click type%" contains "shift":
+            player's inventory contains 4 emeralds
+            set {_y} to true
+            while {_y}:
+                set {_d} to amount of emeralds in player's inventory
+                if {_d} >= 3:
+                    if inventory of player has enough space for 1 of {globaltoken}:
+                        give player {globaltoken}
+                        remove 4 emeralds from player's inventory
+                        wait 1 tick
+                    else:
+                        set {_y} to false
+                else:
+                    set {_y} to false
+        else:
+            player's inventory contains 4 emeralds
+            if inventory of player has enough space for 1 of {globaltoken}:
+                give player {globaltoken}
+                remove 4 emeralds from player's inventory
+            else:
+                send "&cNot enough room!"
+    if index of event-slot is 4:
+        if player has permission "custom.use":
+            if getKitPrice(player) >= 1:
+                player's inventory contains getKitPrice(player) of {comptoken}
+                if inventory of player has enough space for 1 of getKit(player):
+                    set {_kit} to getKit(player)
+                    set name of {_kit} to "&a%player%&a's Kit"
+                    give player {_kit}
+                    remove getKitPrice(player) of {comptoken} from player's inventory
+                else:
+                    send "&cNot enough room!"
+            else:
+                send "&cYou can create a kit with &e/customkit edit&r&c!"
+        else:
+            send "&cYou need to purchase Custom Rank at &eshop.leonemc.net&r&c!"
+
+function getKit(plr: player) :: itemtype:
+    set {_kit} to Core.getInstance().getUserManager().get({_plr}).getCustomKit()
+    set {_shulker} to {_kit}.getShulkerBox()
+    return {_shulker}
+
+function getKitPrice(plr: player) :: integer:
+    set {_kit} to Core.getInstance().getUserManager().get({_plr}).getCustomKit()
+    set {_price} to {_kit}.getPrice()
+    return {_price}

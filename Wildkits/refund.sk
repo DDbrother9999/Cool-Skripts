@@ -1,0 +1,51 @@
+on join:
+	if {refund.%player's uuid%} is not set:
+		set {refund.%player's uuid%} to false
+
+command /allowrefund <player>:
+	permission: op
+	trigger:
+		set {refund.%arg-1's uuid%} to true
+		send "&aYou've allowed a refund to %arg-1%"
+
+command /disablerefund <player>:
+	permission: op
+	trigger:
+		set {refund.%arg-1's uuid%} to false
+		send "&aYou've allowed a refund to %arg-1%"
+
+command /testrefund:
+	trigger:
+		send "%{refund.%player's uuid%}%" to player
+		if {refund.%player's uuid%} is true:
+			send "&aYou have unclaimed items awaiting you" to player
+			send "&aUse /claim to get your items" to player
+
+command /refunditems:
+	permission: op
+	trigger:
+		set {_gui} to a chest inventory with 3 rows with name "&aRefund Items Panel"
+		set {refundpanel.%player's uuid%} to true
+		open {_gui} to player
+
+
+on inventory close:
+	if {refundpanel.%player's uuid%} is true:
+		set {refund::%player's uuid%::28::*} to all items in event-inventory
+		set {refundpanel.%player's uuid%} to false
+		send "&aSaved Refund Items" to player
+
+command /refundpush <player>:
+	permission: op
+	trigger:
+		set {_p} to arg-1
+		set {refund::%player's uuid%::28::*} to {refund::%{_p}'s uuid%::28::*}
+		send "&aPushed refund to %{_p}%"
+
+command /showrefunditems <player>:
+	permission: op
+	trigger:
+		set {_gui} to a chest inventory with 3 rows with name "&aShow Refund Items"
+		loop {refund::%{_p}'s uuid%::28::*}:
+			set slot loop-index parsed as int of {_gui} to loop-value
+		open {_gui} to player

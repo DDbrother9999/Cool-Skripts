@@ -1,0 +1,197 @@
+on load:
+    delete {enchants.max1::*}
+    add "minecraft:aqua_affinity" and "minecraft:binding_curse" and "minecraft:flame" and "minecraft:infinity" and "minecraft:silk_touch" and "minecraft:mending" and "minecraft:vanishing_curse" and "minecraft:channeling" and "minecraft:multishot" to {enchants.max1::*}
+    delete {enchants.max2::*}
+    add "minecraft:punch" and "minecraft:fire_aspect" and "minecraft:knockback" and "minecraft:frost_walker" to {enchants.max2::*}
+    delete {enchants.max3::*}
+    add "minecraft:respiration" and "minecraft:thorns" and "minecraft:depth_strider" and "minecraft:soul_speed" and "minecraft:looting" and "minecraft:sweeping_edge" and "minecraft:fortune" and "minecraft:luck_of_the_sea" and "minecraft:lure" and "minecraft:unbreaking" and "minecraft:loyalty" and "minecraft:riptide" and "minecraft:quick_charge" to {enchants.max3::*}
+    delete {enchants.max4::*}
+    add "minecraft:protection" and "minecraft:fire_protection" and "minecraft:feather_falling" and "minecraft:blast_protection" and "minecraft:projectile_protection" and "minecraft:piercing" to {enchants.max4::*}
+    delete {enchants.max5::*}
+    add "minecraft:impaling" and "minecraft:sharpness" and "minecraft:smite" and "minecraft:bane_of_arthropods" to {enchants.max5::*}
+    delete {enchants.max7::*}
+    add "minecraft:efficiency" to {enchants.max7::*}
+
+function isItemIllegal(i: item) :: boolean:
+    set {_true} to false
+    if uncolored {_i}'s name is "Platinum Shard":
+        set {_skipenchantcheck} to true
+    if tag "Unbreakable" of nbt compound of {_i} is 1:
+        set {_enchantments::*} to tag "Enchantments" of nbt compound of {_i}
+        if "%{_i}'s type%" is "gold sword":
+            loop {_enchantments::*}:
+                set {_id} to tag "id" of loop-value
+                add 1 to {_checkenchants} if {_id} is "minecraft:unbreaking"
+                add 1 to {_checkenchants} if {_id} is "minecraft:knockback"
+                add 1 to {_totalenchants}
+            if {_checkenchants} and {_totalenchants} are 2:
+                set {_skipenchantcheck} to true
+            else:
+                set {_true} to true
+                    
+                
+        else:
+            set {_true} to true
+    if {_true} is true:
+        return {_true}
+        stop
+    set {_enchantments::*} to tag "Enchantments" of nbt compound of {_i}
+    # check enchantments
+    loop {_enchantments::*}:
+        {_skipenchantcheck} is not true
+        set {_id} to tag "id" of loop-value
+        set {_maxlvl} to 1 if {enchants.max1::*} contains {_id}
+        set {_maxlvl} to 2 if {enchants.max2::*} contains {_id}
+        set {_maxlvl} to 3 if {enchants.max3::*} contains {_id}
+        set {_maxlvl} to 4 if {enchants.max4::*} contains {_id}
+        set {_maxlvl} to 5 if {enchants.max5::*} contains {_id}
+        set {_maxlvl} to 7 if {enchants.max7::*} contains {_id}
+        set {_level} to tag "lvl" of loop-value
+        set {_true} to true if {_level} is greater than {_maxlvl}
+    if {_true} is true:
+        return {_true}
+        stop
+    set {_attributes::*} to tag "AttributeModifiers" of nbt compound of {_i}
+    loop {_attributes::*}:
+        if "%{_i}'s type%" is "totem of undying":
+            set {_attribute} to tag "AttributeName" of loop-value
+            set {_amount} to tag "Amount" of loop-value
+            if {_attribute} is "minecraft:generic.max_health":
+                if {_amount} is not 4:
+                    set {_true} to true
+        else:
+            set {_true} to true
+    return {_true}
+
+on inventory click:
+    loop player's inventory:
+        set {_true} to isItemIllegal(loop-slot)
+        if {_true} is true:
+            send "&aItems have been removed from your inventory due to having illegal enchants/attributes. Please report this if you believe this to be a bug." if {_true} is true
+            log "Item removed from player %player's name% (UUID: %player's uuid%). NBT of Item: (%full nbt compound of loop-slot%)" in "illegalitemlog.log"
+            add loop-slot to {playerillegals.%player's uuid%::*}
+            set loop-slot to air if {_true} is true
+        
+on click:
+    loop player's inventory:
+        set {_true} to isItemIllegal(loop-slot)
+        if {_true} is true:
+            send "&aItems have been removed from your inventory due to having illegal enchants/attributes. Please report this if you believe this to be a bug." if {_true} is true
+            log "Item removed from player %player's name% (UUID: %player's uuid%). NBT of Item: (%full nbt compound of loop-slot%)" in "illegalitemlog.log"
+            add loop-slot to {playerillegals.%player's uuid%::*}
+            set loop-slot to air if {_true} is true
+
+on join:
+    loop player's inventory:
+        set {_true} to isItemIllegal(loop-slot)
+        if {_true} is true:
+            send "&aItems have been removed from your inventory due to having illegal enchants/attributes. Please report this if you believe this to be a bug." if {_true} is true
+            log "Item removed from player %player's name% (UUID: %player's uuid%). NBT of Item: (%full nbt compound of loop-slot%)" in "illegalitemlog.log"
+            add loop-slot to {playerillegals.%player's uuid%::*}
+            set loop-slot to air if {_true} is true
+
+command /checkplayerillegals <offline player>:
+    permission: checkplayerillegals.true
+    trigger:
+        send "----%arg 1's name%'s deleted illegal items.----"
+        send "&cNo illegal items found." if {playerillegals.%arg 1's uuid%::*} is not set
+        loop {playerillegals.%arg 1's uuid%::*}:
+            set {_i} to loop-value
+            set {_name} to {_i}'s name if {_i}'s name is set
+            set {_name} to {_i}'s type if {_i}'s type is not set
+            send formatted "&aIllegal item --- &r%{_i}%%nl% <cmd:/giveplayerillegal %arg 1% %loop-index%>&a&l[GIVE]<reset> <cmd:/checkplayerillegalforenchantsandattributes %arg 1% %loop-index%>&a&l[CHECK]"
+
+command /checkplayerillegalforenchantsandattributes <offline player> <integer>:
+    permission: checkplayerillegals.true
+    trigger:
+        if player's tool is air:
+            set player's tool to {playerillegals.%arg 1's uuid%::%arg 2%}
+            wait 1 tick
+            execute player command "/checkitemforillegalstatus"
+            wait 1 tick
+            set player's tool to air
+        else:
+            send "&aPlease clear your hand."
+
+
+command /giveplayerillegal <offline player> <integer>:
+    permission: checkplayerillegals.giveplayerillegals
+    trigger:
+        give {playerillegals.%arg 1's uuid%::%arg 2%} to player
+
+options:
+	prefix: "&6Item Check&7"
+    
+on command "/checkitemforillegalstatus":
+	cancel event
+	if 0 is 0:
+		if 0 is 0:
+        # put 0 is 0 because i don't want to unindent all of this
+			send " "
+			send "%{@prefix}% >"
+			set {_loop} to 0
+			if player's tool's lore is set:
+				send " &6 Lore"
+				add 1 to {_loop}
+				set {_loop2} to 0
+				loop player's tool's lore:
+					add 1 to {_loop2}
+					send "  &6Line %{_loop2}% &7>&f %loop-value%"
+		#Attributes
+			if tag "AttributeModifiers" of nbt compound of player's tool is set:
+				add 1 to {_loop}
+				set {_loop2} to 0
+				send " &6Attributes: &7(Attribute, Slot, Amount, Operation)"
+				set {_value::*} to tag "AttributeModifiers" of nbt compound of player's tool
+				loop {_value::*}:
+					add 1 to {_loop2}
+					set {_Amount} to tag "Amount" of loop-value
+					set {_AttributeName} to tag "AttributeName" of loop-value
+					set {_Operation} to tag "Operation" of loop-value
+					if {_Operation} is 0:
+						set {_Operation} to "Add"
+					else if {_Operation} is 1:
+						set {_Operation} to "Multiply Base"
+					else if {_Operation} is 2:
+						set {_Operation} to "Multiply"
+					set {_Slot} to tag "Slot" of loop-value
+					send "  &6Attribute %{_loop2}% &7>&f %{_AttributeName}%, %{_Slot}%, %{_Amount}%, %{_Operation}%"
+			if tag "HideFlags" of nbt compound of player's tool is set:
+				add 1 to {_loop}
+				set {_value} to tag "HideFlags" of nbt compound of player's tool
+				if {_value}-64 is greater than or equal to 0:
+					remove 64 from {_value}
+					add "Dye" to {_flags::*}
+				if {_value}-32 is greater than or equal to 0:
+					remove 32 from {_value}
+					add "Additional" to {_flags::*}
+				if {_value}-16 is greater than or equal to 0:
+					remove 16 from {_value}
+					add "CanPlace" to {_flags::*}
+				if {_value}-8 is greater than or equal to 0:
+					remove 8 from {_value}
+					add "CanDestroy" to {_flags::*}
+				if {_value}-4 is greater than or equal to 0:
+					remove 4 from {_value}
+					add "Unbreakable" to {_flags::*}
+				if {_value}-2 is greater than or equal to 0:
+					remove 2 from {_value}
+					add "Modifiers" to {_flags::*}
+				if {_value}-1 is greater than or equal to 0:
+					remove 1 from {_value}
+					add "Enchantments" to {_flags::*}
+				send " &6Hide Flags &7>"
+				set {_loop2} to 0
+				loop {_flags::*}:
+					add 1 to {_loop2}
+					send "  &6Flag %{_loop2}% &7>&f %loop-value%"
+			if player's tool's enchantments are set:
+				send " &6Enchantments"
+				add 1 to {_loop}
+				set {_loop2} to 0
+				loop player's tool's enchantments:
+					add 1 to {_loop2}
+					send "  &6Enchant %{_loop2}% &7>&f %loop-value%"
+			if {_loop} is 0:
+				send "  &7No enchantments, lore, or attributes detected on this item."
+			send ""

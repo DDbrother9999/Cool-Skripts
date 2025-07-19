@@ -1,0 +1,5 @@
+on load:
+    set {WeeklyWinnerQuest} to "IV"
+
+on disable:
+    clear {WeeklyWinnerQuest}

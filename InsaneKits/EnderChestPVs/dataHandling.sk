@@ -1,0 +1,77 @@
+on quit:
+	ecgetEnabled() is true
+	ecSaveAll(player)
+
+on skript stop:
+	ecgetEnabled() is true
+	saveAllEdited()
+
+every 5 minutes:
+	ecgetEnabled() is true
+	saveAllEdited()
+
+function ecgetItem(p: offline player, page: integer, itemIndex: integer) :: item: 
+	load yaml "plugins/Skript/yamlData/%{_p}'s uuid%/page%{_page}%" as "pageYaml"
+	set {_item} to yaml value "page.%{_itemIndex}%" of "pageYaml"
+	return {_item}
+		
+function ecSavePage(p: player, page: integer):
+	load yaml "plugins/Skript/yamlData/%{_p}'s uuid%/page%{_page}%" as "pageYaml"
+	set {_inventory} to metadata "ecPage%{_page}%" of {_p}
+	set {_loop} to 0
+	loop ecgetRows({_p})*9 times:
+		set {_item} to slot {_loop}+9 of {_inventory}
+		if {_item} is not air:
+			set yaml value "page.%{_loop}%" of "pageYaml" to {_item} 
+		else:
+			delete yaml value "page.%{_loop}%" of "pageYaml"
+		add 1 to {_loop}
+
+	save yaml "pageYaml"
+
+function ecSaveAll(p: player):
+	set {_loop} to 1
+	loop ecgetPages() times:
+		ecSavePage({_p}, {_loop})
+		add 1 to {_loop}
+
+function saveAllEdited():
+	loop all players:
+		echasOpened(loop-player) is true
+		close loop-player's inventory if name of loop-player's current inventory is "&fEnder Chest "
+		ecSaveAll(loop-player)
+
+function ecChangeRows(p: player, rows: integer):
+	if {_rows} is greater than 5:
+		send "&cERROR with EnderChestPVs/dataHandling.sk -- Rows cannot be greater than 5! (ecChangeRows(%{_p}%, %{_rows}%)" to console
+		stop
+	load yaml "plugins/Skript/yamlData/%{_p}'s uuid%/allPages.yml" as "loadedYaml"
+	close {_p}'s inventory if name of {_p}'s inventory is "&fEnder Chest "
+	set yaml value "data.totalRows" of "loadedYaml" to {_rows}
+	save yaml "loadedYaml"
+	execute console command "forceupdateenderchest %{_p}%"
+		
+function ecChangePages(p: player, pages: integer):
+	if {_pages} is greater than 9:
+		send "&cERROR with EnderChestPVs/dataHandling.sk -- Pages cannot be greater than 9! (ecChangePages(%{_p}%, %{_pages}%)" to console
+		stop
+	load yaml "plugins/Skript/yamlData/%{_p}'s uuid%/allPages.yml" as "loadedYaml"
+	close {_p}'s inventory if name of {_p}'s inventory is "&fEnder Chest "
+	set yaml value "data.totalPages" of "loadedYaml" to {_pages}	
+	save yaml "loadedYaml"
+	execute console command "forceupdateenderchest %{_p}%"
+		
+
+		
+		
+command /setenderchestrows <integer> [<player>]:
+	permission: op
+	trigger:
+		set {_player} to arg 2 ? player
+		ecChangeRows({_player}, arg 1)
+
+command /setenderchestpages <integer> [<player>]:
+	permission: op
+	trigger:
+		set {_player} to arg 2 ? player
+		ecChangePages({_player}, arg 1)

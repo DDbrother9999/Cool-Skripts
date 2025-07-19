@@ -1,0 +1,242 @@
+on skript start:
+	resetNightMarket()
+   
+options:
+	resetTime: 2 hours
+   
+on load:
+	createNightMarketGUI()
+   
+function createNightMarketGUI(flash: boolean = false):
+	if gui with id "nightmarket" does not exist:
+		create gui with id "nightmarket" with virtual chest inventory with 4 rows named "&5&lNight Market"
+		wait 1 tick
+		edit gui with id "nightmarket":
+			format gui slots (integers between 0 and 54) with gray stained glass pane named "&f"
+			format gui slot 4 with nether star named "&5&lInfo!" with lore "&fPurchase &eexclusive &fcosmetics here!","&fThere is a &6limited &fstock, so be quick!"
+			format gui slots (11,12,13,14,15,20,24,29,30,31,32,33) with purple stained glass pane of mending 1 named "&f" with all flags hidden
+			format gui slot 31 with clock of mending 1 named "&6&lTime Remaining:%nl%&f%getTimeRemaining()%" with all flags hidden
+	if {_flash} is true: #0, 9, 18, 27, 8, 17, 26, 35
+		NMFlashResetSequence()
+	edit gui with id "nightmarket":
+		format gui slot 21 to formatNMItem({NightMarket::Current::1}):
+			cancel event
+			set {_item} to {NightMarket::Current::1}
+			set {_price} to {NightMarket::Current::%{_item}%::Price}
+			set {_stock} to {NightMarket::Current::%{_item}%::Stock}
+			if {_stock} is 0:
+				send "&cThis item is out of stock!" to player
+				stop
+			if {_price} is greater than getNMT(player):
+				send "&cYou do not have enough NMT to purchase this item!" to player
+			else:
+				removeNMT(player, {_price})
+				remove 1 from {NightMarket::Current::%{_item}%::Stock}
+				give {_item} to player
+				send "&aYou have purchased %name of {NightMarket::Current::1}%&r&a for %{_price}% NMT!" to player
+				createNightMarketGUI(true)
+		format gui slot 22 to formatNMItem({NightMarket::Current::2}):
+			cancel event
+			set {_item} to {NightMarket::Current::2}
+			set {_price} to {NightMarket::Current::%{_item}%::Price}
+			set {_stock} to {NightMarket::Current::%{_item}%::Stock}
+			if {_stock} is 0:
+				send "&cThis item is out of stock!" to player
+				stop
+			if {_price} is greater than getNMT(player):
+				send "&cYou do not have enough NMT to purchase this item!" to player
+			else:
+				removeNMT(player, {_price})
+				remove 1 from {NightMarket::Current::%{_item}%::Stock}
+				give {_item} to player
+				send "&aYou have purchased %name of {NightMarket::Current::2}%&r&a for %{_price}% NMT!" to player
+				createNightMarketGUI(true)
+		format gui slot 23 to formatNMItem({NightMarket::Current::3}):
+			cancel event
+			set {_item} to {NightMarket::Current::3}
+			set {_price} to {NightMarket::Current::%{_item}%::Price}
+			set {_stock} to {NightMarket::Current::%{_item}%::Stock}
+			if {_stock} is 0:
+				send "&cThis item is out of stock!" to player
+				stop
+			if {_price} is greater than getNMT(player):
+				send "&cYou do not have enough NMT to purchase this item!" to player
+			else:
+				removeNMT(player, {_price})
+				remove 1 from {NightMarket::Current::%{_item}%::Stock}
+				give {_item} to player
+				send "&aYou have purchased %name of {NightMarket::Current::3}%&r&a for %{_price}% NMT!" to player
+				createNightMarketGUI(true)
+		
+local function NMFlashResetSequence():
+	set slots (0,1,2,3,5,6,7,8,9,10,16,17,18,19,25,26,27,28,34,35) of gui with id "nightmarket" to yellow stained glass pane
+	wait 0.1 seconds
+	set slots (0,1,2,3,5,6,7,8,9,10,16,17,18,19,25,26,27,28,34,35) of gui with id "nightmarket" to lime stained glass pane
+	wait 0.07 seconds
+	set slots (0,1,2,3,5,6,7,8,9,10,16,17,18,19,25,26,27,28,34,35) of gui with id "nightmarket" to orange stained glass pane
+	wait 0.07 seconds
+	set slots (0,1,2,3,5,6,7,8,9,10,16,17,18,19,25,26,27,28,34,35) of gui with id "nightmarket" to gray stained glass pane
+			
+function getTimeRemaining() :: string:
+	return formatTimespanStandard(difference between {@resetTime} from {-lastNMReset} and now)
+
+command /nightmarket:
+	trigger:
+		#resetNightMarket()
+
+		open gui with id "nightmarket" to player
+
+on inventory click:
+	the name of event-inventory is "&5&lNight Market"
+	cancel event
+
+every second:
+	set {_remaining} to getTimeRemaining()
+	set slot 31 of gui with id "nightmarket" to clock of mending 1 named "&6Limited Time!" with lore "&e%{_remaining}% &fremaining." with all flags hidden
+	if {@resetTime} from {-lastNMReset} is less than now:
+		resetNightMarket()
+		broadcast "&5&lNight Market&5 has restocked."
+
+function formatNMItem(item: item) :: item:
+	if name of {_item} contains "Trim Set":
+		set {_item} to {_item} with lore "&7Apply to an armor piece in a smithing table%nl%&7to add a little extra flair!","","&7Price: &d%{NightMarket::Current::%{_item}%::Price}% NMT","&7Stock: &c&l%{NightMarket::Current::%{_item}%::Stock}%x","","&5&lEPIC COSMETIC" with all flags hidden
+	else if name of {_item} contains "&5&lEC":
+		set {_item} to {_item} with lore "&8Consumed on use!","","&7Expands your enderchest!","&7Maximum of 9 Pages & 5 Rows!","","&7Price: &d%{NightMarket::Current::%{_item}%::Price}% NMT","&7Stock: &c&l%{NightMarket::Current::%{_item}%::Stock}%x","","&5&lEPIC UTILITY"
+	else if {_item} is a barrier:
+		set {_item} to {_item} with lore "&8Consumed on use!","","&7Best item!","&7Skript broke, lol!","","&7Price: &d∞ NMT","&7Stock: &c&l∞&x","","&6&lLEGENDARY ERROR"	
+	else if string tag "Skin;Pet" of nbt compound of {_item} is set:
+		set {_item} to {_item} with lore "&8Drag and drop to use!%nl%&8Consumed on use!","","&7Pet skins change the look and","&7buff the pet in some way!","&7Only one skin can be active!","","&7This skin can only be applied to %string tag "Skin;Pet" of nbt compound of {_item}% Pets!","","&7Price: &d%{NightMarket::Current::%{_item}%::Price}% NMT","&7Stock: &c&l%{NightMarket::Current::%{_item}%::Stock}%x","","&d&lMYTHIC UTILITY"
+	return {_item}
+
+function resetNightMarket():
+	clear {NightMarket::Current::*}
+	loop {NightMarket::Rewards::*}:
+		clear {NightMarket::%loop-value%::Stock}
+	set {_list::*} to selectThreeNonOverlappingRandomCategories()
+	
+	set {_loop} to 1
+	loop 3 times:
+		set {_item%{_loop}%::*} to selectRandomItemFromCategoryWithPrice({_list::%{_loop}%}) ? barrier named "&9An issue has occured putting this item onto the nightmarket. (no item recieved)"
+		
+		add {_item%{_loop}%::1} to {NightMarket::Current::*}
+
+		set {NightMarket::Current::%{_item%{_loop}%::1}%::Stock} to {nightmarket.categories::%{_list::%{_loop}%}%::stock}
+		set {NightMarket::Current::%{_item%{_loop}%::1}%::Category} to {_list::%{_loop}%}
+		set {NightMarket::Current::%{_item%{_loop}%::1}%::Price} to {_item%{_loop}%::2}
+		#set {NightMarket::Current::%{_item%{_loop}%::1}%::CurrencyType} to "NMT" # not planned as of rn
+        
+		delete {_item%{_loop}%::1}
+		add 1 to {_loop}
+		
+	set {-lastNMReset} to now
+	createNightMarketGUI(true)
+   
+   
+   
+# Old code, kept here for literally no reason.	
+#	while size of {NightMarket::Current::*} is less than or equal to 3:
+#		set {_i} to random integer between 1 and 100
+#		if {_i} is greater than 90:
+#			set {_trim} to random element out of {ArmorTrims::*}
+#			continue if {NightMarket::Current::*} contains {_trim}
+#			add {_trim} to {NightMarket::Current::*}
+#			set {NightMarket::%{_trim}%::Stock} to 3
+#			set {NightMarket::%{_trim}%::Price} to "10 Gems"
+#		else if {_i} is greater than 50:
+#			set {_petskin} to random element out of {PetSkins::*}
+#			continue if {NightMarket::Current::*} contains {PetSkins::%{_petskin}%}
+#			add {PetSkins::%{_petskin}%} to {NightMarket::Current::*}
+#			set {NightMarket::%{_petskin}%::Stock} to 1
+#			set {NightMarket::%{_petskin}%::Price} to "50 Gems"
+#		else:
+#			if mod({_i},2) is 0:
+#				continue if {NightMarket::Current::*} contains {ECRowsExpander}
+#				add {ECRowsExpander} to {NightMarket::Current::*}
+#				set {NightMarket::EC Row Expander::Stock} to 3
+#				set {NightMarket::EC Row Expander::Price} to "10 Gems"
+#			else:
+#				continue if {NightMarket::Current::*} contains {ECPVExpander}
+#				add {ECPVExpander} to {NightMarket::Current::*}
+#				set {NightMarket::EC Page Expander::Stock} to 3
+#				set {NightMarket::EC Page Expander::Price} to "10 Gems"
+#				
+#	set {-lastNMReset} to now
+#	createNightMarketGUI(true)
+
+import:
+	me.arcaniax.hdb.api.HeadDatabaseAPI
+
+on load:
+	set {HDBA} to new HeadDatabaseAPI()
+
+	set {PetSkins::*} to "Phoenix"
+	set {PetSkins::Phoenix} to {HDBA}.getItemHead("683") named "&c&lPhoenix"
+	set {PetSkins::Phoenix::headID} to "683"
+	set string tag "Skin;Pet" of nbt compound of {PetSkins::Phoenix} to "&cBlaze"
+	
+# ----------------------------------------------------------------------------------------------------------- Category Management
+
+function addItemToCategory(item: item, price: integer, category: text): # PRICE IS IN NMT
+	set {_itemsInCategory} to size of {nightmarket.categories::%{_category}%::items::*}
+	
+	set {nightmarket.categories::%{_category}%::items::%{_itemsInCategory}+1%} to {_item}
+	set {nightmarket.categories::%{_category}%::itemPrices::%{_itemsInCategory}+1%} to {_price}
+	set {nightmarket.categories::%{_category}%::itemAmount} to {_itemsInCategory}+1
+
+function getAllCategoryItems(category: text) :: items:
+	return {nightmarket.categories::%{_category}%::items::*}
+
+function addCategoryToCategoryList(category: text):
+	if {nightmarket.categories::%{_category}%::items::*} is set:
+		add {_category} to {nightmarket.usedCategories::*}
+		send "&c%{_category}% has been added to the used categories." to console
+	else:
+		send "&c%{_category}% has not been added to used categories. ERROR: no items" to console
+		
+local function selectRandomItemFromRandomUsedCategory() :: text:
+	set {_category} to random string out of {nightmarket.usedCategories::*}
+	
+	return {_category}
+
+	
+local function selectRandomItemFromCategory(category: text) :: item:
+	set {_item} to random item out of {nightmarket.categories::%{_category}%::items::*}
+
+	return {_item}
+	
+local function selectRandomItemFromCategoryWithPrice(category: text) :: objects:
+	set {_itemIndex} to random integer between 1 and {nightmarket.categories::%{_category}%::itemAmount}
+	
+	set {_item} to {nightmarket.categories::%{_category}%::items::%{_itemIndex}%}
+	set {_price} to {nightmarket.categories::%{_category}%::itemPrices::%{_itemIndex}%}
+
+	return {_item} and {_price}
+	
+local function selectThreeNonOverlappingRandomCategories() :: texts:
+	set {_usedCategories::*} to {nightmarket.usedCategories::*}
+	
+	set {_loop} to 0
+	loop 3 times:
+		add 1 to {_loop}
+		set {_category%{_loop}%} to random string out of {_usedCategories::*}
+		remove {_category%{_loop}%} from {_usedCategories::*}
+		
+	return {_category1} and {_category2} and {_category3}
+	
+function setCategoryStock(category: text, stock: integer):
+	set {nightmarket.categories::%{_category}%::stock} to {_stock}
+	
+command /additemtocategory <text> <integer>:
+	permission: op
+	trigger:
+		addItemToCategory(player's tool, arg-2, arg-1)
+
+command /createnmcategory <text>:
+	permission: op
+	trigger:
+		addCategoryToCategoryList(arg-1)
+
+command /setcategorystock <text> <number>:
+	permission: op
+	trigger:
+		setCategoryStock(arg-1, arg-2)

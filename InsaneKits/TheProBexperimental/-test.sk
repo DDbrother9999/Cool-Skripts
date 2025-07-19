@@ -1,0 +1,5 @@
+on right click:
+	player's name is "TheProB"
+	set {_item} to player's tool
+	wait 1 tick
+	set player's tool to {_item}
